@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 
 import 'pages/home_page.dart';
-import 'pages/tree_page.dart';
-import 'pages/messenger_page.dart';
-import 'pages/service_page.dart';
+import 'pages/cleaning.dart';
+import 'pages/catering.dart';
+import 'pages/contacts.dart';
 import 'pages/more_page.dart';
 import 'components/navigation_bar.dart';
 
@@ -57,9 +57,9 @@ class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
   final List<Widget> _pages = const [
     HomePage(),
-    TreePage(),
-    MessengerPage(),
-    ServicePage(),
+    CleaningPage(),
+    CateringPage(),
+    ContactsPage(),
     MorePage(),
   ];
 
