@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
     HomePage(),
     CleaningPage(),
     CateringPage(),
-    ContactsPage(),
+    ProgramPage(),
     MorePage(),
   ];
 

@@ -13,20 +13,20 @@ class NavBar extends StatelessWidget {
 
   static const List<NavigationDestination> _destinations = [
     NavigationDestination(
-      icon: Icon(Icons.home),
+      icon: Icon(Icons.home_filled),
       label: 'Home',
     ),
     NavigationDestination(
-      icon: Icon(Icons.account_tree_outlined),
-      label: 'Tree',
+      icon: Icon(Icons.cleaning_services),
+      label: 'Cleaning',
     ),
     NavigationDestination(
-      icon: Icon(Icons.chat),
-      label: 'Messenger',
+      icon: Icon(Icons.dining),
+      label: 'Catering',
     ),
     NavigationDestination(
-      icon: Icon(Icons.browse_gallery),
-      label: 'Service',
+      icon: Icon(Icons.checklist),
+      label: 'Program',
     ),
     NavigationDestination(
       icon: Icon(Icons.more_horiz_outlined),
