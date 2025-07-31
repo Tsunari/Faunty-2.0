@@ -6,7 +6,7 @@ import 'pages/tree_page.dart';
 import 'pages/messenger_page.dart';
 import 'pages/service_page.dart';
 import 'pages/more_page.dart';
-import 'components/main_nav_bar.dart';
+import 'components/navigation_bar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -77,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: _pages[_selectedIndex],
-      bottomNavigationBar: MainNavBar(
+      bottomNavigationBar: NavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
       ),

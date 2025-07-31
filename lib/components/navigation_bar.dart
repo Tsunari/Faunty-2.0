@@ -17,19 +17,19 @@ class NavBar extends StatelessWidget {
       label: 'Home',
     ),
     NavigationDestination(
-      icon: Icon(Icons.nature),
+      icon: Icon(Icons.account_tree_outlined),
       label: 'Tree',
     ),
     NavigationDestination(
-      icon: Icon(Icons.message),
+      icon: Icon(Icons.chat),
       label: 'Messenger',
     ),
     NavigationDestination(
-      icon: Icon(Icons.miscellaneous_services),
+      icon: Icon(Icons.browse_gallery),
       label: 'Service',
     ),
     NavigationDestination(
-      icon: Icon(Icons.more_horiz),
+      icon: Icon(Icons.more_horiz_outlined),
       label: 'More',
     ),
   ];
