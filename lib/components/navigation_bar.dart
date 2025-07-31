@@ -1,15 +1,19 @@
 
+
 import 'package:flutter/material.dart';
 
-class NavBar extends StatelessWidget {
-  final int selectedIndex;
-  final ValueChanged<int> onItemTapped;
+class NavBar extends StatefulWidget {
+  final List<Widget> pages;
+  final List<String> titles;
+  final List<List<Widget>>? actions;
+  const NavBar({Key? key, required this.pages, required this.titles, this.actions}) : super(key: key);
 
-  const NavBar({
-    super.key,
-    required this.selectedIndex,
-    required this.onItemTapped,
-  });
+  @override
+  State<NavBar> createState() => _NavBarState();
+}
+
+class _NavBarState extends State<NavBar> {
+  int _selectedIndex = 0;
 
   static const List<NavigationDestination> _destinations = [
     NavigationDestination(
@@ -34,13 +38,29 @@ class NavBar extends StatelessWidget {
     ),
   ];
 
+  void _onDestinationSelected(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return NavigationBar(
-      labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-      selectedIndex: selectedIndex,
-      destinations: _destinations,
-      onDestinationSelected: onItemTapped,
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.titles[_selectedIndex]),
+        actions: widget.actions != null && widget.actions!.length > _selectedIndex
+            ? widget.actions![_selectedIndex]
+            : null,
+      ),
+      body: widget.pages[_selectedIndex],
+      bottomNavigationBar: NavigationBar(
+        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+        selectedIndex: _selectedIndex,
+        destinations: _destinations,
+        onDestinationSelected: _onDestinationSelected,
+      ),
     );
   }
 }
