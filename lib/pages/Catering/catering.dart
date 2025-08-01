@@ -1,3 +1,4 @@
+import 'package:faunty/components/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'catering_organisation.dart';
 
@@ -50,6 +51,10 @@ class _CateringPageState extends State<CateringPage> {
       if (hasUser) visibleDays.add(day);
     }
     return Scaffold(
+      appBar: CustomAppBar(
+        title: 'Catering',
+        actions: []
+      ),
       body: Center(
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
