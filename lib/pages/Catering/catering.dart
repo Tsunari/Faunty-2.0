@@ -20,8 +20,8 @@ class _CateringPageState extends State<CateringPage> {
     // Initialize with dummy data: jede Mahlzeit hat mehrere User pro Tag
     weekPlan = List.generate(7, (day) =>
       List.generate(3, (meal) => [
-        users[(day + meal) % users.length],
-        users[(day + meal + 1) % users.length],
+          users[(day + meal) % users.length],
+          users[(day + meal + 1) % users.length],
       ])
     );
   }
@@ -50,10 +50,9 @@ class _CateringPageState extends State<CateringPage> {
       if (hasUser) visibleDays.add(day);
     }
     return Scaffold(
-      
       body: Center(
         child: SizedBox(
-          width: 500,
+          width: MediaQuery.of(context).size.width,
           child: ListView.builder(
             physics: const BouncingScrollPhysics(),
             scrollDirection: Axis.vertical,
@@ -63,7 +62,7 @@ class _CateringPageState extends State<CateringPage> {
               final date = monday.add(Duration(days: dayIdx));
               return Card(
                 color: isDark ? Colors.grey[850] : null,
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Column(
@@ -88,33 +87,33 @@ class _CateringPageState extends State<CateringPage> {
                       const SizedBox(height: 8),
                       ...List.generate(meals.length, (mealIdx) =>
                         weekPlan[dayIdx][mealIdx].isNotEmpty
-                          ? Padding(
+                            ? Padding(
                               padding: const EdgeInsets.symmetric(vertical: 4.0),
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: 100,
-                                    child: Text(
-                                      meals[mealIdx],
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        color: isDark ? Colors.white : null,
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 100,
+                                      child: Text(
+                                        meals[mealIdx],
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          color: isDark ? Colors.white : null,
+                                        ),
                                       ),
                                     ),
-                                  ),
                                   ...weekPlan[dayIdx][mealIdx].map((user) => Container(
-                                    margin: const EdgeInsets.only(left: 8),
+                                        margin: const EdgeInsets.only(left: 8),
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
+                                        decoration: BoxDecoration(
                                       color: isDark ? Colors.green.shade900 : Colors.green.shade100,
                                       borderRadius: BorderRadius.circular(12),
-                                    ),
+                                        ),
                                     child: Text(user, style: TextStyle(color: isDark ? Colors.white : null)),
                                   )),
-                                ],
-                              ),
-                            )
-                          : const SizedBox.shrink(),
+                                  ],
+                                ),
+                              )
+                            : const SizedBox.shrink(),
                       ),
                     ],
                   ),
