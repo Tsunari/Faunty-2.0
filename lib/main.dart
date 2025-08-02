@@ -8,7 +8,7 @@ import 'pages/home_page.dart';
 import 'pages/login.dart';
 import 'pages/cleaning/cleaning.dart';
 import 'pages/catering/catering.dart';
-import 'pages/more_page.dart';
+import 'pages/more/more_page.dart';
 import 'components/navigation_bar.dart';
 import 'pages/program/program_page.dart';
 
