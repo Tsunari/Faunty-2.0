@@ -125,7 +125,7 @@ class HomePage extends StatelessWidget {
         ],
       ),
       body: Column(
-        children: [ //test
+        children: [
           SizedBox(
               width: width,
               child: Card(
