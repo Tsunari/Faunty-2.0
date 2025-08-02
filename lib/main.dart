@@ -8,10 +8,9 @@ import 'pages/home_page.dart';
 import 'pages/login.dart';
 import 'pages/cleaning/cleaning.dart';
 import 'pages/catering/catering.dart';
-import 'pages/contacts.dart';
 import 'pages/more_page.dart';
 import 'components/navigation_bar.dart';
-import 'pages/program_page.dart';
+import 'pages/Program/program_page.dart';
 
 
 void main() async {
