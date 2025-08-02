@@ -94,31 +94,40 @@ class _CateringPageState extends State<CateringPage> {
                       ...List.generate(meals.length, (mealIdx) =>
                         weekPlan[dayIdx][mealIdx].isNotEmpty
                             ? Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4.0),
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: 100,
-                                    child: Text(
-                                      meals[mealIdx],
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        color: isDark ? Colors.white : null,
+                                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      width: 100,
+                                      child: Text(
+                                        meals[mealIdx],
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          color: isDark ? Colors.white : null,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  ...weekPlan[dayIdx][mealIdx].map((user) => Container(
-                                        margin: const EdgeInsets.only(left: 8),
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                        decoration: BoxDecoration(
-                                      color: isDark ? Colors.green.shade900 : Colors.green.shade100,
-                                      borderRadius: BorderRadius.circular(12),
-                                        ),
-                                    child: Text(user, style: TextStyle(color: isDark ? Colors.white : null)),
-                                  )),
-                                ],
-                              ),
-                            )
+                                    Expanded(
+                                      child: Wrap(
+                                        spacing: 8,
+                                        runSpacing: 4,
+                                        children: weekPlan[dayIdx][mealIdx].map((user) => Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                              decoration: BoxDecoration(
+                                                color: isDark ? Colors.green.shade900 : Colors.green.shade100,
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: Text(
+                                                user,
+                                                style: TextStyle(color: isDark ? Colors.white : null),
+                                              ),
+                                            )).toList(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
                             : const SizedBox.shrink(),
                       ),
                     ],
