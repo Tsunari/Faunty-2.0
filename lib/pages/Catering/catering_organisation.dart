@@ -38,6 +38,9 @@ class _CateringOrganisationPageState extends State<CateringOrganisationPage> {
         title: const Text('Catering Organisation'),
         backgroundColor: isDark ? Colors.grey[900] : null,
         foregroundColor: isDark ? Colors.white : null,
+        actions: [
+          // Test-Button entfernt
+        ],
       ),
       body: Row(
         children: [

@@ -6,6 +6,7 @@ import 'pages/catering/catering.dart';
 import 'pages/contacts.dart';
 import 'pages/more_page.dart';
 import 'components/navigation_bar.dart';
+import 'pages/program_page.dart';
 
 void main() {
   runApp(const Faunty());
