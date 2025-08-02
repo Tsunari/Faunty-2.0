@@ -1,13 +1,23 @@
+
+import 'package:faunty/firebase_options.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+// import your firebase_options.dart if you use FlutterFire CLI
 
 import 'pages/home_page.dart';
+import 'pages/login.dart';
 import 'pages/cleaning/cleaning.dart';
 import 'pages/catering/catering.dart';
 import 'pages/contacts.dart';
 import 'pages/more_page.dart';
 import 'components/navigation_bar.dart';
 
-void main() {
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const Faunty());
 }
 
@@ -32,7 +42,11 @@ class Faunty extends StatelessWidget {
       ),
       themeMode: ThemeMode.dark,
 
-      home: const MainPage(),
+      initialRoute: '/login',
+      routes: {
+        '/login': (context) => const LoginPage(),
+        '/home': (context) => const MainPage(),
+      },
     );
   }
 }
