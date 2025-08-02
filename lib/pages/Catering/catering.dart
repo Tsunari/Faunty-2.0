@@ -23,6 +23,8 @@ class _CateringPageState extends State<CateringPage> {
       List.generate(3, (meal) => [
           users[(day + meal) % users.length],
           users[(day + meal + 1) % users.length],
+          users[(day + meal) % users.length],
+          users[(day + meal + 1) % users.length],
       ])
     );
   }
@@ -53,7 +55,6 @@ class _CateringPageState extends State<CateringPage> {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Catering',
-        actions: []
       ),
       body: Center(
         child: SizedBox(
@@ -94,18 +95,18 @@ class _CateringPageState extends State<CateringPage> {
                         weekPlan[dayIdx][mealIdx].isNotEmpty
                             ? Padding(
                               padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                child: Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 100,
-                                      child: Text(
-                                        meals[mealIdx],
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          color: isDark ? Colors.white : null,
-                                        ),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 100,
+                                    child: Text(
+                                      meals[mealIdx],
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: isDark ? Colors.white : null,
                                       ),
                                     ),
+                                  ),
                                   ...weekPlan[dayIdx][mealIdx].map((user) => Container(
                                         margin: const EdgeInsets.only(left: 8),
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -115,9 +116,9 @@ class _CateringPageState extends State<CateringPage> {
                                         ),
                                     child: Text(user, style: TextStyle(color: isDark ? Colors.white : null)),
                                   )),
-                                  ],
-                                ),
-                              )
+                                ],
+                              ),
+                            )
                             : const SizedBox.shrink(),
                       ),
                     ],
@@ -147,9 +148,7 @@ class _CateringPageState extends State<CateringPage> {
           }
         },
         child: const Icon(Icons.edit),
-        tooltip: 'Edit duties',
-        backgroundColor: isDark ? Colors.teal[400] : null,
-        foregroundColor: isDark ? Colors.black : null,
+        tooltip: 'Bearbeiten',
       ),
     );
   }
