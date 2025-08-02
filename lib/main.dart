@@ -10,7 +10,7 @@ import 'pages/cleaning/cleaning.dart';
 import 'pages/catering/catering.dart';
 import 'pages/more_page.dart';
 import 'components/navigation_bar.dart';
-import 'pages/Program/program_page.dart';
+import 'pages/program/program_page.dart';
 
 
 void main() async {
@@ -42,7 +42,7 @@ class Faunty extends StatelessWidget {
       ),
       themeMode: ThemeMode.dark,
 
-      initialRoute: '/login',
+      initialRoute: '/home',
       routes: {
         '/login': (context) => const LoginPage(),
         '/home': (context) => const MainPage(),

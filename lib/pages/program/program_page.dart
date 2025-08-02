@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import '../../components/custom_app_bar.dart';
 import 'program_organisation_page.dart';
 
-class ProgramPage extends StatelessWidget {
+
+class ProgramPage extends StatefulWidget {
   const ProgramPage({super.key});
 
-  // Sample program points for 7 days
-  final List<List<Map<String, String>>> weekProgram = const [
+  @override
+  State<ProgramPage> createState() => _ProgramPageState();
+}
+
+class _ProgramPageState extends State<ProgramPage> {
+  List<List<Map<String, String>>> weekProgram = [
     [
       {'from': '08:00', 'to': '09:00', 'event': 'Breakfast'},
       {'from': '09:30', 'to': '11:30', 'event': 'Class'},
@@ -171,7 +176,9 @@ class ProgramPage extends StatelessWidget {
             ),
           );
           if (result != null && result is List<List<Map<String, String>>>) {
-            // Optionally update state if you make ProgramPage stateful
+            setState(() {
+              weekProgram = result;
+            });
           }
         },
         tooltip: 'Edit program',
