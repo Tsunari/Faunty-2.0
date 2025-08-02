@@ -1,10 +1,7 @@
-
 import 'package:faunty/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-// import your firebase_options.dart if you use FlutterFire CLI
-
-import 'pages/home_page.dart';
+import 'pages/home/home_page.dart';
 import 'pages/login.dart';
 import 'pages/cleaning/cleaning.dart';
 import 'pages/catering/catering.dart';
