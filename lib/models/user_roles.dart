@@ -1,8 +1,10 @@
-enum UserRole { hoca, baskan, talebe, user }
+enum UserRole { superuser, hoca, baskan, talebe, user }
 
 extension UserRoleExtension on UserRole {
   String get name {
     switch (this) {
+      case UserRole.superuser:
+        return 'Superuser';
       case UserRole.hoca:
         return 'Hoca';
       case UserRole.baskan:
@@ -17,6 +19,9 @@ extension UserRoleExtension on UserRole {
   // Example role-specific function
   void doRoleSpecificAction() {
     switch (this) {
+      case UserRole.superuser:
+        print('Superuser action');
+        break;
       case UserRole.hoca:
         print('Hoca action');
         break;
@@ -35,6 +40,8 @@ extension UserRoleExtension on UserRole {
 
 UserRole userRoleFromString(String role) {
   switch (role) {
+    case 'Superuser':
+      return UserRole.superuser;
     case 'Hoca':
       return UserRole.hoca;
     case 'Baskan':

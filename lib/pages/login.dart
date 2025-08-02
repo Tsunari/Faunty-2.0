@@ -1,20 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../entities/user_role.dart';
 
 // Register a new user and save their role in Firestore
-Future<User?> registerWithEmail(String email, String password, UserRole role) async {
+Future<User?> registerWithEmail(String email, String password) async {
   try {
-    final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    // Save user role in Firestore
-    await FirebaseFirestore.instance.collection('users').doc(credential.user!.uid).set({
-      'email': email,
-      'role': role.name,
-    });
+    final credential = await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email, password: password);
+    // TODO: Create a user entity and save it in Firestore
     return credential.user;
   } catch (e) {
     print('Registration error: $e');
@@ -25,18 +17,15 @@ Future<User?> registerWithEmail(String email, String password, UserRole role) as
 // Login with email and password
 Future<User?> loginWithEmail(String email, String password) async {
   try {
-    final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    final credential = await FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: email, password: password);
+    // TODO: Fetch user role from Firestore
     return credential.user;
   } catch (e) {
     print('Login error: $e');
     return null;
   }
 }
-
-// Fetch user role from Firestore
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -111,4 +100,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-
