@@ -28,17 +28,13 @@ class _CleaningAssignPageState extends State<CleaningAssignPage> {
 
   @override
   Widget build(BuildContext context) {
-
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Assign Users to Places'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            tooltip: 'Save',
-            onPressed: () => Navigator.of(context).pop(assignments),
-          ),
+         
         ],
       ),
       body: ListView.builder(
@@ -78,8 +74,16 @@ class _CleaningAssignPageState extends State<CleaningAssignPage> {
                 ],
               ),
             ),
+            
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.of(context).pop(assignments),
+        tooltip: 'Save and go back',
+        backgroundColor: isDark ? Colors.teal[400] : null,
+        foregroundColor: isDark ? Colors.black : null,
+        child: const Icon(Icons.save),
       ),
     );
   }

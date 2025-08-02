@@ -63,13 +63,7 @@ class _CleaningPageState extends State<CleaningPage> {
       appBar: CustomAppBar(
         title: 'Cleaning',
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 4.0),
-            child: IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: _navigateToAssignPage,
-            ),
-          ),
+          
         ],
       ),
       body: Padding(
@@ -156,6 +150,11 @@ class _CleaningPageState extends State<CleaningPage> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _navigateToAssignPage,
+        tooltip: 'Edit',
+        child: const Icon(Icons.edit),
       ),
     );
   }
