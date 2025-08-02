@@ -2,6 +2,19 @@ import 'package:faunty/components/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'catering_organisation.dart';
 
+  // Dummy user data for each meal and day
+  final List<String> users = ['Anna', 'Ben', 'Chris', 'Dana', 'Eli', 'Fiona', 'Gus'];
+  final List<String> meals = ['Breakfast', 'Lunch', 'Dinner'];
+  // Initialize with dummy data: jede Mahlzeit hat mehrere User pro Tag
+  List<List<List<String>>> weekPlan = List.generate(7, (day) =>
+      List.generate(3, (meal) => [
+            users[(day + meal) % users.length],
+            users[(day + meal + 1) % users.length],
+            users[(day + meal) % users.length],
+            users[(day + meal + 1) % users.length],
+          ])
+    ); // [day][meal][user]
+
 class CateringPage extends StatefulWidget {
   const CateringPage({super.key});
 
@@ -10,23 +23,10 @@ class CateringPage extends StatefulWidget {
 }
 
 class _CateringPageState extends State<CateringPage> {
-  // Dummy user data for each meal and day
-  final List<String> users = ['Anna', 'Ben', 'Chris', 'Dana', 'Eli', 'Fiona', 'Gus'];
-  final List<String> meals = ['Breakfast', 'Lunch', 'Dinner'];
-  late List<List<List<String>>> weekPlan; // [day][meal][user]
 
   @override
   void initState() {
     super.initState();
-    // Initialize with dummy data: jede Mahlzeit hat mehrere User pro Tag
-    weekPlan = List.generate(7, (day) =>
-      List.generate(3, (meal) => [
-          users[(day + meal) % users.length],
-          users[(day + meal + 1) % users.length],
-          users[(day + meal) % users.length],
-          users[(day + meal + 1) % users.length],
-      ])
-    );
   }
 
   String getWeekday(int weekday) {

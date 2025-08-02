@@ -2,21 +2,11 @@ import 'package:flutter/material.dart';
 import '../../components/custom_app_bar.dart';
 import '../program/program_organisation_page.dart';
 
-
-class ProgramPage extends StatefulWidget {
-  const ProgramPage({super.key});
-
-  @override
-  State<ProgramPage> createState() => _ProgramPageState();
-}
-
-class _ProgramPageState extends State<ProgramPage> {
-  // Wochentage als Keys, damit Reihenfolge und Mapping immer stimmen
-  final List<String> weekDays = [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
-  ];
-
-  Map<String, List<Map<String, String>>> weekProgram = {
+// Wochentage als Keys, damit Reihenfolge und Mapping immer stimmen
+final List<String> weekDays = [
+  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+];
+Map<String, List<Map<String, String>>> weekProgram = {
     'Monday': [
       {
        'from': '08:00',
@@ -68,6 +58,15 @@ class _ProgramPageState extends State<ProgramPage> {
       {'from': '09:30', 'to': '11:00', 'event': 'Departure'},
     ],
   };
+
+class ProgramPage extends StatefulWidget {
+  const ProgramPage({super.key});
+
+  @override
+  State<ProgramPage> createState() => _ProgramPageState();
+}
+
+class _ProgramPageState extends State<ProgramPage> {
 
   String getWeekdayFromDate(DateTime date) {
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
