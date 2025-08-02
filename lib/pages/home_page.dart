@@ -65,8 +65,8 @@ class HomePage extends StatelessWidget {
         if (users.contains(username)) {
           final nextDate = now.add(Duration(days: i));
           return Card(
-            color: Colors.green.shade50,
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            // color: Colors.green.shade50,
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), // TODO 
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -75,7 +75,7 @@ class HomePage extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Anstehendes Catering: ${weekDaysFull[dayIdx]}, ${nextDate.day.toString().padLeft(2, '0')}.${nextDate.month.toString().padLeft(2, '0')}.${nextDate.year} für ${meals[mealIdx]}',
+                        'Next Catering: ${i == 0 ? 'Today' : 'in $i day${i > 1 ? 's' : ''}'} for ${meals[mealIdx]}',
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                   ),
@@ -126,9 +126,8 @@ class HomePage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Center(
-            child: SizedBox(
-              width: width * 0.95,
+          SizedBox(
+              width: width,
               child: Card(
                 margin: const EdgeInsets.all(16),
                 child: Padding(
@@ -206,7 +205,8 @@ class HomePage extends StatelessWidget {
                 ), // Ende Padding
               ), // Ende Card
             ), // Ende SizedBox
-          ), // Ende Center
+          // Ende Center
+          nextCateringDutyWidget(username: "Ben")
         ], // Ende children von Column (body)
       ), // Ende Column (body)
     ); // Ende Scaffold
