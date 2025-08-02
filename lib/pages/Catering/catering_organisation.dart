@@ -63,7 +63,7 @@ class _CateringOrganisationPageState extends State<CateringOrganisationPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     getWeekday(dayIdx),
@@ -72,11 +72,14 @@ class _CateringOrganisationPageState extends State<CateringOrganisationPage> {
                                       color: isDark ? Colors.white : null,
                                     ),
                                   ),
+                                  const Spacer(),
                                   IconButton(
                                     icon: Icon(Icons.delete_outline, 
                                       color: isDark ? Colors.white : Colors.black,
-                                      size: 20,
+                                      size: 18,
                                     ),
+                                    padding: const EdgeInsets.all(0),
+                                    constraints: const BoxConstraints(),
                                     onPressed: () {
                                       showDialog(
                                         context: context,
@@ -110,62 +113,74 @@ class _CateringOrganisationPageState extends State<CateringOrganisationPage> {
                               ),
                               ...List.generate(widget.meals.length, (mealIdx) => Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                child: Row(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    SizedBox(
-                                      width: 100,
-                                      child: Text(
-                                        widget.meals[mealIdx],
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          color: isDark ? Colors.white : null,
+                                    Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 100,
+                                          child: Text(
+                                            widget.meals[mealIdx],
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              color: isDark ? Colors.white : null,
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                      ],
                                     ),
-                                    Expanded(
-                                      child: DragTarget<String>(
-                                        builder: (context, candidateData, rejectedData) {
-                                          return Wrap(
-                                            children: localWeekPlan[dayIdx][mealIdx].isNotEmpty
-                                              ? localWeekPlan[dayIdx][mealIdx].map((user) => Container(
-                                                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                                    const SizedBox(height: 4),
+                                    DragTarget<String>(
+                                      builder: (context, candidateData, rejectedData) {
+                                        return Wrap(
+                                          spacing: 4,
+                                          runSpacing: 4,
+                                          children: localWeekPlan[dayIdx][mealIdx].isNotEmpty
+                                            ? localWeekPlan[dayIdx][mealIdx].map((user) => Container(
+                                                margin: const EdgeInsets.only(bottom: 2),
+                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: isDark ? Colors.green.shade900 : Colors.green.shade100,
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Text(user, style: TextStyle(color: isDark ? Colors.white : null)),
+                                                    const SizedBox(width: 4),
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        setState(() {
+                                                          localWeekPlan[dayIdx][mealIdx].remove(user);
+                                                        });
+                                                      },
+                                                      child: Icon(Icons.remove_circle_outline, size: 18, color: isDark ? Colors.red[200] : Colors.red[700]),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )).toList()
+                                            : [
+                                                Container(
                                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                                   decoration: BoxDecoration(
-                                                    color: isDark ? Colors.green.shade900 : Colors.green.shade100,
+                                                    color: isDark ? Colors.grey[800] : Colors.grey.shade200,
                                                     borderRadius: BorderRadius.circular(12),
+                                                    border: Border.all(color: isDark ? Colors.white24 : Colors.grey),
                                                   ),
-                                                  child: Text(user, style: TextStyle(color: isDark ? Colors.white : null)),
-                                                )).toList()
-                                              : [
-                                                  Container(
-                                                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                                    decoration: BoxDecoration(
-                                                      color: isDark ? Colors.grey[800] : Colors.grey.shade200,
-                                                      borderRadius: BorderRadius.circular(12),
-                                                      border: Border.all(color: isDark ? Colors.white24 : Colors.grey),
-                                                    ),
-                                                    child: Text('Drag here', style: TextStyle(color: isDark ? Colors.white54 : Colors.black54)),
-                                                  )
-                                                ],
-                                          );
-                                        },
-                                        onAccept: (user) {
-                                          setState(() {
+                                                  child: Text('Drag here', style: TextStyle(color: isDark ? Colors.white54 : Colors.black54)),
+                                                )
+                                              ],
+                                        );
+                                      },
+                                      onAccept: (user) {
+                                        setState(() {
+                                          if (!localWeekPlan[dayIdx][mealIdx].contains(user)) {
                                             localWeekPlan[dayIdx][mealIdx].add(user);
-                                          });
-                                        },
-                                      ),
+                                          }
+                                        });
+                                      },
                                     ),
-                                    if (localWeekPlan[dayIdx][mealIdx].isNotEmpty)
-                                      IconButton(
-                                        icon: Icon(Icons.remove, size: 18, color: isDark ? Colors.white : Colors.black),
-                                        onPressed: () {
-                                          setState(() {
-                                            localWeekPlan[dayIdx][mealIdx].removeLast();
-                                          });
-                                        },
-                                      ),
                                   ],
                                 ),
                               )),
@@ -223,7 +238,14 @@ class _CateringOrganisationPageState extends State<CateringOrganisationPage> {
                             color: isDark ? Colors.blue.shade900 : Colors.blue.shade100,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Text(user, style: TextStyle(color: isDark ? Colors.white : null)),
+                          child: Text(
+                            user,
+                            style: TextStyle(
+                              color: isDark ? Colors.white : null,
+                              fontSize: 17, // slightly larger
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ),
                       ),
                     )).toList(),

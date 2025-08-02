@@ -49,35 +49,43 @@ class _ProgramOrganisationPageState extends State<ProgramOrganisationPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: isDark ? Colors.grey[800] : Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  getWeekday(idx),
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: isDark ? Colors.white : null,
-                                  ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                getWeekday(idx),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: isDark ? Colors.white : null,
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: isDark ? Colors.white70 : Colors.black87,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(height: 4),
+                              // Copy button
+                              DropdownButton<int>(
+                                hint: const Text('Copy', style: TextStyle(fontSize: 12)),
+                                value: null,
+                                style: const TextStyle(fontSize: 12),
+                                isDense: true,
+                                alignment: Alignment.centerLeft,
+                                underline: SizedBox.shrink(),
+                                iconSize: 18,
+                                items: List.generate(7, (copyIdx) => DropdownMenuItem(
+                                  value: copyIdx,
+                                  child: Text(getWeekday(copyIdx), style: const TextStyle(fontSize: 12)),
+                                )),
+                                onChanged: (copyIdx) {
+                                  if (copyIdx != null && copyIdx != idx) {
+                                    setState(() {
+                                      localWeekProgram[idx] = localWeekProgram[copyIdx].map((e) => Map<String, String>.from(e)).toList();
+                                    });
+                                  }
+                                },
+                                dropdownColor: isDark ? Colors.grey[800] : Colors.white,
+                              ),
+                            ],
                           ),
                           const SizedBox(width: 12),
                           Expanded(
