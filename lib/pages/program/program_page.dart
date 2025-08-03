@@ -6,7 +6,7 @@ import '../../state_management/program_provider.dart';
 
 
 const List<String> weekDays = [
-  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+  'Mo', 'Tue', 'Wed', 'Thu', 'Fr', 'Sat', 'Sun'
 ];
 
 class ProgramPage extends ConsumerStatefulWidget {
@@ -18,7 +18,8 @@ class ProgramPage extends ConsumerStatefulWidget {
 
 class _ProgramPageState extends ConsumerState<ProgramPage> {
   String getWeekdayFromDate(DateTime date) {
-    return weekDays[date.weekday - 1];
+    // Dart weekday: 1=Mon, ..., 7=Sun; our weekDays[0]=Mo
+    return weekDays[(date.weekday - 1) % 7];
   }
 
   @override
@@ -70,36 +71,39 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: isToday
-                                      ? Colors.blue.shade400
-                                      : isDark
-                                          ? Colors.grey[800]
-                                          : Colors.blue.shade50,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      dayName,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: isToday ? Colors.white : isDark ? Colors.white : null,
+                              SizedBox(
+                                width: 56, // compact for short day names
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                                  decoration: BoxDecoration(
+                                    color: isToday
+                                        ? Colors.blue.shade400
+                                        : isDark
+                                            ? Colors.grey[800]
+                                            : Colors.blue.shade50,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        dayName,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                          color: isToday ? Colors.white : isDark ? Colors.white : null,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: isToday ? Colors.white : isDark ? Colors.white70 : Colors.black87,
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year.toString().substring(2)}',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: isToday ? Colors.white : isDark ? Colors.white70 : Colors.black87,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
