@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../components/custom_app_bar.dart';
+import '../../state_management/program_provider.dart';
 
-class ProgramOrganisationPage extends StatefulWidget {
+class ProgramOrganisationPage extends ConsumerStatefulWidget {
   final Map<String, List<Map<String, String>>> weekProgram;
-  const ProgramOrganisationPage({super.key, required this.weekProgram});
+  const ProgramOrganisationPage({Key? key, required this.weekProgram}) : super(key: key);
 
   @override
-  State<ProgramOrganisationPage> createState() => _ProgramOrganisationPageState();
+  ConsumerState<ProgramOrganisationPage> createState() => _ProgramOrganisationPageState();
 }
 
-class _ProgramOrganisationPageState extends State<ProgramOrganisationPage> {
+class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPage> {
   late Map<String, List<Map<String, String>>> localWeekProgram;
   final List<String> weekDays = [
     'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
@@ -24,13 +26,12 @@ class _ProgramOrganisationPageState extends State<ProgramOrganisationPage> {
     };
   }
 
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: CustomAppBar(
-        title: 'Program Organisation',
-      ),
+      appBar: CustomAppBar(title: 'Program Organisation'),
       body: Center(
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
@@ -75,12 +76,14 @@ class _ProgramOrganisationPageState extends State<ProgramOrganisationPage> {
                               style: const TextStyle(fontSize: 12),
                               isDense: true,
                               alignment: Alignment.centerLeft,
-                              underline: SizedBox.shrink(),
+                              underline: const SizedBox.shrink(),
                               iconSize: 18,
-                              items: weekDays.map((copyDay) => DropdownMenuItem(
-                                value: copyDay,
-                                child: Text(copyDay, style: const TextStyle(fontSize: 12)),
-                              )).toList(),
+                              items: weekDays
+                                  .map<DropdownMenuItem<String>>((copyDay) => DropdownMenuItem<String>(
+                                        value: copyDay,
+                                        child: Text(copyDay, style: const TextStyle(fontSize: 12)),
+                                      ))
+                                  .toList(),
                               onChanged: (copyDay) {
                                 if (copyDay != null && copyDay != dayName) {
                                   setState(() {
@@ -246,7 +249,6 @@ class _ProgramOrganisationPageState extends State<ProgramOrganisationPage> {
                                 ),
                               );
                             }),
-                            // Add button
                             Align(
                               alignment: Alignment.centerLeft,
                               child: TextButton.icon(
@@ -366,8 +368,10 @@ class _ProgramOrganisationPageState extends State<ProgramOrganisationPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pop(context, localWeekProgram);
+        onPressed: () async {
+          final service = ref.read(programFirestoreServiceProvider);
+          await service.setWeekProgram(localWeekProgram);
+          if (mounted) Navigator.pop(context, localWeekProgram);
         },
         tooltip: 'Save and go back',
         backgroundColor: isDark ? Colors.teal[400] : null,

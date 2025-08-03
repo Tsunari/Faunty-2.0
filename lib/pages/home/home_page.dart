@@ -25,7 +25,7 @@ class HomePage extends ConsumerWidget {
       final dayIdx = (todayIdx + i) % 7;
       final dayFull = weekDaysFull[dayIdx];
       final dayAbbr = weekDays[dayIdx];
-      final events = weekProgram[dayFull] ?? [];
+      final events = [];
       for (final event in events) {
         if (i == 0) {
           final fromParts = event['from']!.split(':');
