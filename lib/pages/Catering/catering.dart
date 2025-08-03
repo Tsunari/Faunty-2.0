@@ -39,11 +39,13 @@ class _CateringPageState extends ConsumerState<CateringPage> {
           data: (weekPlan) {
             // Only show days with at least one user in any meal
             List<int> visibleDays = [];
+            bool hasAnyUser = false;
             for (int day = 0; day < 7; day++) {
               bool hasUser = false;
               for (int meal = 0; meal < meals.length; meal++) {
                 if (weekPlan[day][meal].isNotEmpty) {
                   hasUser = true;
+                  hasAnyUser = true;
                   break;
                 }
               }
@@ -56,83 +58,113 @@ class _CateringPageState extends ConsumerState<CateringPage> {
               body: Center(
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width,
-                  child: ListView.builder(
-                    physics: const BouncingScrollPhysics(),
-                    scrollDirection: Axis.vertical,
-                    itemCount: visibleDays.length,
-                    itemBuilder: (context, idx) {
-                      final dayIdx = visibleDays[idx];
-                      final date = monday.add(Duration(days: dayIdx));
-                      return Card(
-                        color: isDark ? Colors.grey[850] : null,
-                        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: isDark ? Colors.grey[800] : Colors.blue.shade50,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  '${days[dayIdx]}, ${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: isDark ? Colors.white : null,
-                                  ),
+                  child: hasAnyUser
+                      ? ListView.builder(
+                          physics: const BouncingScrollPhysics(),
+                          scrollDirection: Axis.vertical,
+                          itemCount: visibleDays.length,
+                          itemBuilder: (context, idx) {
+                            final dayIdx = visibleDays[idx];
+                            final date = monday.add(Duration(days: dayIdx));
+                            return Card(
+                              color: isDark ? Colors.grey[850] : null,
+                              margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: isDark ? Colors.grey[800] : Colors.blue.shade50,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        '${days[dayIdx]}, ${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                          color: isDark ? Colors.white : null,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    ...List.generate(meals.length, (mealIdx) =>
+                                      weekPlan[dayIdx][mealIdx].isNotEmpty
+                                          ? Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                              child: Row(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(
+                                                    width: 100,
+                                                    child: Text(
+                                                      meals[mealIdx],
+                                                      style: TextStyle(
+                                                        fontWeight: FontWeight.w500,
+                                                        color: isDark ? Colors.white : null,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                    child: Wrap(
+                                                      spacing: 8,
+                                                      runSpacing: 4,
+                                                      children: weekPlan[dayIdx][mealIdx].map((user) => Container(
+                                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                            decoration: BoxDecoration(
+                                                              color: isDark ? Colors.green.shade900 : Colors.green.shade100,
+                                                              borderRadius: BorderRadius.circular(12),
+                                                            ),
+                                                            child: Text(
+                                                              user,
+                                                              style: TextStyle(color: isDark ? Colors.white : null),
+                                                            ),
+                                                          )).toList(),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            )
+                                          : const SizedBox.shrink(),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              ...List.generate(meals.length, (mealIdx) =>
-                                weekPlan[dayIdx][mealIdx].isNotEmpty
-                                    ? Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                        child: Row(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            SizedBox(
-                                              width: 100,
-                                              child: Text(
-                                                meals[mealIdx],
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  color: isDark ? Colors.white : null,
-                                                ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: Wrap(
-                                                spacing: 8,
-                                                runSpacing: 4,
-                                                children: weekPlan[dayIdx][mealIdx].map((user) => Container(
-                                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                                      decoration: BoxDecoration(
-                                                        color: isDark ? Colors.green.shade900 : Colors.green.shade100,
-                                                        borderRadius: BorderRadius.circular(12),
-                                                      ),
-                                                      child: Text(
-                                                        user,
-                                                        style: TextStyle(color: isDark ? Colors.white : null),
-                                                      ),
-                                                    )).toList(),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    : const SizedBox.shrink(),
+                            );
+                          },
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 64.0, horizontal: 24.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(Icons.emoji_food_beverage, size: 64, color: isDark ? Colors.white54 : Colors.blue.shade200),
+                              const SizedBox(height: 24),
+                              Text(
+                                'No catering assignments yet!',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white70 : Colors.blue.shade700,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Tap the edit button below to assign users to meals for the week.',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: isDark ? Colors.white54 : Colors.black54,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
                             ],
                           ),
                         ),
-                      );
-                    },
-                  ),
                 ),
               ),
               floatingActionButton: FloatingActionButton(

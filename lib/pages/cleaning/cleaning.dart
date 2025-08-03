@@ -53,42 +53,70 @@ class CleaningPage extends ConsumerWidget {
                     Expanded(
                       child: places.isEmpty
                           ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Text(
-                                    'No places found. Create your first place to get started!',
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 24),
-                                  ElevatedButton.icon(
-                                    icon: const Icon(Icons.add),
-                                    label: const Text('Create Place'),
-                                    onPressed: () async {
-                                      final controller = TextEditingController();
-                                      final name = await showDialog<String>(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          title: const Text('Create Place'),
-                                          content: TextField(
-                                            controller: controller,
-                                            autofocus: true,
-                                            decoration: const InputDecoration(labelText: 'Place name'),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 64.0, horizontal: 24.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.cleaning_services_rounded, size: 64, color: Theme.of(context).colorScheme.primary.withAlpha(180)),
+                                    const SizedBox(height: 24),
+                                    Text(
+                                      'No cleaning places yet!',
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context).brightness == Brightness.dark
+                                            ? Colors.white70
+                                            : Theme.of(context).colorScheme.primary,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      'Tap below to create your first place and start assigning users.',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Theme.of(context).brightness == Brightness.dark
+                                            ? Colors.white54
+                                            : Colors.black54,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 28),
+                                    ElevatedButton.icon(
+                                      icon: const Icon(Icons.add),
+                                      label: const Text('Create Place'),
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                      ),
+                                      onPressed: () async {
+                                        final controller = TextEditingController();
+                                        final name = await showDialog<String>(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: const Text('Create Place'),
+                                            content: TextField(
+                                              controller: controller,
+                                              autofocus: true,
+                                              decoration: const InputDecoration(labelText: 'Place name'),
+                                            ),
+                                            actions: [
+                                              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                                              ElevatedButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Create')),
+                                            ],
                                           ),
-                                          actions: [
-                                            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-                                            ElevatedButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Create')),
-                                          ],
-                                        ),
-                                      );
-                                      if (name != null && name.isNotEmpty) {
-                                        final service = ref.read(cleaningFirestoreServiceProvider);
-                                        await service.addPlace(name);
-                                      }
-                                    },
-                                  ),
-                                ],
+                                        );
+                                        if (name != null && name.isNotEmpty) {
+                                          final service = ref.read(cleaningFirestoreServiceProvider);
+                                          await service.addPlace(name);
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
                             )
                           : ListView.builder(

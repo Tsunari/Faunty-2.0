@@ -36,6 +36,22 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
     final weekProgramAsync = ref.watch(weekProgramProvider);
     return weekProgramAsync.when(
       data: (weekProgram) {
+        // Build a list of days (date, dayName, dayShort, entries) where entries is not empty
+        final List<Map<String, dynamic>> daysWithPrograms = [];
+        for (int idx = 0; idx < 7; idx++) {
+          final date = now.add(Duration(days: idx));
+          final dayName = getWeekdayFromDate(date);
+          final dayShort = getWeekdayShort(date);
+          final entries = weekProgram[dayName] ?? [];
+          if (entries.isNotEmpty) {
+            daysWithPrograms.add({
+              'date': date,
+              'dayName': dayName,
+              'dayShort': dayShort,
+              'entries': entries,
+            });
+          }
+        }
         return Scaffold(
           appBar: CustomAppBar(
             title: 'Program',
@@ -43,142 +59,155 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
           body: Center(
             child: SizedBox(
               width: MediaQuery.of(context).size.width,
-              child: ListView.builder(
-                physics: const BouncingScrollPhysics(),
-                itemCount: 7,
-                itemBuilder: (context, idx) {
-                  final date = now.add(Duration(days: idx));
-                  final dayName = getWeekdayFromDate(date);
-                  final dayShort = getWeekdayShort(date);
-                  final entries = weekProgram[dayName] ?? [];
-                  final isToday = date.day == now.day && date.month == now.month && date.year == now.year;
-                  TimeOfDay nowTime = TimeOfDay.now();
-                  int? currentEventIdx;
-                  if (isToday) {
-                    for (int i = 0; i < entries.length; i++) {
-                      final fromParts = entries[i]['from']!.split(':');
-                      final toParts = entries[i]['to']!.split(':');
-                      final from = TimeOfDay(hour: int.parse(fromParts[0]), minute: int.parse(fromParts[1]));
-                      final to = TimeOfDay(hour: int.parse(toParts[0]), minute: int.parse(toParts[1]));
-                      bool afterFrom = nowTime.hour > from.hour || (nowTime.hour == from.hour && nowTime.minute >= from.minute);
-                      bool beforeTo = nowTime.hour < to.hour || (nowTime.hour == to.hour && nowTime.minute <= to.minute);
-                      if (afterFrom && beforeTo) {
-                        currentEventIdx = i;
-                        break;
-                      }
-                    }
-                  }
-                  return SizedBox(
-                    width: double.infinity,
-                    child: Card(
-                      color: isDark ? Colors.grey[850] : null,
-                      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: 56, // compact for short day names
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                                  decoration: BoxDecoration(
-                                    color: isToday
-                                        ? Colors.blue.shade400
-                                        : isDark
-                                            ? Colors.grey[800]
-                                            : Colors.blue.shade50,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        dayShort,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                          color: isToday ? Colors.white : isDark ? Colors.white : null,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year.toString().substring(2)}',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: isToday ? Colors.white : isDark ? Colors.white70 : Colors.black87,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
+              child: daysWithPrograms.isEmpty
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(Icons.event_busy, size: 64, color: isDark ? Colors.white24 : Colors.grey[400]),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No program entries for this week',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white70 : Colors.black54,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tap the edit button to add a program.',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: isDark ? Colors.white54 : Colors.black45,
+                          ),
+                        ),
+                      ],
+                    )
+                  : ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: daysWithPrograms.length,
+                      itemBuilder: (context, idx) {
+                        final day = daysWithPrograms[idx];
+                        final date = day['date'] as DateTime;
+                        final dayShort = day['dayShort'] as String;
+                        final entries = day['entries'] as List;
+                        final isToday = date.day == now.day && date.month == now.month && date.year == now.year;
+                        TimeOfDay nowTime = TimeOfDay.now();
+                        int? currentEventIdx;
+                        if (isToday) {
+                          for (int i = 0; i < entries.length; i++) {
+                            final fromParts = entries[i]['from']!.split(':');
+                            final toParts = entries[i]['to']!.split(':');
+                            final from = TimeOfDay(hour: int.parse(fromParts[0]), minute: int.parse(fromParts[1]));
+                            final to = TimeOfDay(hour: int.parse(toParts[0]), minute: int.parse(toParts[1]));
+                            bool afterFrom = nowTime.hour > from.hour || (nowTime.hour == from.hour && nowTime.minute >= from.minute);
+                            bool beforeTo = nowTime.hour < to.hour || (nowTime.hour == to.hour && nowTime.minute <= to.minute);
+                            if (afterFrom && beforeTo) {
+                              currentEventIdx = i;
+                              break;
+                            }
+                          }
+                        }
+                        return SizedBox(
+                          width: double.infinity,
+                          child: Card(
+                            color: isDark ? Colors.grey[850] : null,
+                            margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: IntrinsicHeight(
+                                child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    if (entries.isEmpty)
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                        child: Text(
-                                          'No program for this day',
-                                          style: TextStyle(
-                                            color: isDark ? Colors.white70 : Colors.black54,
-                                            fontStyle: FontStyle.italic,
-                                          ),
+                                    SizedBox(
+                                      width: 56, // compact for short day names
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                                        decoration: BoxDecoration(
+                                          color: isToday
+                                              ? Colors.blue.shade400
+                                              : isDark
+                                                  ? Colors.grey[800]
+                                                  : Colors.blue.shade50,
+                                          borderRadius: BorderRadius.circular(8),
                                         ),
-                                      )
-                                    else
-                                      ...entries.asMap().entries.map((entryMap) {
-                                        final entry = entryMap.value;
-                                        final entryIdx = entryMap.key;
-                                        final isCurrent = isToday && currentEventIdx == entryIdx;
-                                        return Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: isDark ? Colors.green.shade900 : Colors.green.shade100,
-                                              borderRadius: BorderRadius.circular(12),
-                                              border: isCurrent ? Border.all(color: Colors.red, width: 2) : null,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              dayShort,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                                color: isToday ? Colors.white : isDark ? Colors.white : null,
+                                              ),
                                             ),
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  '${entry['from']} - ${entry['to']}',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.w500,
-                                                    color: isDark ? Colors.white : null,
-                                                  ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year.toString().substring(2)}',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color: isToday ? Colors.white : isDark ? Colors.white70 : Colors.black87,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          ...entries.asMap().entries.map((entryMap) {
+                                            final entry = entryMap.value;
+                                            final entryIdx = entryMap.key;
+                                            final isCurrent = isToday && currentEventIdx == entryIdx;
+                                            return Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: isDark ? Colors.green.shade900 : Colors.green.shade100,
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: isCurrent ? Border.all(color: Colors.red, width: 2) : null,
                                                 ),
-                                                const SizedBox(width: 12),
-                                                Expanded(
-                                                  child: Text(
-                                                    entry['event'] ?? '',
-                                                    style: TextStyle(
-                                                      color: isDark ? Colors.white : null,
-                                                      fontWeight: FontWeight.w500,
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      '${entry['from']} - ${entry['to']}',
+                                                      style: TextStyle(
+                                                        fontWeight: FontWeight.w500,
+                                                        color: isDark ? Colors.white : null,
+                                                      ),
                                                     ),
-                                                  ),
+                                                    const SizedBox(width: 12),
+                                                    Expanded(
+                                                      child: Text(
+                                                        entry['event'] ?? '',
+                                                        style: TextStyle(
+                                                          color: isDark ? Colors.white : null,
+                                                          fontWeight: FontWeight.w500,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      }),
+                                              ),
+                                            );
+                                          }),
+                                        ],
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ),
           floatingActionButton: FloatingActionButton(
