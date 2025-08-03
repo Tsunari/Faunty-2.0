@@ -15,58 +15,39 @@ class SplashPage extends ConsumerStatefulWidget {
 }
 
 class _SplashPageState extends ConsumerState<SplashPage> {
-  @override
-  void initState() {
-    super.initState();
-    _checkAuth();
-  }
-
-  Future<void> _checkAuth() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      // Use allUsersProvider to get user_list from Riverpod
-      final allUsersAsync = ref.read(allUsersProvider);
-      List<UserEntity> allUsers = [];
-      if (allUsersAsync is AsyncData<List<UserEntity>>) {
-        allUsers = allUsersAsync.value;
-      } else {
-        // If not loaded yet, fallback to Firestore (rare, e.g. on cold start)
-        final doc = await FirebaseFirestore.instance.collection('user_list').doc(user.uid).get();
-        if (doc.exists && doc.data() != null && doc.data()!['place'] != null) {
-          allUsers = [UserEntity.fromMap(doc.data()!)];
-        }
-      }
-      final userEntity = allUsers.where((u) => u.uid == user.uid).toList();
-      final placeName = userEntity.isNotEmpty ? userEntity.first.place.name : null;
-      if (placeName != null) {
-        final success = await ref.read(userProvider.notifier).loadUser(uid: user.uid);
-        if (success) {
-          if (mounted) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.of(context).pushReplacementNamed('/home');
-            });
-          }
-          return;
-        }
-      }
-      // If failed, go to login
-      if (mounted) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.of(context).pushReplacementNamed('/login');
-        });
-      }
-    } else {
-      // Not logged in
-      if (mounted) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.of(context).pushReplacementNamed('/login');
-        });
-      }
-    }
-  }
+  bool _navigated = false;
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final allUsersAsync = ref.watch(allUsersProvider);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (_navigated) return;
+      if (user == null) {
+        _navigated = true;
+        Navigator.of(context).pushReplacementNamed('/login');
+        return;
+      }
+      if (allUsersAsync is AsyncData<List<UserEntity>>) {
+        final allUsers = allUsersAsync.value;
+        final userEntity = allUsers.where((u) => u.uid == user.uid).toList();
+        final placeName = userEntity.isNotEmpty ? userEntity.first.place.name : null;
+        if (placeName != null) {
+          final success = await ref.read(userProvider.notifier).loadUser(uid: user.uid);
+          if (success) {
+            _navigated = true;
+            Navigator.of(context).pushReplacementNamed('/home');
+            return;
+          }
+        }
+        // If failed, go to login
+        _navigated = true;
+        Navigator.of(context).pushReplacementNamed('/login');
+      }
+      // If loading or error, do nothing (show progress)
+    });
+
     return const Scaffold(
       body: Center(
         child: CircularProgressIndicator(),

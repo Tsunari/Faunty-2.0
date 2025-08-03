@@ -1,16 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_entity.dart';
+import '../models/places.dart';
 import 'package:uuid/uuid.dart';
 
 
 class CleaningFirestoreService {
   final UserEntity user;
   CleaningFirestoreService(this.user);
-  DocumentReference get _docRef => FirebaseFirestore.instance
-      .collection('places')
-      .doc(user.place.name)
-      .collection('cleaning')
-      .doc('data');
+  DocumentReference get _docRef {
+    // Defensive: ensure user.place is always a Place enum
+    // user.place should always be a Place enum
+    final placeName = user.place.name;
+    return FirebaseFirestore.instance
+        .collection('places')
+        .doc(placeName)
+        .collection('cleaning')
+        .doc('data');
+  }
 
   /// Watches the cleaning places and assignments structure:
   /// { places: { placeId: { name: String, assignees: [userId, ...] }, ... } }

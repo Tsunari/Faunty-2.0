@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../models/user_entity.dart';
 import '../state_management/user_provider.dart';
 import '../state_management/user_list_provider.dart';
@@ -123,20 +124,21 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       _isLoading = false;
     });
     if (user != null) {
-      // Use allUsersProvider to get user_list from Riverpod
-      final allUsersAsync = ref.read(allUsersProvider);
-      List<UserEntity> allUsers = [];
-      if (allUsersAsync is AsyncData<List<UserEntity>>) {
-        allUsers = allUsersAsync.value;
-      } else {
-        // If not loaded yet, fallback to Firestore (rare, e.g. on cold start) TODO: use firestore service
-        final doc = await FirebaseFirestore.instance.collection('user_list').doc(user.uid).get();
-        if (doc.exists && doc.data() != null && doc.data()!['place'] != null) {
-          allUsers = [UserEntity.fromMap(doc.data()!)];
+      // Always fetch user doc from Firestore after login
+      final doc = await FirebaseFirestore.instance.collection('user_list').doc(user.uid).get();
+      print('[DEBUG] Firestore user doc: ${doc.data()}');
+      String? placeName;
+      if (doc.exists && doc.data() != null) {
+        final data = doc.data()!;
+        if (data['place'] != null) {
+          placeName = data['place'] as String?;
+          print('[DEBUG] Place field exists: $placeName');
+        } else {
+          print('[DEBUG] User doc exists but no place field.');
         }
+      } else {
+        print('[DEBUG] User doc does not exist or is null.');
       }
-      final userEntity = allUsers.where((u) => u.uid == user.uid).toList();
-      final placeName = userEntity.isNotEmpty ? userEntity.first.place.name : null;
       if (placeName == null) {
         setState(() {
           _error = 'Could not determine your place. Please contact support.';
