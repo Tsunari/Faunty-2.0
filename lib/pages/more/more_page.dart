@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class MorePage extends StatefulWidget {
@@ -21,18 +22,62 @@ class _MorePageState extends State<MorePage> {
         Center(
           child: Hero(
             tag: 'mosque',
-            child: SizedBox(
-              height: 100,
-              child: Image(
-                image: AssetImage('assets/LogoInverse.png'),
-                fit: BoxFit.contain,
+            child: GestureDetector(
+              onTap: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.pushReplacementNamed(context, '/login');
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: 100,
+                    child: Image(
+                      image: const AssetImage('assets/LogoInverse.png'),
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.logout,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Click to log out',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 8),
         const Divider(),
         SwitchListTile(
+          secondary: const Icon(Icons.dark_mode_outlined),
           title: const Text('Dark Mode'),
           subtitle: const Text('Switch between light and dark mode'),
           value: darkMode,
@@ -41,6 +86,7 @@ class _MorePageState extends State<MorePage> {
           },
         ),
         SwitchListTile(
+          secondary: const Icon(Icons.app_registration_outlined),
           title: const Text('Registration Mode'),
           subtitle: const Text('Enable or disable registration'),
           value: registrationMode,

@@ -1,9 +1,13 @@
+import 'package:faunty/models/user_entity.dart';
 import 'package:faunty/pages/home/catering_widget.dart';
 import 'package:flutter/material.dart';
 import '../../components/custom_app_bar.dart';
 import '../../pages/program/program_page.dart';
 
-class HomePage extends StatelessWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../state_management/user_provider.dart';
+
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   static const List<String> weekDaysFull = [
@@ -51,9 +55,15 @@ class HomePage extends StatelessWidget {
  
 
   @override
-  Widget build(BuildContext context) {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final appointments = getNextAppointments();
     final width = MediaQuery.of(context).size.width;
+    final user = ref.watch(userProvider);
+    if (user != null) {
+      // Print user info to console
+      print('UserEntity: uid=${user.uid}, email=${user.email}, role=${user.role}, place=${user.place}');
+    }
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Home'

@@ -1,6 +1,7 @@
 import 'package:faunty/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'pages/home/home_page.dart';
 import 'pages/login.dart';
 import 'pages/cleaning/cleaning.dart';
@@ -15,7 +16,11 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const Faunty());
+  runApp(
+    ProviderScope(
+      child: Faunty(),
+    ),
+  );
 }
 
 class Faunty extends StatelessWidget {
@@ -39,7 +44,7 @@ class Faunty extends StatelessWidget {
       ),
       themeMode: ThemeMode.dark,
 
-      initialRoute: '/home',
+      initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
         '/home': (context) => const MainPage(),
