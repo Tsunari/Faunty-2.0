@@ -79,8 +79,6 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                     physics: const BouncingScrollPhysics(),
                     itemCount: 7,
                     itemBuilder: (context, dayIdx) {
-                      // ...existing code for day cards, using localWeekPlan...
-                      // (no change needed here)
                       return Card(
                         color: isDark ? Colors.grey[850] : null,
                         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -90,20 +88,23 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    getWeekday(dayIdx),
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: isDark ? Colors.white : null,
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Text(
+                                      getWeekday(dayIdx),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark ? Colors.white : null,
+                                      ),
                                     ),
                                   ),
                                   const Spacer(),
                                   IconButton(
                                     icon: Icon(Icons.delete_outline, 
                                       color: isDark ? Colors.white : Colors.black,
-                                      size: 18,
+                                      size: 20,
                                     ),
                                     padding: const EdgeInsets.all(0),
                                     constraints: const BoxConstraints(),
@@ -138,79 +139,93 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                                   ),
                                 ],
                               ),
-                              ...List.generate(widget.meals.length, (mealIdx) => Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        SizedBox(
-                                          width: 100,
-                                          child: Text(
-                                            widget.meals[mealIdx],
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w500,
-                                              color: isDark ? Colors.white : null,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 4),
-                                    DragTarget<String>(
+                              // Stacked drop zones: 3 vertically, label inside the drag box
+                              Column(
+                                children: List.generate(widget.meals.length, (mealIdx) {
+                                  final mealName = widget.meals[mealIdx];
+                                  final usersForMeal = localWeekPlan![dayIdx][mealIdx];
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 6.0),
+                                    child: DragTarget<String>(
                                       builder: (context, candidateData, rejectedData) {
-                                        return Wrap(
-                                          spacing: 4,
-                                          runSpacing: 4,
-                                          children: localWeekPlan![dayIdx][mealIdx].isNotEmpty
-                                            ? localWeekPlan![dayIdx][mealIdx].map((user) => Container(
-                                                margin: const EdgeInsets.only(bottom: 2),
-                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                                decoration: BoxDecoration(
-                                                  color: isDark ? Colors.green.shade900 : Colors.green.shade100,
-                                                  borderRadius: BorderRadius.circular(12),
-                                                ),
-                                                child: Row(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    Text(user, style: TextStyle(color: isDark ? Colors.white : null)),
-                                                    const SizedBox(width: 4),
-                                                    GestureDetector(
-                                                      onTap: () {
-                                                        setState(() {
-                                                          localWeekPlan![dayIdx][mealIdx].remove(user);
-                                                        });
-                                                      },
-                                                      child: Icon(Icons.remove_circle_outline, size: 18, color: isDark ? Colors.red[200] : Colors.red[700]),
+                                        return Container(
+                                          constraints: const BoxConstraints(minHeight: 54),
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                          decoration: BoxDecoration(
+                                            color: isDark ? Colors.grey[800] : Colors.grey.shade200,
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: Border.all(color: isDark ? Colors.white24 : Colors.grey),
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(Icons.restaurant_menu, size: 18, color: isDark ? Colors.white54 : Colors.black45),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    mealName,
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.w500,
+                                                      color: isDark ? Colors.white70 : Colors.black87,
                                                     ),
-                                                  ],
-                                                ),
-                                              )).toList()
-                                            : [
-                                                Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                                  decoration: BoxDecoration(
-                                                    color: isDark ? Colors.grey[800] : Colors.grey.shade200,
-                                                    borderRadius: BorderRadius.circular(12),
-                                                    border: Border.all(color: isDark ? Colors.white24 : Colors.grey),
                                                   ),
-                                                  child: Text('Drag here', style: TextStyle(color: isDark ? Colors.white54 : Colors.black54)),
-                                                )
-                                              ],
+                                                ],
+                                              ),
+                                              const SizedBox(height: 4),
+                                              usersForMeal.isNotEmpty
+                                                  ? Wrap(
+                                                      spacing: 4,
+                                                      runSpacing: 4,
+                                                      children: usersForMeal.map((user) => Container(
+                                                        margin: const EdgeInsets.only(bottom: 2),
+                                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                        decoration: BoxDecoration(
+                                                          color: isDark ? Colors.green.shade900 : Colors.green.shade100,
+                                                          borderRadius: BorderRadius.circular(12),
+                                                        ),
+                                                        child: Row(
+                                                          mainAxisSize: MainAxisSize.min,
+                                                          children: [
+                                                            Text(user, style: TextStyle(color: isDark ? Colors.white : null)),
+                                                            const SizedBox(width: 4),
+                                                            GestureDetector(
+                                                              onTap: () {
+                                                                setState(() {
+                                                                  usersForMeal.remove(user);
+                                                                });
+                                                              },
+                                                              child: Icon(Icons.remove_circle_outline, size: 18, color: isDark ? Colors.red[200] : Colors.red[700]),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      )).toList(),
+                                                    )
+                                                  : Padding(
+                                                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                                      child: Center(
+                                                        child: Text(
+                                                          'Drag here for $mealName',
+                                                          style: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
+                                                        ),
+                                                      ),
+                                                    ),
+                                            ],
+                                          ),
                                         );
                                       },
                                       onAccept: (user) {
                                         setState(() {
-                                          if (!localWeekPlan![dayIdx][mealIdx].contains(user)) {
-                                            localWeekPlan![dayIdx][mealIdx].add(user);
+                                          if (!usersForMeal.contains(user)) {
+                                            usersForMeal.add(user);
                                           }
                                         });
                                       },
                                     ),
-                                  ],
-                                ),
-                              )),
+                                  );
+                                }),
+                              ),
                             ],
                           ),
                         ),

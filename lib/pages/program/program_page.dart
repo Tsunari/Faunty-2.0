@@ -60,29 +60,34 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
             child: SizedBox(
               width: MediaQuery.of(context).size.width,
               child: daysWithPrograms.isEmpty
-                  ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(Icons.event_busy, size: 64, color: isDark ? Colors.white24 : Colors.grey[400]),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No program entries for this week',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white70 : Colors.black54,
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 64.0, horizontal: 24.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(Icons.event_busy, size: 64, color: isDark ? Colors.white54 : Colors.blue.shade200),
+                          const SizedBox(height: 24),
+                          Text(
+                            'No program entries for this week!',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white70 : Colors.blue.shade700,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Tap the edit button to add a program.',
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: isDark ? Colors.white54 : Colors.black45,
+                          const SizedBox(height: 12),
+                          Text(
+                            'Tap the edit button below to add a program for the week.',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: isDark ? Colors.white54 : Colors.black54,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     )
                   : ListView.builder(
                       physics: const BouncingScrollPhysics(),
