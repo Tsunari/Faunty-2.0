@@ -6,6 +6,9 @@ import '../../state_management/program_provider.dart';
 
 
 const List<String> weekDays = [
+  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+];
+const List<String> weekDaysShort = [
   'Mo', 'Tue', 'Wed', 'Thu', 'Fr', 'Sat', 'Sun'
 ];
 
@@ -18,8 +21,12 @@ class ProgramPage extends ConsumerStatefulWidget {
 
 class _ProgramPageState extends ConsumerState<ProgramPage> {
   String getWeekdayFromDate(DateTime date) {
-    // Dart weekday: 1=Mon, ..., 7=Sun; our weekDays[0]=Mo
+    // For Firestore key lookup (full name)
     return weekDays[(date.weekday - 1) % 7];
+  }
+  String getWeekdayShort(DateTime date) {
+    // For UI display (short name)
+    return weekDaysShort[(date.weekday - 1) % 7];
   }
 
   @override
@@ -42,6 +49,7 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                 itemBuilder: (context, idx) {
                   final date = now.add(Duration(days: idx));
                   final dayName = getWeekdayFromDate(date);
+                  final dayShort = getWeekdayShort(date);
                   final entries = weekProgram[dayName] ?? [];
                   final isToday = date.day == now.day && date.month == now.month && date.year == now.year;
                   TimeOfDay nowTime = TimeOfDay.now();
@@ -87,7 +95,7 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        dayName,
+                                        dayShort,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14,
