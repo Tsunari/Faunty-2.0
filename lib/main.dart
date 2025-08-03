@@ -9,6 +9,7 @@ import 'pages/catering/catering.dart';
 import 'pages/more/more_page.dart';
 import 'components/navigation_bar.dart';
 import 'pages/program/program_page.dart';
+import 'pages/splash_page.dart';
 
 
 void main() async {
@@ -44,8 +45,9 @@ class Faunty extends StatelessWidget {
       ),
       themeMode: ThemeMode.dark,
 
-      initialRoute: '/login',
+      initialRoute: '/splash',
       routes: {
+        '/splash': (context) => const SplashPage(),
         '/login': (context) => const LoginPage(),
         '/home': (context) => const MainPage(),
       },

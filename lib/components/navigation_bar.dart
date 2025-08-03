@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class NavBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
-  const NavBar({Key? key, required this.selectedIndex, required this.onDestinationSelected}) : super(key: key);
+  const NavBar({super.key, required this.selectedIndex, required this.onDestinationSelected});
 
   static const List<NavigationDestination> _destinations = [
     NavigationDestination(
