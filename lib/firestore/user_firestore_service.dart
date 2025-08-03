@@ -10,10 +10,8 @@ class UserFirestoreService {
       .doc(place.name)
       .collection('users');
 
-  Future<void> createUser(UserEntity user, {String? firstName, String? lastName}) async {
+  Future<void> createUser(UserEntity user) async {
     final data = user.toMap();
-    if (firstName != null) data['firstName'] = firstName;
-    if (lastName != null) data['lastName'] = lastName;
     await _usersCollection(user.place).doc(user.uid).set(data);
   }
 

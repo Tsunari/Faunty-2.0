@@ -24,18 +24,20 @@ class UserNotifier extends StateNotifier<UserEntity?> {
   Future<bool> createUser({
     required String uid,
     required String email,
+    required String firstName,
+    required String lastName,
     required Place place,
-    String? firstName,
-    String? lastName,
   }) async {
     // Always create as UserRole.user for registration
     final user = UserEntity(
       uid: uid,
       email: email,
+      firstName: firstName,
+      lastName: lastName,
       role: UserRole.user,
       place: place,
     );
-    await _firestoreService.createUser(user, firstName: firstName, lastName: lastName);
+    await _firestoreService.createUser(user);
     return await loadUser(uid: uid, place: place);
   }
 
