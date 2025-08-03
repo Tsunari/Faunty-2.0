@@ -63,15 +63,4 @@ class CleaningFirestoreService {
       await _docRef.set({'places': places});
     }
   }
-
-  /// Assigns users to a place (overwrites assignees for that place)
-  Future<void> setAssignees(String placeId, List<String> userIds) async {
-    final snapshot = await _docRef.get();
-    final data = snapshot.data() as Map<String, dynamic>? ?? {};
-    final places = Map<String, dynamic>.from(data['places'] ?? {});
-    if (places[placeId] != null) {
-      places[placeId]['assignees'] = userIds;
-      await _docRef.set({'places': places});
-    }
-  }
 }

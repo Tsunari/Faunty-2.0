@@ -1,28 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../state_management/catering_provider.dart';
 
-class CateringOrganisationPage extends StatefulWidget {
+class CateringOrganisationPage extends ConsumerStatefulWidget {
   final List<List<List<String>>> weekPlan;
   final List<String> users;
   final List<String> meals;
 
-  const CateringOrganisationPage({
-    super.key,
-    required this.weekPlan,
-    required this.users,
-    required this.meals,
-  });
+  const CateringOrganisationPage({Key? key, required this.weekPlan, required this.users, required this.meals}) : super(key: key);
 
   @override
-  State<CateringOrganisationPage> createState() => _CateringOrganisationPageState();
+  ConsumerState<CateringOrganisationPage> createState() => _CateringOrganisationPageState();
 }
 
-class _CateringOrganisationPageState extends State<CateringOrganisationPage> {
-  late List<List<List<String>>> localWeekPlan;
+class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationPage> {
+  List<List<List<String>>>? localWeekPlan;
+  bool isSaving = false;
 
   @override
-  void initState() {
-    super.initState();
-    localWeekPlan = widget.weekPlan.map((day) => day.map((meal) => List<String>.from(meal)).toList()).toList();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final weekPlanAsync = ref.watch(cateringWeekPlanProvider);
+    if (weekPlanAsync is AsyncData<List<List<List<String>>>>) {
+      final firestorePlan = weekPlanAsync.value;
+      if (localWeekPlan == null || !_deepEquals(localWeekPlan!, firestorePlan)) {
+        // Only update if different (prevents overwriting local edits)
+        localWeekPlan = firestorePlan.map((day) => day.map((meal) => List<String>.from(meal)).toList()).toList();
+      }
+    }
+  }
+
+  bool _deepEquals(List<List<List<String>>> a, List<List<List<String>>> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i].length != b[i].length) return false;
+      for (int j = 0; j < a[i].length; j++) {
+        if (a[i][j].length != b[i][j].length) return false;
+        for (int k = 0; k < a[i][j].length; k++) {
+          if (a[i][j][k] != b[i][j][k]) return false;
+        }
+      }
+    }
+    return true;
   }
 
   String getWeekday(int weekday) {
@@ -33,14 +52,20 @@ class _CateringOrganisationPageState extends State<CateringOrganisationPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final users = widget.users;
+    final weekPlanAsync = ref.watch(cateringWeekPlanProvider);
+    if (localWeekPlan == null) {
+      // Show loading until Firestore data is available
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Catering Organisation'),
         backgroundColor: isDark ? Colors.grey[900] : null,
         foregroundColor: isDark ? Colors.white : null,
-        actions: [
-          // Test-Button entfernt
-        ],
+        actions: [],
       ),
       body: Row(
         children: [
@@ -49,11 +74,13 @@ class _CateringOrganisationPageState extends State<CateringOrganisationPage> {
               child: SizedBox(
                 width: 500,
                 child: NotificationListener<ScrollNotification>(
-                  onNotification: (notification) => true, // disables scrollbar
+                  onNotification: (notification) => true,
                   child: ListView.builder(
                     physics: const BouncingScrollPhysics(),
                     itemCount: 7,
                     itemBuilder: (context, dayIdx) {
+                      // ...existing code for day cards, using localWeekPlan...
+                      // (no change needed here)
                       return Card(
                         color: isDark ? Colors.grey[850] : null,
                         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -97,7 +124,7 @@ class _CateringOrganisationPageState extends State<CateringOrganisationPage> {
                                               TextButton(
                                                 onPressed: () {
                                                   setState(() {
-                                                    localWeekPlan[dayIdx] = List.generate(widget.meals.length, (_) => []);
+                                                    localWeekPlan![dayIdx] = List.generate(widget.meals.length, (_) => []);
                                                   });
                                                   Navigator.of(context).pop();
                                                 },
@@ -136,8 +163,8 @@ class _CateringOrganisationPageState extends State<CateringOrganisationPage> {
                                         return Wrap(
                                           spacing: 4,
                                           runSpacing: 4,
-                                          children: localWeekPlan[dayIdx][mealIdx].isNotEmpty
-                                            ? localWeekPlan[dayIdx][mealIdx].map((user) => Container(
+                                          children: localWeekPlan![dayIdx][mealIdx].isNotEmpty
+                                            ? localWeekPlan![dayIdx][mealIdx].map((user) => Container(
                                                 margin: const EdgeInsets.only(bottom: 2),
                                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                                 decoration: BoxDecoration(
@@ -152,7 +179,7 @@ class _CateringOrganisationPageState extends State<CateringOrganisationPage> {
                                                     GestureDetector(
                                                       onTap: () {
                                                         setState(() {
-                                                          localWeekPlan[dayIdx][mealIdx].remove(user);
+                                                          localWeekPlan![dayIdx][mealIdx].remove(user);
                                                         });
                                                       },
                                                       child: Icon(Icons.remove_circle_outline, size: 18, color: isDark ? Colors.red[200] : Colors.red[700]),
@@ -175,8 +202,8 @@ class _CateringOrganisationPageState extends State<CateringOrganisationPage> {
                                       },
                                       onAccept: (user) {
                                         setState(() {
-                                          if (!localWeekPlan[dayIdx][mealIdx].contains(user)) {
-                                            localWeekPlan[dayIdx][mealIdx].add(user);
+                                          if (!localWeekPlan![dayIdx][mealIdx].contains(user)) {
+                                            localWeekPlan![dayIdx][mealIdx].add(user);
                                           }
                                         });
                                       },
@@ -206,7 +233,7 @@ class _CateringOrganisationPageState extends State<CateringOrganisationPage> {
                 ),
                 Expanded(
                   child: ListView(
-                    children: widget.users.map((user) => Padding(
+                    children: users.map((user) => Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                       child: Draggable<String>(
                         data: user,
@@ -257,10 +284,16 @@ class _CateringOrganisationPageState extends State<CateringOrganisationPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pop(context, localWeekPlan);
-        },
-        child: const Icon(Icons.save),
+        onPressed: isSaving
+            ? null
+            : () async {
+                setState(() => isSaving = true);
+                final service = ref.read(cateringFirestoreServiceProvider);
+                await service.setWeekPlan(localWeekPlan!);
+                setState(() => isSaving = false);
+                if (mounted) Navigator.pop(context, localWeekPlan);
+              },
+        child: isSaving ? const CircularProgressIndicator() : const Icon(Icons.save),
         tooltip: 'Save and go back',
         backgroundColor: isDark ? Colors.teal[400] : null,
         foregroundColor: isDark ? Colors.black : null,
