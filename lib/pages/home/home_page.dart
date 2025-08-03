@@ -1,4 +1,3 @@
-import 'package:faunty/models/user_entity.dart';
 import 'package:faunty/pages/home/catering_widget.dart';
 import 'package:flutter/material.dart';
 import '../../components/custom_app_bar.dart';
@@ -54,7 +53,6 @@ class HomePage extends ConsumerWidget {
 
  
 
-  @override
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appointments = getNextAppointments();

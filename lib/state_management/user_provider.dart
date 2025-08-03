@@ -10,15 +10,15 @@ class UserNotifier extends StateNotifier<UserEntity?> {
 
   UserNotifier() : super(null);
 
-  Future<bool> loadUser({required String uid, required Place place}) async {
-    final user = await _firestoreService.getUserByUidAndPlace(uid: uid, place: place);
+  Future<bool> loadUser({required String uid}) async {
+    final user = await _firestoreService.getUserByUid(uid: uid);
     state = user;
     return user != null;
   }
 
   Future<void> updateUser(UserEntity user) async {
     await _firestoreService.updateUser(user);
-    await loadUser(uid: user.uid, place: user.place);
+    await loadUser(uid: user.uid);
   }
 
   Future<bool> createUser({
@@ -38,7 +38,7 @@ class UserNotifier extends StateNotifier<UserEntity?> {
       place: place,
     );
     await _firestoreService.createUser(user);
-    return await loadUser(uid: uid, place: place);
+    return await loadUser(uid: uid);
   }
 
   Future<void> deleteUser(UserEntity user) async {

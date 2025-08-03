@@ -1,22 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:faunty/models/places.dart';
 
 import '../models/user_entity.dart';
 
 class UserFirestoreService {
-  CollectionReference _usersCollection(Place place) => FirebaseFirestore
-      .instance
-      .collection('places')
-      .doc(place.name)
-      .collection('users');
+  CollectionReference get _usersCollection => FirebaseFirestore.instance.collection('user_list');
 
   Future<void> createUser(UserEntity user) async {
     final data = user.toMap();
-    await _usersCollection(user.place).doc(user.uid).set(data);
+    await _usersCollection.doc(user.uid).set(data);
   }
 
-  Future<UserEntity?> getUserByUidAndPlace({required String uid, required Place place}) async {
-    final doc = await _usersCollection(place).doc(uid).get();
+  Future<UserEntity?> getUserByUid({required String uid}) async {
+    final doc = await _usersCollection.doc(uid).get();
     if (doc.exists && doc.data() != null) {
       return UserEntity.fromMap(doc.data() as Map<String, dynamic>);
     }
@@ -24,10 +19,10 @@ class UserFirestoreService {
   }
 
   Future<void> updateUser(UserEntity user) async {
-    await _usersCollection(user.place).doc(user.uid).update(user.toMap());
+    await _usersCollection.doc(user.uid).update(user.toMap());
   }
 
   Future<void> deleteUser(UserEntity user) async {
-    await _usersCollection(user.place).doc(user.uid).delete();
+    await _usersCollection.doc(user.uid).delete();
   }
 }

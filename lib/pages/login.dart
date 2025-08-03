@@ -4,8 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_entity.dart';
-import '../models/user_roles.dart' as user_roles;
 import '../state_management/user_provider.dart';
+import '../state_management/user_list_provider.dart';
 
 // Register a new user and save their role in Firestore
 Future<(User?, String?)> registerWithEmail(String email, String password) async {
@@ -80,7 +80,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
   }
 
   Future<void> _fetchPlaces() async {
-    // Fetch places from Firestore (assuming collection 'places' with 'name' field)
+    // Fetch places from Firestore (assuming collection 'places' with 'name' field) TODO: use firestore service
     try {
       final snapshot = await FirebaseFirestore.instance.collection('places').get();
       print('Fetched places: ${snapshot.docs.length}');
@@ -123,26 +123,27 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       _isLoading = false;
     });
     if (user != null) {
-      // Fetch user's place from user_places collection
-      String? placeName;
-      try {
-        final placeDoc = await FirebaseFirestore.instance.collection('user_places').doc(user.uid).get();
-        if (placeDoc.exists && placeDoc.data() != null && placeDoc.data()!['place'] != null) {
-          placeName = placeDoc.data()!['place'] as String;
+      // Use allUsersProvider to get user_list from Riverpod
+      final allUsersAsync = ref.read(allUsersProvider);
+      List<UserEntity> allUsers = [];
+      if (allUsersAsync is AsyncData<List<UserEntity>>) {
+        allUsers = allUsersAsync.value;
+      } else {
+        // If not loaded yet, fallback to Firestore (rare, e.g. on cold start) TODO: use firestore service
+        final doc = await FirebaseFirestore.instance.collection('user_list').doc(user.uid).get();
+        if (doc.exists && doc.data() != null && doc.data()!['place'] != null) {
+          allUsers = [UserEntity.fromMap(doc.data()!)];
         }
-      } catch (e) {
-        // ignore, will handle below
       }
+      final userEntity = allUsers.where((u) => u.uid == user.uid).toList();
+      final placeName = userEntity.isNotEmpty ? userEntity.first.place.name : null;
       if (placeName == null) {
         setState(() {
           _error = 'Could not determine your place. Please contact support.';
         });
         return;
       }
-      final success = await ref.read(userProvider.notifier).loadUser(
-        uid: user.uid,
-        place: PlaceExtension.fromString(placeName),
-      );
+      final success = await ref.read(userProvider.notifier).loadUser(uid: user.uid);
       if (success) {
         Navigator.of(context).pushReplacementNamed('/home');
       } else {
@@ -203,9 +204,14 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
     }
     final (user, regError) = await registerWithEmail(email, password);
     if (user != null) {
-      // Save user->place mapping for login
-      await FirebaseFirestore.instance.collection('user_places').doc(user.uid).set({
+      // Save all required user fields in user_list for login and provider TODO: use firestore service
+      await FirebaseFirestore.instance.collection('user_list').doc(user.uid).set({
+        'uid': user.uid,
+        'email': email,
         'place': _selectedPlace!,
+        'firstName': firstName,
+        'lastName': lastName,
+        'role': 'User',
       });
       final success = await ref.read(userProvider.notifier).createUser(
         uid: user.uid,
@@ -340,8 +346,10 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                             ),
                           ),
                           keyboardType: TextInputType.emailAddress,
-                          autofillHints: const [AutofillHints.username, AutofillHints.email],
-                              autofocus: false,
+                          autofillHints: !_isRegisterMode
+                              ? const [AutofillHints.username, AutofillHints.email]
+                              : null,
+                          autofocus: false,
                           textInputAction: TextInputAction.next,
                           onEditingComplete: () {
                             if (!_isRegisterMode) {
@@ -399,7 +407,9 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                             ),
                           ),
                           obscureText: !_showPassword,
-                          autofillHints: const [AutofillHints.password],
+                          autofillHints: !_isRegisterMode
+                              ? const [AutofillHints.password]
+                              : null,
                           textInputAction: _isRegisterMode ? TextInputAction.next : TextInputAction.done,
                           onEditingComplete: () {
                             if (_isRegisterMode) {
