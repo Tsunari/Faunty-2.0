@@ -1,4 +1,5 @@
 import 'package:faunty/components/custom_app_bar.dart';
+import 'package:faunty/global_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'catering_organisation.dart';
@@ -142,7 +143,7 @@ class _CateringPageState extends ConsumerState<CateringPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Icon(Icons.emoji_food_beverage, size: 64, color: isDark ? Colors.white54 : Colors.blue.shade200),
+                              Icon(Icons.emoji_food_beverage, size: 64, color: notFoundIconColor(context)),
                               const SizedBox(height: 24),
                               Text(
                                 'No catering assignments yet!',

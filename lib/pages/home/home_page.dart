@@ -92,7 +92,7 @@ class HomePage extends ConsumerWidget {
                       data: (data) {
                         final appointments = getNextAppointments(data);
                         if (appointments.isEmpty) {
-                          return const Text('No appointments found for this week.');
+                          return const Text('No program entries found for this week.');
                         }
                         return Column(
                           children: appointments.asMap().entries.map((entry) {

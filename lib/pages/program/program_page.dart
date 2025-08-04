@@ -1,3 +1,4 @@
+import 'package:faunty/global_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../components/custom_app_bar.dart';
@@ -66,7 +67,7 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Icon(Icons.event_busy, size: 64, color: isDark ? Colors.white54 : Colors.blue.shade200),
+                          Icon(Icons.event_busy, size: 64, color: notFoundIconColor(context)),
                           const SizedBox(height: 24),
                           Text(
                             'No program entries for this week!',
@@ -121,93 +122,93 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                             margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
-                              child: IntrinsicHeight(
-                                child: Row(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 56,
+                                height: 54,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                                  decoration: BoxDecoration(
+                                    color: isToday
+                                        ? Colors.blue.shade400
+                                        : isDark
+                                            ? Colors.grey[800]
+                                            : Colors.blue.shade50,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        dayShort,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                          color: isToday ? Colors.white : isDark ? Colors.white : null,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year.toString().substring(2)}',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: isToday ? Colors.white : isDark ? Colors.white70 : Colors.black87,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    SizedBox(
-                                      width: 56, // compact for short day names
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                                        decoration: BoxDecoration(
-                                          color: isToday
-                                              ? Colors.blue.shade400
-                                              : isDark
-                                                  ? Colors.grey[800]
-                                                  : Colors.blue.shade50,
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              dayShort,
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14,
-                                                color: isToday ? Colors.white : isDark ? Colors.white : null,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year.toString().substring(2)}',
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                color: isToday ? Colors.white : isDark ? Colors.white70 : Colors.black87,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          ...entries.asMap().entries.map((entryMap) {
-                                            final entry = entryMap.value;
-                                            final entryIdx = entryMap.key;
-                                            final isCurrent = isToday && currentEventIdx == entryIdx;
-                                            return Padding(
-                                              padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                              child: Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                                decoration: BoxDecoration(
-                                                  color: isDark ? Colors.green.shade900 : Colors.green.shade100,
-                                                  borderRadius: BorderRadius.circular(12),
-                                                  border: isCurrent ? Border.all(color: Colors.red, width: 2) : null,
-                                                ),
-                                                child: Row(
-                                                  children: [
-                                                    Text(
-                                                      '${entry['from']} - ${entry['to']}',
-                                                      style: TextStyle(
-                                                        fontWeight: FontWeight.w500,
-                                                        color: isDark ? Colors.white : null,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 12),
-                                                    Expanded(
-                                                      child: Text(
-                                                        entry['event'] ?? '',
-                                                        style: TextStyle(
-                                                          color: isDark ? Colors.white : null,
-                                                          fontWeight: FontWeight.w500,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
+                                    ...entries.asMap().entries.map((entryMap) {
+                                      final entry = entryMap.value;
+                                      final entryIdx = entryMap.key;
+                                      final isCurrent = isToday && currentEventIdx == entryIdx;
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: isDark ? Colors.green.shade900 : Colors.green.shade100,
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: isCurrent ? Border.all(color: Colors.red, width: 2) : null,
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                '${entry['from']} - ${entry['to']}',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  color: isDark ? Colors.white : null,
                                                 ),
                                               ),
-                                            );
-                                          }),
-                                        ],
-                                      ),
-                                    ),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: Text(
+                                                  entry['event'] ?? '',
+                                                  style: TextStyle(
+                                                    color: isDark ? Colors.white : null,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }),
                                   ],
                                 ),
                               ),
+                            ],
+                          ),
                             ),
                           ),
                         );

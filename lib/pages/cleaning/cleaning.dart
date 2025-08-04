@@ -1,3 +1,4 @@
+import 'package:faunty/global_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'cleaning_assign.dart';
@@ -20,7 +21,6 @@ class CleaningPage extends ConsumerWidget {
       ),
       body: usersAsync.when(
         data: (users) {
-          final userMap = {for (var u in users) u.uid: u};
           return cleaningDataAsync.when(
             data: (data) {
               final places = data.entries.toList();
@@ -59,7 +59,7 @@ class CleaningPage extends ConsumerWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.cleaning_services_rounded, size: 64, color: Theme.of(context).colorScheme.primary.withAlpha(180)),
+                                    Icon(Icons.cleaning_services_rounded, size: 64, color: notFoundIconColor(context)),
                                     const SizedBox(height: 24),
                                     Text(
                                       'No cleaning places yet!',
@@ -85,12 +85,12 @@ class CleaningPage extends ConsumerWidget {
                                     ),
                                     const SizedBox(height: 28),
                                     ElevatedButton.icon(
-                                      icon: const Icon(Icons.add),
-                                      label: const Text('Create Place'),
+                                      icon: Icon(Icons.add_box, color: notFoundIconColor(context)),
+                                      label: Text('Create Place', style: TextStyle(color: notFoundIconColor(context))),
                                       style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                                         textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                                       ),
                                       onPressed: () async {
                                         final controller = TextEditingController();
@@ -123,7 +123,6 @@ class CleaningPage extends ConsumerWidget {
                               itemCount: places.length,
                               itemBuilder: (context, idx) {
                                 final entry = places[idx];
-                                final placeId = entry.key;
                                 final placeData = entry.value as Map<String, dynamic>;
                                 final placeName = placeData['name'] ?? '';
                                 final assigned = (placeData['assignees'] as List?)?.cast<String>() ?? [];
