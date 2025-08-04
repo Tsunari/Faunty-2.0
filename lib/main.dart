@@ -10,6 +10,7 @@ import 'pages/more/more_page.dart';
 import 'components/navigation_bar.dart';
 import 'pages/program/program_page.dart';
 import 'pages/splash_page.dart';
+import 'pages/welcome/user_welcome_page.dart';
 
 
 void main() async {
@@ -35,6 +36,7 @@ class Faunty extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        useMaterial3: true
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -43,13 +45,14 @@ class Faunty extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark,
 
       initialRoute: '/splash',
       routes: {
         '/splash': (context) => const SplashPage(),
         '/login': (context) => const LoginPage(),
         '/home': (context) => const MainPage(),
+        '/user-welcome': (context) => const UserWelcomePage(),
       },
     );
   }

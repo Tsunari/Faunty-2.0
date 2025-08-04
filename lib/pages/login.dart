@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/user_entity.dart';
 import '../state_management/user_provider.dart';
+import '../models/user_roles.dart';
 import '../state_management/user_list_provider.dart';
 
 // Register a new user and save their role in Firestore
@@ -51,6 +52,7 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProviderStateMixin {
+  static const double _formMaxWidth = 400;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
@@ -147,7 +149,12 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       }
       final success = await ref.read(userProvider.notifier).loadUser(uid: user.uid);
       if (success) {
-        Navigator.of(context).pushReplacementNamed('/home');
+        final userEntity = ref.read(userProvider);
+        if (userEntity != null && userEntity.role == UserRole.user) {
+          Navigator.of(context).pushReplacementNamed('/user-welcome');
+        } else {
+          Navigator.of(context).pushReplacementNamed('/home');
+        }
       } else {
         setState(() {
           _error = 'User data not found or incomplete. Please contact support.';
@@ -223,7 +230,16 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
         lastName: lastName,
       );
       if (success) {
-        Navigator.of(context).pushReplacementNamed('/home');
+        final userEntity = ref.read(userProvider);
+        if (userEntity != null && userEntity.role == UserRole.user) {
+          if (context.mounted) {
+            Navigator.of(context).pushReplacementNamed('/user-welcome');
+          }
+        } else {
+          if (context.mounted) {
+            Navigator.of(context).pushReplacementNamed('/home');
+          }
+        }
       } else {
         setState(() {
           _error = 'Failed to create user. Please try again.';
@@ -280,309 +296,338 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                       : const SizedBox.shrink(),
                 ),
                 const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 16,
-                        offset: Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        _isRegisterMode ? 'Register' : 'Login',
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                  AutofillGroup(
-                    child: Column(
-                      children: [
-                        if (_isRegisterMode) ...[
-                          TextField(
-                            controller: _firstNameController,
-                            decoration: InputDecoration(
-                              labelText: 'First Name',
-                              prefixIcon: Icon(Icons.person_outline),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            textInputAction: TextInputAction.next,
-                            autofillHints: const [AutofillHints.givenName],
-                            onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: _formMaxWidth),
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 16,
+                            offset: Offset(0, 8),
                           ),
-                          const SizedBox(height: 16),
-                          TextField(
-                            controller: _lastNameController,
-                            decoration: InputDecoration(
-                              labelText: 'Last Name',
-                              prefixIcon: Icon(Icons.person_outline),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            textInputAction: TextInputAction.next,
-                            autofillHints: const [AutofillHints.familyName],
-                            onEditingComplete: () => FocusScope.of(context).nextFocus(),
-                          ),
-                          const SizedBox(height: 16),
                         ],
-                        TextField(
-                          controller: _emailController,
-                          decoration: InputDecoration(
-                            labelText: 'Email',
-                            prefixIcon: Icon(Icons.email_outlined),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            _isRegisterMode ? 'Register' : 'Login',
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                          keyboardType: TextInputType.emailAddress,
-                          autofillHints: !_isRegisterMode
-                              ? const [AutofillHints.username, AutofillHints.email]
-                              : null,
-                          autofocus: false,
-                          textInputAction: TextInputAction.next,
-                          onEditingComplete: () {
-                            if (!_isRegisterMode) {
-                              final email = _emailController.text.trim();
-                              final password = _passwordController.text.trim();
-                              if (email.isNotEmpty && password.isNotEmpty) {
-                                FocusScope.of(context).unfocus(); // Hide keyboard
-                                _login();
-                              } else {
-                                FocusScope.of(context).nextFocus();
-                              }
-                            } else {
-                              FocusScope.of(context).nextFocus();
-                            }
-                          },
-                          onSubmitted: (_) {
-                            if (!_isRegisterMode) {
-                              final email = _emailController.text.trim();
-                              final password = _passwordController.text.trim();
-                              if (email.isNotEmpty && password.isNotEmpty) {
-                                FocusScope.of(context).unfocus(); // Hide keyboard
-                                _login();
-                              } else {
-                                FocusScope.of(context).nextFocus();
-                              }
-                            } else {
-                              FocusScope.of(context).nextFocus();
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _passwordController,
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            prefixIcon: Icon(Icons.lock_outline),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            suffixIcon: FocusScope(
-                              canRequestFocus: false,
-                              skipTraversal: true,
-                              child: Padding(
-                                padding: const EdgeInsetsDirectional.only(end: 8.0),
-                                child: IconButton(
-                                  icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
-                                  onPressed: () {
-                                    setState(() {
-                                      _showPassword = !_showPassword;
-                                    });
-                                  },
-                                  tooltip: _showPassword ? 'Hide password' : 'Show password',
-                                ),
-                              ),
-                            ),
-                          ),
-                          obscureText: !_showPassword,
-                          autofillHints: !_isRegisterMode
-                              ? const [AutofillHints.password]
-                              : null,
-                          textInputAction: _isRegisterMode ? TextInputAction.next : TextInputAction.done,
-                          onEditingComplete: () {
-                            if (_isRegisterMode) {
-                              FocusScope.of(context).nextFocus();
-                            } else {
-                              // Try login if all required fields are filled
-                              if (_emailController.text.trim().isNotEmpty && _passwordController.text.trim().isNotEmpty) {
-                                FocusScope.of(context).unfocus(); // Hide keyboard
-                                _login();
-                              } else {
-                                FocusScope.of(context).unfocus();
-                              }
-                            }
-                          },
-                          onSubmitted: (_) {
-                            if (_isRegisterMode) {
-                              FocusScope.of(context).nextFocus();
-                            } else {
-                              if (_emailController.text.trim().isNotEmpty && _passwordController.text.trim().isNotEmpty) {
-                                FocusScope.of(context).unfocus(); // Hide keyboard
-                                _login();
-                              }
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizeTransition(
-                    sizeFactor: _registerFieldsAnim,
-                    axisAlignment: -1.0,
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _confirmPasswordController,
-                          decoration: InputDecoration(
-                            labelText: 'Confirm Password',
-                            prefixIcon: Icon(Icons.lock_reset),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            suffixIcon: FocusScope(
-                              canRequestFocus: false,
-                              skipTraversal: true,
-                              child: Padding(
-                                padding: const EdgeInsetsDirectional.only(end: 8.0),
-                                child: IconButton(
-                                  icon: Icon(_showConfirmPassword ? Icons.visibility_off : Icons.visibility),
-                                  onPressed: () {
-                                    setState(() {
-                                      _showConfirmPassword = !_showConfirmPassword;
-                                    });
-                                  },
-                                  tooltip: _showConfirmPassword ? 'Hide password' : 'Show password',
-                                ),
-                              ),
-                            ),
-                          ),
-                          obscureText: !_showConfirmPassword,
-                          textInputAction: TextInputAction.next,
-                          onSubmitted: (_) => FocusScope.of(context).nextFocus(),
-                        ),
-                        const SizedBox(height: 16),
-                        DropdownButtonFormField<String>(
-                          value: _selectedPlace,
-                          isExpanded: true,
-                          icon: const Icon(Icons.keyboard_arrow_down),
-                          items: _places.map((place) => DropdownMenuItem(
-                            value: place,
-                            child: Row(
+                          const SizedBox(height: 24),
+                          AutofillGroup(
+                            child: Column(
                               children: [
-                                const Icon(Icons.place_outlined, size: 18),
-                                const SizedBox(width: 8),
-                                Text(place, style: const TextStyle(fontSize: 16)),
+                                if (_isRegisterMode) ...[
+                                  ConstrainedBox(
+                                    constraints: const BoxConstraints(maxWidth: _formMaxWidth),
+                                    child: TextField(
+                                      controller: _firstNameController,
+                                      decoration: InputDecoration(
+                                        labelText: 'First Name',
+                                        prefixIcon: Icon(Icons.person_outline),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                      textInputAction: TextInputAction.next,
+                                      autofillHints: const [AutofillHints.givenName],
+                                      onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  ConstrainedBox(
+                                    constraints: const BoxConstraints(maxWidth: _formMaxWidth),
+                                    child: TextField(
+                                      controller: _lastNameController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Last Name',
+                                        prefixIcon: Icon(Icons.person_outline),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                      textInputAction: TextInputAction.next,
+                                      autofillHints: const [AutofillHints.familyName],
+                                      onEditingComplete: () => FocusScope.of(context).nextFocus(),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                ],
+                                ConstrainedBox(
+                                  constraints: const BoxConstraints(maxWidth: _formMaxWidth),
+                                  child: TextField(
+                                    controller: _emailController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Email',
+                                      prefixIcon: Icon(Icons.email_outlined),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    keyboardType: TextInputType.emailAddress,
+                                    autofillHints: !_isRegisterMode
+                                        ? const [AutofillHints.username, AutofillHints.email]
+                                        : null,
+                                    autofocus: false,
+                                    textInputAction: TextInputAction.next,
+                                    onEditingComplete: () {
+                                      if (!_isRegisterMode) {
+                                        final email = _emailController.text.trim();
+                                        final password = _passwordController.text.trim();
+                                        if (email.isNotEmpty && password.isNotEmpty) {
+                                          FocusScope.of(context).unfocus(); // Hide keyboard
+                                          _login();
+                                        } else {
+                                          FocusScope.of(context).nextFocus();
+                                        }
+                                      } else {
+                                        FocusScope.of(context).nextFocus();
+                                      }
+                                    },
+                                    onSubmitted: (_) {
+                                      if (!_isRegisterMode) {
+                                        final email = _emailController.text.trim();
+                                        final password = _passwordController.text.trim();
+                                        if (email.isNotEmpty && password.isNotEmpty) {
+                                          FocusScope.of(context).unfocus(); // Hide keyboard
+                                          _login();
+                                        } else {
+                                          FocusScope.of(context).nextFocus();
+                                        }
+                                      } else {
+                                        FocusScope.of(context).nextFocus();
+                                      }
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                ConstrainedBox(
+                                  constraints: const BoxConstraints(maxWidth: _formMaxWidth),
+                                  child: TextField(
+                                    controller: _passwordController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Password',
+                                      prefixIcon: Icon(Icons.lock_outline),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      suffixIcon: FocusScope(
+                                        canRequestFocus: false,
+                                        skipTraversal: true,
+                                        child: Padding(
+                                          padding: const EdgeInsetsDirectional.only(end: 8.0),
+                                          child: IconButton(
+                                            icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
+                                            onPressed: () {
+                                              setState(() {
+                                                _showPassword = !_showPassword;
+                                              });
+                                            },
+                                            tooltip: _showPassword ? 'Hide password' : 'Show password',
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    obscureText: !_showPassword,
+                                    autofillHints: !_isRegisterMode
+                                        ? const [AutofillHints.password]
+                                        : null,
+                                    textInputAction: _isRegisterMode ? TextInputAction.next : TextInputAction.done,
+                                    onEditingComplete: () {
+                                      if (_isRegisterMode) {
+                                        FocusScope.of(context).nextFocus();
+                                      } else {
+                                        // Try login if all required fields are filled
+                                        if (_emailController.text.trim().isNotEmpty && _passwordController.text.trim().isNotEmpty) {
+                                          FocusScope.of(context).unfocus(); // Hide keyboard
+                                          _login();
+                                        } else {
+                                          FocusScope.of(context).unfocus();
+                                        }
+                                      }
+                                    },
+                                    onSubmitted: (_) {
+                                      if (_isRegisterMode) {
+                                        FocusScope.of(context).nextFocus();
+                                      } else {
+                                        if (_emailController.text.trim().isNotEmpty && _passwordController.text.trim().isNotEmpty) {
+                                          FocusScope.of(context).unfocus(); // Hide keyboard
+                                          _login();
+                                        }
+                                      }
+                                    },
+                                  ),
+                                ),
                               ],
                             ),
-                          )).toList(),
-                          onChanged: (val) => setState(() => _selectedPlace = val),
-                          decoration: InputDecoration(
-                            labelText: 'Select Place',
-                            prefixIcon: Icon(Icons.domain_outlined),
-                            suffixIcon: _selectedPlace != null
-                                ? IconButton(
-                                    icon: const Icon(Icons.clear),
-                                    onPressed: () => setState(() => _selectedPlace = null),
-                                    tooltip: 'Clear selection',
-                                  )
-                                : null,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                           ),
-                          menuMaxHeight: 300,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  if (_error != null) ...[
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.error.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Theme.of(context).colorScheme.error.withOpacity(0.3)),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error, size: 22),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _error!,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.error,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                  _isLoading
-                      ? Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              SizedBox(height: 8),
-                              CircularProgressIndicator(),
-                              SizedBox(height: 16),
-                              Text('Please wait...', style: TextStyle(fontSize: 16)),
-                            ],
-                          ),
-                        )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            ElevatedButton(
-                              onPressed: _isRegisterMode ? _register : _login,
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                          SizeTransition(
+                            sizeFactor: _registerFieldsAnim,
+                            axisAlignment: -1.0,
+                            child: Column(
+                              children: [
+                                const SizedBox(height: 16),
+                                ConstrainedBox(
+                                  constraints: const BoxConstraints(maxWidth: _formMaxWidth),
+                                  child: TextField(
+                                    controller: _confirmPasswordController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Confirm Password',
+                                      prefixIcon: Icon(Icons.lock_reset),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      suffixIcon: FocusScope(
+                                        canRequestFocus: false,
+                                        skipTraversal: true,
+                                        child: Padding(
+                                          padding: const EdgeInsetsDirectional.only(end: 8.0),
+                                          child: IconButton(
+                                            icon: Icon(_showConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                                            onPressed: () {
+                                              setState(() {
+                                                _showConfirmPassword = !_showConfirmPassword;
+                                              });
+                                            },
+                                            tooltip: _showConfirmPassword ? 'Hide password' : 'Show password',
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    obscureText: !_showConfirmPassword,
+                                    textInputAction: TextInputAction.next,
+                                    onSubmitted: (_) => FocusScope.of(context).nextFocus(),
+                                  ),
                                 ),
-                              ),
-                              child: Text(_isRegisterMode ? 'Register' : 'Login',
-                                style: const TextStyle(fontSize: 18)),
-                            ),
-                            const SizedBox(height: 12),
-                            TextButton(
-                              onPressed: _toggleRegisterMode,
-                              child: AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 250),
-                                child: Text(
-                                  _isRegisterMode
-                                      ? 'Already have an account? Login'
-                                      : 'Don\'t have an account? Register',
-                                  key: ValueKey(_isRegisterMode),
-                                  style: const TextStyle(fontSize: 15),
+                                const SizedBox(height: 16),
+                                ConstrainedBox(
+                                  constraints: const BoxConstraints(maxWidth: _formMaxWidth),
+                                  child: DropdownButtonFormField<String>(
+                                    value: _selectedPlace,
+                                    isExpanded: true,
+                                    icon: const Icon(Icons.keyboard_arrow_down),
+                                    items: _places.map((place) => DropdownMenuItem(
+                                      value: place,
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.place_outlined, size: 18),
+                                          const SizedBox(width: 8),
+                                          Text(place, style: const TextStyle(fontSize: 16)),
+                                        ],
+                                      ),
+                                    )).toList(),
+                                    onChanged: (val) => setState(() => _selectedPlace = val),
+                                    decoration: InputDecoration(
+                                      labelText: 'Select Place',
+                                      prefixIcon: Icon(Icons.domain_outlined),
+                                      suffixIcon: _selectedPlace != null
+                                          ? IconButton(
+                                              icon: const Icon(Icons.clear),
+                                              onPressed: () => setState(() => _selectedPlace = null),
+                                              tooltip: 'Clear selection',
+                                            )
+                                          : null,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                    ),
+                                    menuMaxHeight: 300,
+                                  ),
                                 ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          if (_error != null) ...[
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.error.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Theme.of(context).colorScheme.error.withOpacity(0.3)),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error, size: 22),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _error!,
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.error,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
-                        ),
-                    ],
+                          _isLoading
+                              ? Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: const [
+                                      SizedBox(height: 8),
+                                      CircularProgressIndicator(),
+                                      SizedBox(height: 16),
+                                      Text('Please wait...', style: TextStyle(fontSize: 16)),
+                                    ],
+                                  ),
+                                )
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    ConstrainedBox(
+                                      constraints: const BoxConstraints(maxWidth: _formMaxWidth),
+                                      child: ElevatedButton(
+                                        onPressed: _isRegisterMode ? _register : _login,
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(vertical: 16),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        child: Text(_isRegisterMode ? 'Register' : 'Login',
+                                          style: const TextStyle(fontSize: 18)),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    ConstrainedBox(
+                                      constraints: const BoxConstraints(maxWidth: _formMaxWidth),
+                                      child: TextButton(
+                                        onPressed: _toggleRegisterMode,
+                                        child: AnimatedSwitcher(
+                                          duration: const Duration(milliseconds: 250),
+                                          child: Text(
+                                            _isRegisterMode
+                                                ? 'Already have an account? Login'
+                                                : 'Don\'t have an account? Register',
+                                            key: ValueKey(_isRegisterMode),
+                                            style: const TextStyle(fontSize: 15),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],

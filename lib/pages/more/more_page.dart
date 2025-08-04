@@ -1,20 +1,18 @@
+import 'package:faunty/components/role_gate.dart';
+import 'package:faunty/models/user_roles.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../state_management/globals_provider.dart';
 
-class MorePage extends StatefulWidget {
+class MorePage extends ConsumerWidget {
   const MorePage({super.key});
 
   @override
-  State<MorePage> createState() => _MorePageState();
-}
-
-class _MorePageState extends State<MorePage> {
-  bool darkMode = false;
-  bool registrationMode = false;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     Color primaryColor = Theme.of(context).colorScheme.primary;
+    final globals = ref.watch(globalsProvider);
+    final globalsNotifier = ref.read(globalsProvider.notifier);
     return ListView(
       padding: EdgeInsets.zero,
       children: [
@@ -39,37 +37,6 @@ class _MorePageState extends State<MorePage> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  // Container(
-                  //   padding: const EdgeInsets.symmetric(
-                  //     horizontal: 16,
-                  //     vertical: 6,
-                  //   ),
-                  //   decoration: BoxDecoration(
-                  //     color: Theme.of(
-                  //       context,
-                  //     ).colorScheme.primary.withOpacity(0.1),
-                  //     borderRadius: BorderRadius.circular(16),
-                  //   ),
-                  //   child: Row(
-                  //     mainAxisSize: MainAxisSize.min,
-                  //     children: [
-                  //       Icon(
-                  //         Icons.logout,
-                  //         size: 18,
-                  //         color: Theme.of(context).colorScheme.primary,
-                  //       ),
-                  //       const SizedBox(width: 6),
-                  //       Text(
-                  //         'Click to log out',
-                  //         style: Theme.of(context).textTheme.bodySmall
-                  //             ?.copyWith(
-                  //               color: Theme.of(context).colorScheme.primary,
-                  //               fontWeight: FontWeight.w600,
-                  //             ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
                 ],
               ),
             ),
@@ -77,25 +44,28 @@ class _MorePageState extends State<MorePage> {
         ),
         const SizedBox(height: 24),
         const Divider(),
-        SwitchListTile(
-          secondary: Icon(Icons.dark_mode_outlined, color: primaryColor),
-          title: const Text('Dark Mode'),
-          subtitle: const Text('Switch between light and dark mode'),
-          value: darkMode,
-          onChanged: (val) {
-            setState(() => darkMode = val);
-          },
+        // SwitchListTile(
+        //   secondary: Icon(Icons.dark_mode_outlined, color: primaryColor),
+        //   title: const Text('Dark Mode'),
+        //   subtitle: const Text('Switch between light and dark mode'),
+        //   value: darkMode,
+        //   onChanged: (val) {
+        //     setState(() => darkMode = val);
+        //   },
+        // ),
+        RoleGate(
+          minRole: UserRole.hoca,
+          child: SwitchListTile(
+            secondary: Icon(Icons.app_registration_outlined, color: primaryColor),
+            title: const Text('Registration Mode'),
+            subtitle: const Text('Enable or disable registration'),
+            value: globals.registrationMode,
+            onChanged: (val) {
+              globalsNotifier.setRegistrationMode(val);
+            },
+          ),
         ),
-        SwitchListTile(
-          secondary: Icon(Icons.app_registration_outlined, color: primaryColor),
-          title: const Text('Registration Mode'),
-          subtitle: const Text('Enable or disable registration'),
-          value: registrationMode,
-          onChanged: (val) {
-            setState(() => registrationMode = val);
-          },
-        ),
-        const Divider(),
+        RoleGate(minRole: UserRole.hoca, child: const Divider()),
         ListTile(
           leading: Icon(Icons.account_circle_outlined, color: primaryColor),
           title: const Text('Account'),
