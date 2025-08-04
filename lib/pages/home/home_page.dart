@@ -6,9 +6,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/user_provider.dart';
 import '../../state_management/program_provider.dart';
 import '../../state_management/catering_provider.dart';
+import '../../state_management/cleaning_provider.dart';
 
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
+
+  @override
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  bool _navigated = false;
 
   static const List<String> weekDaysFull = [
     'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
@@ -59,23 +67,26 @@ class HomePage extends ConsumerWidget {
  
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    // Navigation logic moved out of build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = ref.read(userProvider);
+      if (_navigated) return;
+      if (user == null && mounted && ModalRoute.of(context)?.settings.name != '/splash') {
+        printError('UserEntity not loaded - HomePage build() called without loaded user!');
+        printWarning('Navigiere automatisch zur SplashPage, weil kein User geladen ist.');
+        _navigated = true;
+        Navigator.of(context).pushReplacementNamed('/splash');
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
     printInfo(user != null ? 'UserEntity: uid=${user.uid}, email=${user.email}, role=${user.role}, place=${user.place}' : 'UserEntity NOT LOADED');
-    //assert(user != null, 'UserEntity not loaded - HomePage build() called without loaded user!');
     if (user == null) {
-      printError('UserEntity not loaded - HomePage build() called without loaded user!');
-      // Im Debug-Modus automatisch zur SplashPage navigieren
-      assert(() {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          // Check if context is still mounted before navigating
-          if (context.mounted && ModalRoute.of(context)?.settings.name != '/splash') {
-            printWarning('Navigiere automatisch zur SplashPage, weil kein User geladen ist.');
-            Navigator.of(context).pushReplacementNamed('/splash');
-          }
-        });
-        return true;
-      }());
       return const Scaffold(
         body: Center(
           child: Column(
@@ -88,11 +99,10 @@ class HomePage extends ConsumerWidget {
           ),
         ),
       );
-    } else {
-      printInfo('UserEntity: uid=${user.uid}, email=${user.email}, role=${user.role}, place=${user.place}');
     }
     final weekProgramAsync = ref.watch(weekProgramProvider);
     final cateringAsync = ref.watch(cateringWeekPlanProvider);
+    final cleaningAsync = ref.watch(cleaningDataProvider);
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: CustomAppBar(
@@ -191,7 +201,7 @@ class HomePage extends ConsumerWidget {
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  const Icon(Icons.event, color: Colors.green),
+                  const Icon(Icons.dining, color: Colors.green),
                   const SizedBox(width: 12),
                   Expanded(
                     child: cateringAsync.when(
@@ -223,7 +233,7 @@ class HomePage extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Your next catering assignments:',
+                                  'Your next catering assignment:',
                                   style: const TextStyle(fontWeight: FontWeight.bold),
                                 ),
                                 Row(
@@ -258,7 +268,80 @@ class HomePage extends ConsumerWidget {
                 ],
               ),
             ),
-          )
+          ),
+          // Cleaning assignment widget
+          Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Icon(Icons.cleaning_services, color: Colors.green),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: cleaningAsync.when(
+                      data: (data) {
+                        final user = ref.read(userProvider);
+                        if (user == null) {
+                          return const Text('No user loaded.');
+                        }
+                        final places = data as Map<String, dynamic>? ?? {};
+                        // print('DEBUG: Firestore cleaning places: $places');
+                        // print('DEBUG: Current user.uid: ${user.uid}');
+                        if (places.isEmpty) {
+                          return const Text('No cleaning assignments found.');
+                        }
+                        // Find all place names where the user is assigned
+                        final userPlaces = <String>[];
+                        places.forEach((placeId, placeData) {
+                          // print('DEBUG: placeId=$placeId, placeData=$placeData');
+                          if (placeData is Map) {
+                            final assignees = placeData['assignees'];
+                            // print('DEBUG:   assignees=$assignees');
+                            if (assignees is List && assignees.any((a) {
+                              if (a is String) {
+                                final assigneeUid = a.split('_').first;
+                                return assigneeUid == user.uid;
+                              }
+                              return false;
+                            })) {
+                              // print('DEBUG:   MATCH for user.uid in $assignees');
+                              userPlaces.add(placeData['name'] as String? ?? placeId);
+                            }
+                          }
+                        });
+                        // print('DEBUG: userPlaces=$userPlaces');
+                        if (userPlaces.isEmpty) {
+                          return const Text('You have no cleaning assignment');
+                        }
+                        // if (userPlaces.length == places.length) {
+                        //   return const Text('You are assigned to all cleaning places this week.');
+                        // }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Your cleaning assignment:',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            ...userPlaces.map((place) => Text( 
+                                  place,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue,
+                                  ),
+                                )),
+                          ],
+                        );
+                      },
+                      loading: () => const Text('Cleaning assignments are loading...'),
+                      error: (e, s) => const Text('Fehler beim Laden der Cleaning-Daten.'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
