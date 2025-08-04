@@ -14,3 +14,18 @@ final weekProgramProvider = StreamProvider<Map<String, List<Map<String, String>>
   final service = ref.watch(programFirestoreServiceProvider);
   return service.watchWeekProgram();
 });
+
+final programTemplatesProvider = FutureProvider<Map<String, Map<String, List<Map<String, String>>>>>((ref) {
+  final service = ref.watch(programFirestoreServiceProvider);
+  return service.getTemplates();
+});
+
+final saveProgramTemplateProvider = FutureProvider.family<void, MapEntry<String, Map<String, List<Map<String, String>>>>>((ref, entry) async {
+  final service = ref.watch(programFirestoreServiceProvider);
+  await service.setTemplate(entry.key, entry.value);
+});
+
+final deleteProgramTemplateProvider = FutureProvider.family<void, String>((ref, name) async {
+  final service = ref.watch(programFirestoreServiceProvider);
+  await service.deleteTemplate(name);
+});

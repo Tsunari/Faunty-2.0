@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../components/custom_app_bar.dart';
+import '../../components/custom_snackbar.dart';
 import '../../state_management/program_provider.dart';
 
 class ProgramOrganisationPage extends ConsumerStatefulWidget {
   final Map<String, List<Map<String, String>>> weekProgram;
-  const ProgramOrganisationPage({Key? key, required this.weekProgram}) : super(key: key);
+  const ProgramOrganisationPage({super.key, required this.weekProgram});
 
   @override
   ConsumerState<ProgramOrganisationPage> createState() => _ProgramOrganisationPageState();
 }
 
 class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPage> {
+  String? loadedTemplateName;
   late Map<String, List<Map<String, String>>> localWeekProgram;
   final List<String> weekDays = [
     'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
@@ -31,353 +33,578 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: CustomAppBar(title: 'Program Organisation'),
+      appBar: CustomAppBar(
+        title: 'Organisation',
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save_as),
+            tooltip: 'Save as template',
+            onPressed: () async {
+              final nameController = TextEditingController();
+              final result = await showDialog<String>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Save as template'),
+                  content: TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'Template name'),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (nameController.text.trim().isNotEmpty) {
+                          Navigator.pop(context, nameController.text.trim());
+                        }
+                      },
+                      child: const Text('Save'),
+                    ),
+                  ],
+                ),
+              );
+              if (result != null && result.isNotEmpty) {
+                final service = ref.read(programFirestoreServiceProvider);
+                await service.setTemplate(result, localWeekProgram);
+                if (!mounted) return;
+                setState(() {
+                  loadedTemplateName = result;
+                });
+                showCustomSnackBar(context, 'Template "$result" saved.');
+              }
+            },
+          ),
+          if (loadedTemplateName != null)
+            IconButton(
+              icon: const Icon(Icons.update),
+              tooltip: 'Update current template',
+              onPressed: () async {
+                final service = ref.read(programFirestoreServiceProvider);
+                await service.setTemplate(loadedTemplateName!, localWeekProgram);
+                if (!mounted) return;
+                showCustomSnackBar(context, 'Template "${loadedTemplateName!}" updated.');
+              },
+            ),
+          IconButton(
+            icon: const Icon(Icons.list_alt),
+            tooltip: 'Load template',
+            onPressed: () async {
+              final service = ref.read(programFirestoreServiceProvider);
+              var templates = await service.getTemplates();
+              if (!mounted) return;
+              final selected = await showDialog<String>(
+                context: context,
+                builder: (context) => _TemplateSelectionDialog(
+                  templates: templates,
+                  loadedTemplateName: loadedTemplateName,
+                  onDelete: (name) async {
+                    await service.deleteTemplate(name);
+                    if (!mounted) return;
+                    showCustomSnackBar(context, 'Template "$name" deleted.');
+                  },
+                  onUpdate: (name) async {
+                    await service.setTemplate(name, localWeekProgram);
+                    if (!mounted) return templates;
+                    showCustomSnackBar(context, 'Template "$name" updated.');
+                    // Fetch latest templates after update and update dialog state
+                    templates = await service.getTemplates();
+                    return templates;
+                  },
+                ),
+              );
+              // Always fetch latest templates after dialog closes
+              templates = await service.getTemplates();
+              if (selected != null && templates.containsKey(selected)) {
+                setState(() {
+                  // Deep copy to avoid reference issues
+                  localWeekProgram = {
+                    for (final day in weekDays)
+                      day: (templates[selected]![day] as List?)?.map((e) => Map<String, String>.from(e)).toList() ?? []
+                  };
+                  loadedTemplateName = selected;
+                });
+                if (!mounted) return;
+                showCustomSnackBar(context, 'Template "$selected" loaded.');
+              }
+            },
+          ),
+        ],
+      ),
       body: Center(
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
-          child: ListView.builder(
-            physics: const BouncingScrollPhysics(),
-            itemCount: 7,
-            itemBuilder: (context, idx) {
-              final dayName = weekDays[idx];
-              return Card(
-                color: isDark ? Colors.grey[850] : null,
-                margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: isDark ? Colors.grey[800] : Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              dayName,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: isDark ? Colors.white : null,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            width: 90,
-                            height: 38,
-                            child: DropdownButton<String>(
-                              hint: const Text('Copy', style: TextStyle(fontSize: 12)),
-                              value: null,
-                              style: const TextStyle(fontSize: 12),
-                              isDense: true,
-                              alignment: Alignment.centerLeft,
-                              underline: const SizedBox.shrink(),
-                              iconSize: 18,
-                              items: weekDays
-                                  .map<DropdownMenuItem<String>>((copyDay) => DropdownMenuItem<String>(
-                                        value: copyDay,
-                                        child: Text(copyDay, style: const TextStyle(fontSize: 12)),
-                                      ))
-                                  .toList(),
-                              onChanged: (copyDay) {
-                                if (copyDay != null && copyDay != dayName) {
-                                  setState(() {
-                                    localWeekProgram[dayName] = localWeekProgram[copyDay]!.map((e) => Map<String, String>.from(e)).toList();
-                                  });
-                                }
-                              },
-                              dropdownColor: isDark ? Colors.grey[800] : Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ...localWeekProgram[dayName]!.asMap().entries.map((entryMap) {
-                              final entry = entryMap.value;
-                              final entryIdx = entryMap.key;
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                child: GestureDetector(
-                                  onTap: () async {
-                                    final fromParts = entry['from']!.split(':');
-                                    final toParts = entry['to']!.split(':');
-                                    TimeOfDay? fromTime = TimeOfDay(hour: int.parse(fromParts[0]), minute: int.parse(fromParts[1]));
-                                    TimeOfDay? toTime = TimeOfDay(hour: int.parse(toParts[0]), minute: int.parse(toParts[1]));
-                                    final eventController = TextEditingController(text: entry['event']);
-                                    final result = await showDialog<Map<String, String>>(
-                                      context: context,
-                                      builder: (context) {
-                                        return StatefulBuilder(
-                                          builder: (context, setState) {
-                                            return AlertDialog(
-                                              title: const Text('Edit event'),
-                                              content: SizedBox(
-                                                width: 350,
-                                                child: Column(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        Expanded(
-                                                          child: OutlinedButton(
-                                                            onPressed: () async {
-                                                              final picked = await showTimePicker(
-                                                                context: context,
-                                                                initialTime: fromTime ?? TimeOfDay.now(),
-                                                                builder: (context, child) {
-                                                                  return MediaQuery(
-                                                                    data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-                                                                    child: child!,
-                                                                  );
-                                                                },
-                                                              );
-                                                              if (picked != null) {
-                                                                setState(() => fromTime = picked);
-                                                              }
-                                                            },
-                                                            child: Text(fromTime == null ? 'Select start time' : (fromTime!.hour.toString().padLeft(2, '0') + ':' + fromTime!.minute.toString().padLeft(2, '0'))),
-                                                          ),
-                                                        ),
-                                                        const SizedBox(width: 8),
-                                                        Expanded(
-                                                          child: OutlinedButton(
-                                                            onPressed: () async {
-                                                              final picked = await showTimePicker(
-                                                                context: context,
-                                                                initialTime: toTime ?? TimeOfDay.now(),
-                                                                builder: (context, child) {
-                                                                  return MediaQuery(
-                                                                    data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-                                                                    child: child!,
-                                                                  );
-                                                                },
-                                                              );
-                                                              if (picked != null) {
-                                                                setState(() => toTime = picked);
-                                                              }
-                                                            },
-                                                            child: Text(toTime == null ? 'Select end time' : (toTime!.hour.toString().padLeft(2, '0') + ':' + toTime!.minute.toString().padLeft(2, '0'))),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    const SizedBox(height: 16),
-                                                    TextField(
-                                                      controller: eventController,
-                                                      decoration: const InputDecoration(labelText: 'Title'),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              actions: <Widget>[
-                                                TextButton(
-                                                  onPressed: () => Navigator.pop(context),
-                                                  child: const Text('Cancel'),
-                                                ),
-                                                ElevatedButton(
-                                                  onPressed: () {
-                                                    if (fromTime != null && toTime != null && eventController.text.isNotEmpty) {
-                                                      String fromStr = fromTime!.hour.toString().padLeft(2, '0') + ':' + fromTime!.minute.toString().padLeft(2, '0');
-                                                      String toStr = toTime!.hour.toString().padLeft(2, '0') + ':' + toTime!.minute.toString().padLeft(2, '0');
-                                                      Navigator.pop(context, {
-                                                        'from': fromStr,
-                                                        'to': toStr,
-                                                        'event': eventController.text,
-                                                      });
-                                                    }
-                                                  },
-                                                  child: const Text('Save'),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      },
-                                    );
-                                    if (result != null) {
-                                      setState(() {
-                                        localWeekProgram[dayName]![entryIdx] = result;
-                                      });
-                                    }
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: isDark ? Colors.green.shade900 : Colors.green.shade100,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          '${entry['from']} - ${entry['to']}',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w500,
-                                            color: isDark ? Colors.white : null,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Text(
-                                            entry['event']!,
-                                            style: TextStyle(
-                                              color: isDark ? Colors.white : null,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.delete, color: Color.fromARGB(255, 63, 63, 63)),
-                                          tooltip: 'Delete event',
-                                          onPressed: () {
-                                            setState(() {
-                                              localWeekProgram[dayName]!.removeAt(entryIdx);
-                                            });
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }),
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: TextButton.icon(
-                                onPressed: () async {
-                                  final newEntry = await showDialog<Map<String, String>>(
-                                    context: context,
-                                    builder: (context) {
-                                      TimeOfDay? fromTime;
-                                      TimeOfDay? toTime;
-                                      final eventController = TextEditingController();
-                                      return StatefulBuilder(
-                                        builder: (context, setState) {
-                                          return AlertDialog(
-                                            title: const Text('Add new event'),
-                                            content: SizedBox(
-                                              width: 350,
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: OutlinedButton(
-                                                          onPressed: () async {
-                                                            final picked = await showTimePicker(
-                                                              context: context,
-                                                              initialTime: fromTime ?? TimeOfDay.now(),
-                                                              builder: (context, child) {
-                                                                return MediaQuery(
-                                                                  data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-                                                                  child: child!,
-                                                                );
-                                                              },
-                                                            );
-                                                            if (picked != null) {
-                                                              setState(() => fromTime = picked);
-                                                            }
-                                                          },
-                                                          child: Text(fromTime == null ? 'Select start time' : (fromTime!.hour.toString().padLeft(2, '0') + ':' + fromTime!.minute.toString().padLeft(2, '0'))),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      Expanded(
-                                                        child: OutlinedButton(
-                                                          onPressed: () async {
-                                                            final picked = await showTimePicker(
-                                                              context: context,
-                                                              initialTime: toTime ?? TimeOfDay.now(),
-                                                              builder: (context, child) {
-                                                                return MediaQuery(
-                                                                  data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-                                                                  child: child!,
-                                                                );
-                                                              },
-                                                            );
-                                                            if (picked != null) {
-                                                              setState(() => toTime = picked);
-                                                            }
-                                                          },
-                                                          child: Text(toTime == null ? 'Select end time' : (toTime!.hour.toString().padLeft(2, '0') + ':' + toTime!.minute.toString().padLeft(2, '0'))),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  const SizedBox(height: 16),
-                                                  TextField(
-                                                    controller: eventController,
-                                                    decoration: const InputDecoration(labelText: 'Title'),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(context),
-                                                child: const Text('Cancel'),
-                                              ),
-                                              ElevatedButton(
-                                                onPressed: () {
-                                                  if (fromTime != null && toTime != null && eventController.text.isNotEmpty) {
-                                                    String fromStr = fromTime!.hour.toString().padLeft(2, '0') + ':' + fromTime!.minute.toString().padLeft(2, '0');
-                                                    String toStr = toTime!.hour.toString().padLeft(2, '0') + ':' + toTime!.minute.toString().padLeft(2, '0');
-                                                    Navigator.pop(context, {
-                                                      'from': fromStr,
-                                                      'to': toStr,
-                                                      'event': eventController.text,
-                                                    });
-                                                  }
-                                                },
-                                                child: const Text('Add'),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    },
-                                  );
-                                  if (newEntry != null) {
-                                    setState(() {
-                                      localWeekProgram[dayName]!.add(newEntry);
-                                    });
-                                  }
-                                },
-                                icon: const Icon(Icons.add),
-                                label: const Text('Add event'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+          child: _ProgramList(
+            weekDays: weekDays,
+            localWeekProgram: localWeekProgram,
+            isDark: isDark,
+            onChanged: (day, entries) {
+              setState(() {
+                localWeekProgram[day] = entries;
+              });
             },
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
+      floatingActionButton: _SaveFab(
+        isDark: isDark,
+        onSave: () async {
           final service = ref.read(programFirestoreServiceProvider);
           await service.setWeekProgram(localWeekProgram);
           if (mounted) Navigator.pop(context, localWeekProgram);
         },
-        tooltip: 'Save and go back',
-        backgroundColor: isDark ? Colors.teal[400] : null,
-        foregroundColor: isDark ? Colors.black : null,
-        child: const Icon(Icons.save),
       ),
+    );
+
+  }
+
+}
+
+
+
+class _TemplateSelectionDialog extends StatefulWidget {
+  final Map<String, Map<String, List<Map<String, String>>>> templates;
+  final String? loadedTemplateName;
+  final Future<void> Function(String name) onDelete;
+  final Future<Map<String, Map<String, List<Map<String, String>>>>> Function(String name) onUpdate;
+  const _TemplateSelectionDialog({required this.templates, required this.onDelete, required this.onUpdate, this.loadedTemplateName});
+
+  @override
+  State<_TemplateSelectionDialog> createState() => _TemplateSelectionDialogState();
+}
+
+class _TemplateSelectionDialogState extends State<_TemplateSelectionDialog> {
+  late Map<String, Map<String, List<Map<String, String>>>> _templates;
+
+  @override
+  void initState() {
+    super.initState();
+    _templates = Map<String, Map<String, List<Map<String, String>>>>.from(widget.templates);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      actionsPadding: EdgeInsets.zero,
+      title: Row(
+        children: [
+          const Icon(Icons.list_alt, color: Colors.teal),
+          const SizedBox(width: 8),
+          const Text('Select a template'),
+        ],
+      ),
+      content: SizedBox(
+        width: 320,
+        child: _templates.isEmpty
+            ? SizedBox(
+                height: 48,
+                child: Center(
+                  child: Text('No templates found', style: theme.textTheme.bodyLarge?.copyWith(color: theme.disabledColor)),
+                ),
+              )
+            : ListView.separated(
+                shrinkWrap: true,
+                itemCount: _templates.length,
+                separatorBuilder: (_, __) => Divider(height: 1, color: theme.dividerColor),
+                itemBuilder: (context, idx) {
+                  final name = _templates.keys.elementAt(idx);
+                  final isCurrent = widget.loadedTemplateName == name;
+                  return Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: () => Navigator.pop(context, name),
+                      child: Container(
+                        decoration: isCurrent
+                            ? BoxDecoration(
+                                border: Border.all(color: Colors.teal, width: 2),
+                                // borderRadius: BorderRadius.circular(10),
+                                color: theme.colorScheme.secondary.withOpacity(0.08),
+                              )
+                            : null,
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.description_outlined, color: Colors.teal, size: 22),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                name,
+                                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.system_update_alt, color: Colors.blueAccent),
+                              tooltip: 'Update template with current configuration',
+                              onPressed: () async {
+                                final updatedTemplates = await widget.onUpdate(name);
+                                setState(() {
+                                  _templates.clear();
+                                  _templates.addAll(updatedTemplates);
+                                });
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                              tooltip: 'Delete template',
+                              onPressed: () async {
+                                await widget.onDelete(name);
+                                setState(() {
+                                  _templates.remove(name);
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+          child: TextButton.icon(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.close),
+            label: const Text('Close'),
+            style: TextButton.styleFrom(
+              foregroundColor: theme.colorScheme.primary,
+              textStyle: theme.textTheme.labelLarge,
+              padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 12.0),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProgramList extends StatelessWidget {
+  final List<String> weekDays;
+  final Map<String, List<Map<String, String>>> localWeekProgram;
+  final bool isDark;
+  final void Function(String day, List<Map<String, String>> entries) onChanged;
+  const _ProgramList({required this.weekDays, required this.localWeekProgram, required this.isDark, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      physics: const BouncingScrollPhysics(),
+      itemCount: 7,
+      itemBuilder: (context, idx) {
+        final dayName = weekDays[idx];
+        return _ProgramDayCard(
+          dayName: dayName,
+          entries: localWeekProgram[dayName]!,
+          weekProgram: localWeekProgram,
+          isDark: isDark,
+          onChanged: (entries) => onChanged(dayName, entries),
+        );
+      },
+    );
+  }
+}
+
+class _ProgramDayCard extends StatelessWidget {
+  final String dayName;
+  final List<Map<String, String>> entries;
+  final Map<String, List<Map<String, String>>> weekProgram;
+  final bool isDark;
+  final void Function(List<Map<String, String>> entries) onChanged;
+  const _ProgramDayCard({required this.dayName, required this.entries, required this.weekProgram, required this.isDark, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: isDark ? Colors.grey[850] : null,
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey[800] : Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    dayName,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: isDark ? Colors.white : null,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: 90,
+                  height: 38,
+                  child: DropdownButton<String>(
+                    hint: const Text('Copy', style: TextStyle(fontSize: 12)),
+                    value: null,
+                    style: const TextStyle(fontSize: 12),
+                    isDense: true,
+                    alignment: Alignment.centerLeft,
+                    underline: const SizedBox.shrink(),
+                    iconSize: 18,
+                    items: [
+                      ...List.generate(7, (i) => DropdownMenuItem<String>(
+                        value: _weekDayName(i),
+                        child: Text(_weekDayName(i), style: const TextStyle(fontSize: 12)),
+                      ))
+                    ],
+                    onChanged: (copyDay) {
+                      if (copyDay != null && copyDay != dayName) {
+                        // Copy entries from selected day into current day
+                        final copied = weekProgram[copyDay]?.map((e) => Map<String, String>.from(e)).toList() ?? [];
+                        onChanged(copied);
+                      }
+                    },
+                    dropdownColor: isDark ? Colors.grey[800] : Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...entries.asMap().entries.map((entryMap) {
+                    final entry = entryMap.value;
+                    final entryIdx = entryMap.key;
+                    return _ProgramEntryTile(
+                      entry: entry,
+                      isDark: isDark,
+                      onChanged: (updated) {
+                        final newEntries = List<Map<String, String>>.from(entries);
+                        newEntries[entryIdx] = updated;
+                        onChanged(newEntries);
+                      },
+                      onDelete: () {
+                        final newEntries = List<Map<String, String>>.from(entries);
+                        newEntries.removeAt(entryIdx);
+                        onChanged(newEntries);
+                      },
+                    );
+                  }),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: () async {
+                        final newEntry = await _showAddEditDialog(context);
+                        if (newEntry != null) {
+                          final newEntries = List<Map<String, String>>.from(entries);
+                          newEntries.add(newEntry);
+                          onChanged(newEntries);
+                        }
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add event'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _weekDayName(int idx) {
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    return days[idx];
+  }
+}
+
+class _ProgramEntryTile extends StatelessWidget {
+  final Map<String, String> entry;
+  final bool isDark;
+  final void Function(Map<String, String> updated) onChanged;
+  final VoidCallback onDelete;
+  const _ProgramEntryTile({required this.entry, required this.isDark, required this.onChanged, required this.onDelete});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: GestureDetector(
+        onTap: () async {
+          final result = await _showAddEditDialog(context, entry: entry);
+          if (result != null) {
+            onChanged(result);
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.green.shade900 : Colors.green.shade100,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Text(
+                '${entry['from']} - ${entry['to']}',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white : null,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  entry['event']!,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : null,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete, color: Color.fromARGB(255, 63, 63, 63)),
+                tooltip: 'Delete event',
+                onPressed: onDelete,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Future<Map<String, String>?> _showAddEditDialog(BuildContext context, {Map<String, String>? entry}) async {
+  TimeOfDay? fromTime = entry != null ? _parseTime(entry['from']) : null;
+  TimeOfDay? toTime = entry != null ? _parseTime(entry['to']) : null;
+  final eventController = TextEditingController(text: entry?['event'] ?? '');
+  return showDialog<Map<String, String>>(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(entry == null ? 'Add new event' : 'Edit event'),
+            content: SizedBox(
+              width: 350,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            final picked = await showTimePicker(
+                              context: context,
+                              initialTime: fromTime ?? TimeOfDay.now(),
+                              builder: (context, child) {
+                                return MediaQuery(
+                                  data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+                                  child: child!,
+                                );
+                              },
+                            );
+                            if (picked != null) {
+                              setState(() => fromTime = picked);
+                            }
+                          },
+                          child: Text(fromTime == null
+                              ? 'Select start time'
+                              : ('${fromTime!.hour.toString().padLeft(2, '0')}:${fromTime!.minute.toString().padLeft(2, '0')}')),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            final picked = await showTimePicker(
+                              context: context,
+                              initialTime: toTime ?? TimeOfDay.now(),
+                              builder: (context, child) {
+                                return MediaQuery(
+                                  data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+                                  child: child!,
+                                );
+                              },
+                            );
+                            if (picked != null) {
+                              setState(() => toTime = picked);
+                            }
+                          },
+                          child: Text(toTime == null
+                              ? 'Select end time'
+                              : ('${toTime!.hour.toString().padLeft(2, '0')}:${toTime!.minute.toString().padLeft(2, '0')}')),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: eventController,
+                    decoration: const InputDecoration(labelText: 'Title'),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (fromTime != null && toTime != null && eventController.text.isNotEmpty) {
+                    String fromStr = '${fromTime!.hour.toString().padLeft(2, '0')}:${fromTime!.minute.toString().padLeft(2, '0')}';
+                    String toStr = '${toTime!.hour.toString().padLeft(2, '0')}:${toTime!.minute.toString().padLeft(2, '0')}';
+                    Navigator.pop(context, {
+                      'from': fromStr,
+                      'to': toStr,
+                      'event': eventController.text,
+                    });
+                  }
+                },
+                child: Text(entry == null ? 'Add' : 'Save'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+TimeOfDay? _parseTime(String? time) {
+  if (time == null) return null;
+  final parts = time.split(':');
+  if (parts.length != 2) return null;
+  return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+}
+
+class _SaveFab extends StatelessWidget {
+  final bool isDark;
+  final Future<void> Function() onSave;
+  const _SaveFab({required this.isDark, required this.onSave});
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: onSave,
+      tooltip: 'Save and go back',
+      backgroundColor: isDark ? Colors.teal[400] : null,
+      foregroundColor: isDark ? Colors.black : null,
+      child: const Icon(Icons.save),
     );
   }
 }
