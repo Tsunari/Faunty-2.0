@@ -43,7 +43,7 @@ class Faunty extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.system,
 
       initialRoute: '/splash',
       routes: {

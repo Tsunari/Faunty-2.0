@@ -1,6 +1,6 @@
+import 'package:faunty/helper/logging.dart';
 import 'package:flutter/material.dart';
 import '../../components/custom_app_bar.dart';
-import '../../pages/program/program_page.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/user_provider.dart';
@@ -60,14 +60,40 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(userProvider);
+    printInfo(user != null ? 'UserEntity: uid=${user.uid}, email=${user.email}, role=${user.role}, place=${user.place}' : 'UserEntity NOT LOADED');
+    //assert(user != null, 'UserEntity not loaded - HomePage build() called without loaded user!');
+    if (user == null) {
+      printError('UserEntity not loaded - HomePage build() called without loaded user!');
+      // Im Debug-Modus automatisch zur SplashPage navigieren
+      assert(() {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          // Check if context is still mounted before navigating
+          if (context.mounted && ModalRoute.of(context)?.settings.name != '/splash') {
+            printWarning('Navigiere automatisch zur SplashPage, weil kein User geladen ist.');
+            Navigator.of(context).pushReplacementNamed('/splash');
+          }
+        });
+        return true;
+      }());
+      return const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Warte auf UserEntity... (HomePage wurde ohne geladenen User gebaut)')
+            ],
+          ),
+        ),
+      );
+    } else {
+      printInfo('UserEntity: uid=${user.uid}, email=${user.email}, role=${user.role}, place=${user.place}');
+    }
     final weekProgramAsync = ref.watch(weekProgramProvider);
     final cateringAsync = ref.watch(cateringWeekPlanProvider);
     final width = MediaQuery.of(context).size.width;
-    final user = ref.watch(userProvider);
-    if (user != null) {
-      // Print user info to console
-      print('UserEntity: uid=${user.uid}, email=${user.email}, role=${user.role}, place=${user.place}');
-    }
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Home'
@@ -152,7 +178,7 @@ class HomePage extends ConsumerWidget {
                         );
                       },
                       loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (e, s) => const Text('Fehler beim Laden des Programms.'),
+                      error: (e, s) => Text('Fehler beim Laden des Programms: $e'), // TODO: send to support with error
                     ),
                   ],
                 ),

@@ -19,7 +19,7 @@ class NavBar extends StatelessWidget {
       label: 'Catering',
     ),
     NavigationDestination(
-      icon: Icon(Icons.checklist),
+      icon: Icon(Icons.today),
       label: 'Program',
     ),
     NavigationDestination(
