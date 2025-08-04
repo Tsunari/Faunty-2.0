@@ -1,4 +1,6 @@
+import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/global_styles.dart';
+import 'package:faunty/models/user_roles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'cleaning_assign.dart';
@@ -73,47 +75,53 @@ class CleaningPage extends ConsumerWidget {
                                       textAlign: TextAlign.center,
                                     ),
                                     const SizedBox(height: 12),
-                                    Text(
-                                      'Tap below to create your first place and start assigning users.',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Theme.of(context).brightness == Brightness.dark
-                                            ? Colors.white54
-                                            : Colors.black54,
+                                    RoleGate(
+                                      minRole: UserRole.baskan,
+                                      child: Text(
+                                        'Tap below to create your first place and start assigning users.',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Theme.of(context).brightness == Brightness.dark
+                                              ? Colors.white54
+                                              : Colors.black54,
+                                        ),
+                                        textAlign: TextAlign.center,
                                       ),
-                                      textAlign: TextAlign.center,
                                     ),
                                     const SizedBox(height: 28),
-                                    ElevatedButton.icon(
-                                      icon: Icon(Icons.add_box, color: notFoundIconColor(context)),
-                                      label: Text('Create Place', style: TextStyle(color: notFoundIconColor(context))),
-                                      style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                      ),
-                                      onPressed: () async {
-                                        final controller = TextEditingController();
-                                        final name = await showDialog<String>(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                            title: const Text('Create Place'),
-                                            content: TextField(
-                                              controller: controller,
-                                              autofocus: true,
-                                              decoration: const InputDecoration(labelText: 'Place name'),
+                                    RoleGate(
+                                      minRole: UserRole.baskan,
+                                      child: ElevatedButton.icon(
+                                        icon: Icon(Icons.add_box, color: notFoundIconColor(context)),
+                                        label: Text('Create Place', style: TextStyle(color: notFoundIconColor(context))),
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                        ),
+                                        onPressed: () async {
+                                          final controller = TextEditingController();
+                                          final name = await showDialog<String>(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: const Text('Create Place'),
+                                              content: TextField(
+                                                controller: controller,
+                                                autofocus: true,
+                                                decoration: const InputDecoration(labelText: 'Place name'),
+                                              ),
+                                              actions: [
+                                                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                                                ElevatedButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Create')),
+                                              ],
                                             ),
-                                            actions: [
-                                              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-                                              ElevatedButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Create')),
-                                            ],
-                                          ),
-                                        );
-                                        if (name != null && name.isNotEmpty) {
-                                          final service = ref.read(cleaningFirestoreServiceProvider);
-                                          await service.addPlace(name);
-                                        }
-                                      },
+                                          );
+                                          if (name != null && name.isNotEmpty) {
+                                            final service = ref.read(cleaningFirestoreServiceProvider);
+                                            await service.addPlace(name);
+                                          }
+                                        },
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -192,17 +200,20 @@ class CleaningPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('Error loading users: $e')),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final data = cleaningDataAsync.value ?? {};
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => CleaningAssignPage(initialPlaces: Map<String, dynamic>.from(data)),
-            ),
-          );
-        },
-        tooltip: 'Edit',
-        child: const Icon(Icons.edit),
+      floatingActionButton: RoleGate(
+        minRole: UserRole.baskan,
+        child: FloatingActionButton(
+          onPressed: () async {
+            final data = cleaningDataAsync.value ?? {};
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => CleaningAssignPage(initialPlaces: Map<String, dynamic>.from(data)),
+              ),
+            );
+          },
+          tooltip: 'Edit',
+          child: const Icon(Icons.edit),
+        ),
       ),
     );
   }

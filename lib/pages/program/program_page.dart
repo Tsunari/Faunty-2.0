@@ -1,4 +1,6 @@
+import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/global_styles.dart';
+import 'package:faunty/models/user_roles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../components/custom_app_bar.dart';
@@ -79,13 +81,16 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 12),
-                          Text(
-                            'Tap the edit button below to add a program for the week.',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: isDark ? Colors.white54 : Colors.black54,
+                          RoleGate(
+                            minRole: UserRole.baskan,
+                            child: Text(
+                              'Tap the edit button below to add a program for the week.',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: isDark ? Colors.white54 : Colors.black54,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
-                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
@@ -216,23 +221,26 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                     ),
             ),
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProgramOrganisationPage(
-                    weekProgram: weekProgram,
+          floatingActionButton: RoleGate(
+            minRole: UserRole.baskan,
+            child: FloatingActionButton(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProgramOrganisationPage(
+                      weekProgram: weekProgram,
+                    ),
                   ),
-                ),
-              );
-              if (result != null && result is Map<String, List<Map<String, String>>>) {
-                final service = ref.read(programFirestoreServiceProvider);
-                await service.setWeekProgram(result);
-              }
-            },
-            tooltip: 'Edit program',
-            child: const Icon(Icons.edit),
+                );
+                if (result != null && result is Map<String, List<Map<String, String>>>) {
+                  final service = ref.read(programFirestoreServiceProvider);
+                  await service.setWeekProgram(result);
+                }
+              },
+              tooltip: 'Edit program',
+              child: const Icon(Icons.edit),
+            ),
           ),
         );
       },

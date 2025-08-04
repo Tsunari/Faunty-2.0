@@ -103,7 +103,7 @@ class _MorePageState extends State<MorePage> {
         ),
         ListTile(
           leading: Icon(Icons.group_outlined, color: primaryColor),
-          title: const Text('Roles'),
+          title: const Text('Users'),
           onTap: () {},
         ),
         ListTile(

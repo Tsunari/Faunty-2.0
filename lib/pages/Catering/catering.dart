@@ -1,5 +1,7 @@
 import 'package:faunty/components/custom_app_bar.dart';
+import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/global_styles.dart';
+import 'package:faunty/models/user_roles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'catering_organisation.dart';
@@ -155,39 +157,45 @@ class _CateringPageState extends ConsumerState<CateringPage> {
                                 textAlign: TextAlign.center,
                               ),
                               const SizedBox(height: 12),
-                              Text(
-                                'Tap the edit button below to assign users to meals for the week.',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: isDark ? Colors.white54 : Colors.black54,
+                              RoleGate(
+                                minRole: UserRole.baskan,
+                                child: Text(
+                                  'Tap the edit button below to assign users to meals for the week.',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: isDark ? Colors.white54 : Colors.black54,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
                               ),
                             ],
                           ),
                         ),
                 ),
               ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CateringOrganisationPage(
-                        weekPlan: weekPlan,
-                        users: userNames,
-                        meals: meals,
+              floatingActionButton: RoleGate(
+                minRole: UserRole.baskan,
+                child: FloatingActionButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CateringOrganisationPage(
+                          weekPlan: weekPlan,
+                          users: userNames,
+                          meals: meals,
+                        ),
                       ),
-                    ),
-                  );
-                  if (result != null && result is List<List<List<String>>>) {
-                    // Save to Firestore
-                    final service = ref.read(cateringFirestoreServiceProvider);
-                    await service.setWeekPlan(result);
-                  }
-                },
-                child: const Icon(Icons.edit),
-                tooltip: 'Bearbeiten',
+                    );
+                    if (result != null && result is List<List<List<String>>>) {
+                      // Save to Firestore
+                      final service = ref.read(cateringFirestoreServiceProvider);
+                      await service.setWeekPlan(result);
+                    }
+                  },
+                  child: const Icon(Icons.edit),
+                  tooltip: 'Bearbeiten',
+                ),
               ),
             );
           },
