@@ -1,12 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../state_management/user_provider.dart';
+import '../../models/user_roles.dart';
 
-class UserWelcomePage extends StatelessWidget {
+
+class UserWelcomePage extends ConsumerStatefulWidget {
   const UserWelcomePage({super.key});
+
+  @override
+  ConsumerState<UserWelcomePage> createState() => _UserWelcomePageState();
+}
+
+class _UserWelcomePageState extends ConsumerState<UserWelcomePage> {
+  bool _navigated = false;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final userAsync = ref.watch(userProviderStream);
+
+    userAsync.when(
+      data: (user) {
+        if (!_navigated && user != null && user.role != UserRole.user) {
+          _navigated = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) {
+              Navigator.of(context).pushReplacementNamed('/home');
+            }
+          });
+        }
+      },
+      loading: () {},
+      error: (e, st) {},
+    );
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(

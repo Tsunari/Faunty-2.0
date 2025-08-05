@@ -3,6 +3,8 @@ import '../firestore/user_firestore_service.dart';
 import '../models/user_entity.dart';
 
 import '../models/user_roles.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserNotifier extends StateNotifier<UserEntity?> {
   final UserFirestoreService _firestoreService = UserFirestoreService();
@@ -45,6 +47,17 @@ class UserNotifier extends StateNotifier<UserEntity?> {
     state = null;
   }
 }
+
+/// StreamProvider for real-time user updates (hybrid approach)
+final userProviderStream = StreamProvider<UserEntity?>((ref) {
+  final firebaseUser = FirebaseAuth.instance.currentUser;
+  if (firebaseUser == null) return Stream<UserEntity?>.value(null);
+  return FirebaseFirestore.instance
+      .collection('user_list')
+      .doc(firebaseUser.uid)
+      .snapshots()
+      .map((doc) => doc.exists ? UserEntity.fromMap(doc.data()!) : null);
+});
 
 final userProvider = StateNotifierProvider<UserNotifier, UserEntity?>(
   (ref) => UserNotifier(),
