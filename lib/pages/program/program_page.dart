@@ -157,7 +157,7 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year.toString().substring(2)}',
+                                        '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}',
                                         style: TextStyle(
                                           fontSize: 11,
                                           color: isToday ? Colors.white : isDark ? Colors.white70 : Colors.black87,

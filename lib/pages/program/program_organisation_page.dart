@@ -172,29 +172,9 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
                       templates: templates,
                       loadedTemplateName: loadedTemplateName,
                       onDelete: (name) async {
-                        final confirm = await showDialog<bool>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Template löschen?'),
-                            content: Text('Möchtest du das Template "' + name + '" wirklich löschen?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, false),
-                                child: const Text('Abbrechen'),
-                              ),
-                              ElevatedButton(
-                                onPressed: () => Navigator.pop(context, true),
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                child: const Text('Löschen'),
-                              ),
-                            ],
-                          ),
-                        );
-                        if (confirm == true) {
-                          await service.deleteTemplate(name);
-                          if (!mounted) return;
-                          showCustomSnackBar(context, 'Template "' + name + '" deleted.');
-                        }
+                        await service.deleteTemplate(name);
+                        if (!mounted) return;
+                        showCustomSnackBar(context, 'Template "' + name + '" deleted.');
                       },
                       onUpdate: (name) async {
                         await service.setTemplate(name, localWeekProgram);
@@ -465,7 +445,7 @@ class _ProgramDayCard extends StatelessWidget {
                   width: 90,
                   height: 38,
                   child: DropdownButton<String>(
-                    hint: const Text('Copy \n from', style: TextStyle(fontSize: 12)),
+                    hint: const Text('Copy', style: TextStyle(fontSize: 12)),
                     value: null,
                     style: const TextStyle(fontSize: 12),
                     isDense: true,
