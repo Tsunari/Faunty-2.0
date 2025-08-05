@@ -5,7 +5,11 @@ enum Place {
   }
 
 extension PlaceExtension on Place {
-  String get name {
+  /// Firestore-safe name (enum identifier)
+  String get name => toString().split('.').last;
+
+  /// User-friendly display name
+  String get displayName {
     switch (this) {
       case Place.munihFatih:
         return 'Münih Fatih';
@@ -17,7 +21,6 @@ extension PlaceExtension on Place {
         return 'Neu Ulm';
       case Place.stuttgart:
         return 'Stuttgart';
-        // Add other cases as needed
       case Place.nurnberg:
         return 'Nürnberg';
       case Place.ehrenfeld:
@@ -42,39 +45,14 @@ extension PlaceExtension on Place {
   }
 
   static Place fromString(String value) {
-    switch (value) {
-      case 'Münih Fatih':
-        return Place.munihFatih;
-      case 'Neufahrn':
-        return Place.neufahrn;
-      case 'Augsburg':
-        return Place.augsburg;
-      case 'Neu Ulm':
-        return Place.neuUlm;
-      case 'Stuttgart':
-        return Place.stuttgart;
-      case 'Nürnberg':
-        return Place.nurnberg;
-      case 'Ehrenfeld':
-        return Place.ehrenfeld;
-      case 'Stolberg':
-        return Place.stolberg;
-      case 'Mannheim':
-        return Place.mannheim;
-      case 'Sindelfingen':
-        return Place.sindelfingen;
-      case 'Berlin':
-        return Place.berlin;
-      case 'Hamburg':
-        return Place.hamburg;
-      case 'Dortmund':
-        return Place.dortmund;
-      case 'Darmstadt':
-        return Place.darmstadt;
-      case 'Oberhausen':
-        return Place.oberhausen;
-      default:
-        return Place.munihFatih;
+    // Try to match by enum name first
+    for (final place in Place.values) {
+      if (place.name == value) return place;
     }
+    // Then try to match by displayName
+    for (final place in Place.values) {
+      if (place.displayName == value) return place;
+    }
+    return Place.munihFatih;
   }
 }

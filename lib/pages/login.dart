@@ -1,23 +1,19 @@
+import 'package:faunty/helper/logging.dart';
 import 'package:faunty/models/places.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../models/user_entity.dart';
 import '../state_management/user_provider.dart';
 import '../models/user_roles.dart';
-import '../state_management/user_list_provider.dart';
 
-// Register a new user and save their role in Firestore
 Future<(User?, String?)> registerWithEmail(String email, String password) async {
   try {
     final credential = await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password);
-    // TODO: Create a user entity and save it in Firestore
     return (credential.user, null);
   } on FirebaseAuthException catch (e) {
-    print('Registration error: $e');
+    printError('Registration error: $e');
     if (e.code == 'email-already-in-use') {
       return (null, 'This email is already registered.');
     } else if (e.code == 'weak-password') {
@@ -26,26 +22,24 @@ Future<(User?, String?)> registerWithEmail(String email, String password) async 
       return (null, 'Registration failed. ${e.message ?? ''}');
     }
   } catch (e) {
-    print('Registration error: $e');
+    printError('Registration error: $e');
     return (null, 'Registration failed. Please try again.');
   }
 }
 
-// Login with email and password
 Future<User?> loginWithEmail(String email, String password) async {
   try {
     final credential = await FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password);
-    // TODO: Fetch user role from Firestore
     return credential.user;
   } catch (e) {
-    print('Login error: $e');
+    printError('Login error: $e');
     return null;
   }
 }
 
 class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   ConsumerState<LoginPage> createState() => _LoginPageState();
@@ -61,8 +55,8 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
   bool _isLoading = false;
   String? _error;
   bool _isRegisterMode = false;
-  String? _selectedPlace;
-  List<String> _places = Place.values.map((place) => place.name).toList();
+  Place? _selectedPlace;
+  List<Place> _places = Place.values.toList();
   late AnimationController _animController;
   late Animation<double> _registerFieldsAnim;
   bool _showPassword = false;
@@ -86,19 +80,23 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
     // Fetch places from Firestore (assuming collection 'places' with 'name' field) TODO: use firestore service
     try {
       final snapshot = await FirebaseFirestore.instance.collection('places').get();
-      print('Fetched places: ${snapshot.docs.length}');
+      printInfo('Fetched places: ${snapshot.docs.length}');
+      if (!mounted) return;
       setState(() {
         if (snapshot.docs.isNotEmpty) {
-          _places = snapshot.docs.map((doc) => doc['name'] as String).toList();
+          _places = snapshot.docs
+              .map((doc) => PlaceExtension.fromString(doc['name'] as String))
+              .toList();
         } else {
-          _places = Place.values.map((place) => place.name).toList();
+          _places = Place.values.toList();
         }
       });
     } catch (e) {
       // fallback or ignore
-      print('Error fetching places: $e');
+      if (!mounted) return;
+      printError('Error fetching places: $e');
       setState(() {
-        _places = Place.values.map((place) => place.name).toList();
+        _places = Place.values.toList();
       });
     }
   }
@@ -128,20 +126,20 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
     if (user != null) {
       // Always fetch user doc from Firestore after login
       final doc = await FirebaseFirestore.instance.collection('user_list').doc(user.uid).get();
-      print('[DEBUG] Firestore user doc: ${doc.data()}');
-      String? placeName;
+      printInfo('[DEBUG] Firestore user doc: ${doc.data()}');
+      Place? place;
       if (doc.exists && doc.data() != null) {
         final data = doc.data()!;
         if (data['place'] != null) {
-          placeName = data['place'] as String?;
-          print('[DEBUG] Place field exists: $placeName');
+          place = data['place'] != null ? PlaceExtension.fromString(data['place'] as String) : null;
+          printInfo('[DEBUG] Place field exists: $place');
         } else {
-          print('[DEBUG] User doc exists but no place field.');
+          printInfo('[DEBUG] User doc exists but no place field.');
         }
       } else {
-        print('[DEBUG] User doc does not exist or is null.');
+        printInfo('[DEBUG] User doc does not exist or is null.');
       }
-      if (placeName == null) {
+      if (place == null) {
         setState(() {
           _error = 'Could not determine your place. Please contact support.';
         });
@@ -151,9 +149,13 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       if (success) {
         final userEntity = ref.read(userProvider);
         if (userEntity != null && userEntity.role == UserRole.user) {
-          Navigator.of(context).pushReplacementNamed('/user-welcome');
+          if (context.mounted) {
+            Navigator.of(context).pushReplacementNamed('/user-welcome');
+          }
         } else {
-          Navigator.of(context).pushReplacementNamed('/home');
+          if (context.mounted) {
+            Navigator.of(context).pushReplacementNamed('/home');
+          }
         }
       } else {
         setState(() {
@@ -217,7 +219,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       await FirebaseFirestore.instance.collection('user_list').doc(user.uid).set({
         'uid': user.uid,
         'email': email,
-        'place': _selectedPlace!,
+        'place': _selectedPlace!.name,
         'firstName': firstName,
         'lastName': lastName,
         'role': 'User',
@@ -225,7 +227,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       final success = await ref.read(userProvider.notifier).createUser(
         uid: user.uid,
         email: email,
-        place: PlaceExtension.fromString(_selectedPlace!),
+        place: _selectedPlace!,
         firstName: firstName,
         lastName: lastName,
       );
@@ -512,17 +514,17 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                                 const SizedBox(height: 16),
                                 ConstrainedBox(
                                   constraints: const BoxConstraints(maxWidth: _formMaxWidth),
-                                  child: DropdownButtonFormField<String>(
+                                  child: DropdownButtonFormField<Place>(
                                     value: _selectedPlace,
                                     isExpanded: true,
                                     icon: const Icon(Icons.keyboard_arrow_down),
-                                    items: _places.map((place) => DropdownMenuItem(
+                                    items: _places.map((place) => DropdownMenuItem<Place>(
                                       value: place,
                                       child: Row(
                                         children: [
                                           const Icon(Icons.place_outlined, size: 18),
                                           const SizedBox(width: 8),
-                                          Text(place, style: const TextStyle(fontSize: 16)),
+                                          Text(place.displayName, style: const TextStyle(fontSize: 16)),
                                         ],
                                       ),
                                     )).toList(),
@@ -543,7 +545,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                                     ),
                                     menuMaxHeight: 300,
-                                  ),
+                                  )
                                 ),
                               ],
                             ),
