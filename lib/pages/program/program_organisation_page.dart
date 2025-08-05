@@ -37,36 +37,110 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
         title: 'Organisation',
         actions: [
           IconButton(
-            icon: const Icon(Icons.save_as),
+            icon: const Icon(Icons.note_add), //#Icon Save as Template
             tooltip: 'Save as template',
             onPressed: () async {
               final nameController = TextEditingController();
+              final service = ref.read(programFirestoreServiceProvider);
+              final templates = await service.getTemplates();
+              String? selectedTemplate;
               final result = await showDialog<String>(
                 context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Save as template'),
-                  content: TextField(
-                    controller: nameController,
-                    decoration: const InputDecoration(labelText: 'Template name'),
+                builder: (context) => StatefulBuilder(
+                  builder: (context, setState) => AlertDialog(
+                    title: const Text('Save as template'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Override-Bereich zuerst
+                        if (templates.isNotEmpty) ...[
+                          Padding(
+                            padding: EdgeInsets.only(bottom: 4.0, top: 0.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Override existing template',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              DropdownButton<String>(
+                                isExpanded: true,
+                                value: selectedTemplate,
+                                hint: const Text('Select template to override'),
+                                items: templates.keys.map((name) => DropdownMenuItem(
+                                  value: name,
+                                  child: Text(name),
+                                )).toList(),
+                                onChanged: (val) => setState(() => selectedTemplate = val),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: selectedTemplate == null
+                                        ? null
+                                        : () async {
+                                            await service.setTemplate(selectedTemplate!, localWeekProgram);
+                                            if (!mounted) return;
+                                            setState(() {});
+                                            Navigator.pop(context, selectedTemplate);
+                                            showCustomSnackBar(context, 'Template "$selectedTemplate" overridden.');
+                                          },
+                                    child: const Text('Override this template'),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          const Divider(),
+                        ],
+                        // Save as new template Bereich danach
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 4.0),
+                          child: Text(
+                            'Create a new template',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
+                        ),
+                        TextField(
+                          controller: nameController,
+                          decoration: const InputDecoration(labelText: 'Template name'),
+                        ),
+                        const SizedBox(height: 16),
+                        
+                      ],
+                    ),
+                    actions: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              if (nameController.text.trim().isNotEmpty) {
+                                Navigator.pop(context, nameController.text.trim());
+                              }
+                            },
+                            child: const Text('Create'),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (nameController.text.trim().isNotEmpty) {
-                          Navigator.pop(context, nameController.text.trim());
-                        }
-                      },
-                      child: const Text('Save'),
-                    ),
-                  ],
                 ),
               );
               if (result != null && result.isNotEmpty) {
-                final service = ref.read(programFirestoreServiceProvider);
                 await service.setTemplate(result, localWeekProgram);
                 if (!mounted) return;
                 setState(() {
@@ -76,58 +150,78 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
               }
             },
           ),
-          if (loadedTemplateName != null)
-            IconButton(
-              icon: const Icon(Icons.update),
-              tooltip: 'Update current template',
-              onPressed: () async {
-                final service = ref.read(programFirestoreServiceProvider);
-                await service.setTemplate(loadedTemplateName!, localWeekProgram);
-                if (!mounted) return;
-                showCustomSnackBar(context, 'Template "${loadedTemplateName!}" updated.');
-              },
-            ),
-          IconButton(
-            icon: const Icon(Icons.list_alt),
-            tooltip: 'Load template',
-            onPressed: () async {
-              final service = ref.read(programFirestoreServiceProvider);
-              var templates = await service.getTemplates();
-              if (!mounted) return;
-              final selected = await showDialog<String>(
-                context: context,
-                builder: (context) => _TemplateSelectionDialog(
-                  templates: templates,
-                  loadedTemplateName: loadedTemplateName,
-                  onDelete: (name) async {
-                    await service.deleteTemplate(name);
-                    if (!mounted) return;
-                    showCustomSnackBar(context, 'Template "$name" deleted.');
-                  },
-                  onUpdate: (name) async {
-                    await service.setTemplate(name, localWeekProgram);
-                    if (!mounted) return templates;
-                    showCustomSnackBar(context, 'Template "$name" updated.');
-                    // Fetch latest templates after update and update dialog state
-                    templates = await service.getTemplates();
-                    return templates;
-                  },
-                ),
-              );
-              // Always fetch latest templates after dialog closes
-              templates = await service.getTemplates();
-              if (selected != null && templates.containsKey(selected)) {
-                setState(() {
-                  // Deep copy to avoid reference issues
-                  localWeekProgram = {
-                    for (final day in weekDays)
-                      day: (templates[selected]![day] as List?)?.map((e) => Map<String, String>.from(e)).toList() ?? []
-                  };
-                  loadedTemplateName = selected;
-                });
-                if (!mounted) return;
-                showCustomSnackBar(context, 'Template "$selected" loaded.');
+          // Zeige den Load-Button immer an, wenn Templates existieren
+          FutureBuilder<Map<String, Map<String, List<Map<String, String>>>>> (
+            future: ref.read(programFirestoreServiceProvider).getTemplates(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SizedBox.shrink();
               }
+              final templates = snapshot.data ?? {};
+              if (templates.isEmpty) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.folder_special), //#icon load template
+                tooltip: 'Load template',
+                onPressed: () async {
+                  final service = ref.read(programFirestoreServiceProvider);
+                  var templates = await service.getTemplates();
+                  if (!mounted) return;
+                  final selected = await showDialog<String>(
+                    context: context,
+                    builder: (context) => _TemplateSelectionDialog(
+                      templates: templates,
+                      loadedTemplateName: loadedTemplateName,
+                      onDelete: (name) async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Template löschen?'),
+                            content: Text('Möchtest du das Template "' + name + '" wirklich löschen?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('Abbrechen'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                child: const Text('Löschen'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirm == true) {
+                          await service.deleteTemplate(name);
+                          if (!mounted) return;
+                          showCustomSnackBar(context, 'Template "' + name + '" deleted.');
+                        }
+                      },
+                      onUpdate: (name) async {
+                        await service.setTemplate(name, localWeekProgram);
+                        if (!mounted) return templates;
+                        showCustomSnackBar(context, 'Template "' + name + '" updated.');
+                        // Fetch latest templates after update and update dialog state
+                        templates = await service.getTemplates();
+                        return templates;
+                      },
+                    ),
+                  );
+                  // Always fetch latest templates after dialog closes
+                  templates = await service.getTemplates();
+                  if (selected != null && templates.containsKey(selected)) {
+                    setState(() {
+                      // Deep copy to avoid reference issues
+                      localWeekProgram = {
+                        for (final day in weekDays)
+                          day: (templates[selected]![day] as List?)?.map((e) => Map<String, String>.from(e)).toList() ?? []
+                      };
+                      loadedTemplateName = selected;
+                    });
+                    if (!mounted) return;
+                    showCustomSnackBar(context, 'Template "' + selected + '" loaded.');
+                  }
+                },
+              );
             },
           ),
         ],
@@ -236,25 +330,45 @@ class _TemplateSelectionDialogState extends State<_TemplateSelectionDialog> {
                                 style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
                               ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.system_update_alt, color: Colors.blueAccent),
-                              tooltip: 'Update template with current configuration',
-                              onPressed: () async {
-                                final updatedTemplates = await widget.onUpdate(name);
-                                setState(() {
-                                  _templates.clear();
-                                  _templates.addAll(updatedTemplates);
-                                });
-                              },
-                            ),
+                            // IconButton(
+                            //   icon: const Icon(Icons.system_update_alt, color: Colors.blueAccent),
+                            //   tooltip: 'Update template with current configuration',
+                            //   onPressed: () async {
+                            //     final updatedTemplates = await widget.onUpdate(name);
+                            //     setState(() {
+                            //       _templates.clear();
+                            //       _templates.addAll(updatedTemplates);
+                            //     });
+                            //   },
+                            // ),
                             IconButton(
                               icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
                               tooltip: 'Delete template',
                               onPressed: () async {
-                                await widget.onDelete(name);
-                                setState(() {
-                                  _templates.remove(name);
-                                });
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Delete Template?'),
+                                    content: Text('Do you really want to delete the template: ' + name),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context, false),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () => Navigator.pop(context, true),
+                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                        child: const Text('Delete'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirm == true) {
+                                  await widget.onDelete(name);
+                                  setState(() {
+                                    _templates.remove(name);
+                                  });
+                                }
                               },
                             ),
                           ],
@@ -351,7 +465,7 @@ class _ProgramDayCard extends StatelessWidget {
                   width: 90,
                   height: 38,
                   child: DropdownButton<String>(
-                    hint: const Text('Copy', style: TextStyle(fontSize: 12)),
+                    hint: const Text('Copy \n from', style: TextStyle(fontSize: 12)),
                     value: null,
                     style: const TextStyle(fontSize: 12),
                     isDense: true,
