@@ -113,6 +113,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
   }
 
   Future<void> _login() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
       _error = null;
@@ -120,6 +121,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final user = await loginWithEmail(email, password);
+    if (!mounted) return;
     setState(() {
       _isLoading = false;
     });
@@ -140,6 +142,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
         printInfo('[DEBUG] User doc does not exist or is null.');
       }
       if (placeId == null || placeId.isEmpty) {
+        if (!mounted) return;
         setState(() {
           _error = 'Could not determine your place. Please contact support.';
         });
@@ -158,11 +161,13 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
           }
         }
       } else {
+        if (!mounted) return;
         setState(() {
           _error = 'User data not found or incomplete. Please contact support.';
         });
       }
     } else {
+      if (!mounted) return;
       setState(() {
         if (email.isEmpty || password.isEmpty) {
           _error = 'Please enter both your email and password.';
@@ -176,6 +181,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
   }
 
   Future<void> _register() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
       _error = null;
@@ -186,6 +192,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
     final firstName = _firstNameController.text.trim();
     final lastName = _lastNameController.text.trim();
     if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty || firstName.isEmpty || lastName.isEmpty) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _error = 'Please fill in all fields.';
@@ -193,6 +200,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       return;
     }
     if (!email.contains('@')) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _error = 'Please enter a valid email address.';
@@ -200,6 +208,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       return;
     }
     if (password != confirmPassword) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _error = 'Passwords do not match.';
@@ -207,6 +216,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       return;
     }
     if (_selectedPlace == null || _selectedPlace!.id.isEmpty) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _error = 'Please select a place.';
@@ -221,6 +231,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
         .get()
         .then((doc) => doc.data()?['registrationMode'] as bool? ?? false);
     if (!regMode) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _error = 'Registration is currently disabled for this place.';
@@ -258,16 +269,19 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
           }
         }
       } else {
+        if (!mounted) return;
         setState(() {
           _error = 'Failed to create user. Please try again.';
         });
       }
     } else {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _error = regError ?? 'Registration failed. Please try again.';
       });
     }
+    if (!mounted) return;
     setState(() {
       _isLoading = false;
     });

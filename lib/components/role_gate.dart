@@ -35,16 +35,22 @@ class RoleGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(userProvider);
-    if (user == null) {
-      // Not logged in or user not loaded
-      return fallback ?? const SizedBox.shrink();
-    }
-    final userRole = user.role;
-    if (_roleIndex(userRole) <= _roleIndex(minRole)) {
-      return child;
-    } else {
-      return fallback ?? const SizedBox.shrink();
-    }
+    final userAsync = ref.watch(userProviderStream);
+    return userAsync.when(
+      data: (user) {
+        if (user == null) {
+          // Not logged in or user not loaded
+          return fallback ?? const SizedBox.shrink();
+        }
+        final userRole = user.role;
+        if (_roleIndex(userRole) <= _roleIndex(minRole)) {
+          return child;
+        } else {
+          return fallback ?? const SizedBox.shrink();
+        }
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (e, st) => fallback ?? const SizedBox.shrink(),
+    );
   }
 }
