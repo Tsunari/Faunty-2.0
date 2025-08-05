@@ -19,12 +19,21 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
     'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
   ];
 
+  List<Map<String, String>> _sortEntries(List<Map<String, String>> entries) {
+    entries.sort((a, b) {
+      final aTime = a['from'] ?? '';
+      final bTime = b['from'] ?? '';
+      return aTime.compareTo(bTime);
+    });
+    return entries;
+  }
+
   @override
   void initState() {
     super.initState();
     localWeekProgram = {
       for (final day in weekDays)
-        day: widget.weekProgram[day]?.map((entry) => Map<String, String>.from(entry)).toList() ?? []
+        day: _sortEntries(widget.weekProgram[day]?.map((entry) => Map<String, String>.from(entry)).toList() ?? [])
     };
   }
 
@@ -215,7 +224,7 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
             isDark: isDark,
             onChanged: (day, entries) {
               setState(() {
-                localWeekProgram[day] = entries;
+                localWeekProgram[day] = _sortEntries(List<Map<String, String>>.from(entries));
               });
             },
           ),
@@ -224,9 +233,14 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
       floatingActionButton: _SaveFab(
         isDark: isDark,
         onSave: () async {
+          // Sort all days before saving
+          final sortedWeekProgram = {
+            for (final day in weekDays)
+              day: _sortEntries(List<Map<String, String>>.from(localWeekProgram[day]!))
+          };
           final service = ref.read(programFirestoreServiceProvider);
-          await service.setWeekProgram(localWeekProgram);
-          if (mounted) Navigator.pop(context, localWeekProgram);
+          await service.setWeekProgram(sortedWeekProgram);
+          if (mounted) Navigator.pop(context, sortedWeekProgram);
         },
       ),
     );
@@ -412,8 +426,18 @@ class _ProgramDayCard extends StatelessWidget {
   final void Function(List<Map<String, String>> entries) onChanged;
   const _ProgramDayCard({required this.dayName, required this.entries, required this.weekProgram, required this.isDark, required this.onChanged});
 
+  List<Map<String, String>> _sortEntries(List<Map<String, String>> entries) {
+    entries.sort((a, b) {
+      final aTime = a['from'] ?? '';
+      final bTime = b['from'] ?? '';
+      return aTime.compareTo(bTime);
+    });
+    return entries;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final sortedEntries = _sortEntries(List<Map<String, String>>.from(entries));
     return Card(
       color: isDark ? Colors.grey[850] : null,
       margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -462,7 +486,7 @@ class _ProgramDayCard extends StatelessWidget {
                       if (copyDay != null && copyDay != dayName) {
                         // Copy entries from selected day into current day
                         final copied = weekProgram[copyDay]?.map((e) => Map<String, String>.from(e)).toList() ?? [];
-                        onChanged(copied);
+                        onChanged(_sortEntries(copied));
                       }
                     },
                     dropdownColor: isDark ? Colors.grey[800] : Colors.white,
@@ -475,21 +499,21 @@ class _ProgramDayCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ...entries.asMap().entries.map((entryMap) {
+                  ...sortedEntries.asMap().entries.map((entryMap) {
                     final entry = entryMap.value;
                     final entryIdx = entryMap.key;
                     return _ProgramEntryTile(
                       entry: entry,
                       isDark: isDark,
                       onChanged: (updated) {
-                        final newEntries = List<Map<String, String>>.from(entries);
+                        final newEntries = List<Map<String, String>>.from(sortedEntries);
                         newEntries[entryIdx] = updated;
-                        onChanged(newEntries);
+                        onChanged(_sortEntries(newEntries));
                       },
                       onDelete: () {
-                        final newEntries = List<Map<String, String>>.from(entries);
+                        final newEntries = List<Map<String, String>>.from(sortedEntries);
                         newEntries.removeAt(entryIdx);
-                        onChanged(newEntries);
+                        onChanged(_sortEntries(newEntries));
                       },
                     );
                   }),
@@ -499,9 +523,9 @@ class _ProgramDayCard extends StatelessWidget {
                       onPressed: () async {
                         final newEntry = await _showAddEditDialog(context);
                         if (newEntry != null) {
-                          final newEntries = List<Map<String, String>>.from(entries);
+                          final newEntries = List<Map<String, String>>.from(sortedEntries);
                           newEntries.add(newEntry);
-                          onChanged(newEntries);
+                          onChanged(_sortEntries(newEntries));
                         }
                       },
                       icon: const Icon(Icons.add),
