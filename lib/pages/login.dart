@@ -21,6 +21,7 @@ Future<(User?, String?)> registerWithEmail(String email, String password) async 
     } else {
       return (null, 'Registration failed. ${e.message ?? ''}');
     }
+
   } catch (e) {
     printError('Registration error: $e');
     return (null, 'Registration failed. Please try again.');
@@ -286,15 +287,15 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                   duration: const Duration(milliseconds: 400),
                   switchInCurve: Curves.easeInOut,
                   switchOutCurve: Curves.easeInOut,
-                    child: !_isRegisterMode
+                  child: !_isRegisterMode
                       ? Hero(
-                        tag: 'logo',
-                        child: Image.asset(
-                        'assets/LogoInverse.png',
-                        height: 145,
-                        fit: BoxFit.contain,
-                        ),
-                      )
+                          tag: 'logo',
+                          child: Image.asset(
+                            'assets/LogoInverse.png',
+                            height: 145,
+                            fit: BoxFit.contain,
+                          ),
+                        )
                       : const SizedBox.shrink(),
                 ),
                 const SizedBox(height: 24),
@@ -327,227 +328,31 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                           ),
                           const SizedBox(height: 24),
                           AutofillGroup(
-                            child: Column(
-                              children: [
-                                if (_isRegisterMode) ...[
-                                  ConstrainedBox(
-                                    constraints: const BoxConstraints(maxWidth: _formMaxWidth),
-                                    child: TextField(
-                                      controller: _firstNameController,
-                                      decoration: InputDecoration(
-                                        labelText: 'First Name',
-                                        prefixIcon: Icon(Icons.person_outline),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                      ),
-                                      textInputAction: TextInputAction.next,
-                                      autofillHints: const [AutofillHints.givenName],
-                                      onEditingComplete: () => FocusScope.of(context).nextFocus(),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  ConstrainedBox(
-                                    constraints: const BoxConstraints(maxWidth: _formMaxWidth),
-                                    child: TextField(
-                                      controller: _lastNameController,
-                                      decoration: InputDecoration(
-                                        labelText: 'Last Name',
-                                        prefixIcon: Icon(Icons.person_outline),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                      ),
-                                      textInputAction: TextInputAction.next,
-                                      autofillHints: const [AutofillHints.familyName],
-                                      onEditingComplete: () => FocusScope.of(context).nextFocus(),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                ],
-                                ConstrainedBox(
-                                  constraints: const BoxConstraints(maxWidth: _formMaxWidth),
-                                  child: TextField(
-                                    controller: _emailController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Email',
-                                      prefixIcon: Icon(Icons.email_outlined),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    keyboardType: TextInputType.emailAddress,
-                                    autofillHints: !_isRegisterMode
-                                        ? const [AutofillHints.username, AutofillHints.email]
-                                        : null,
-                                    autofocus: false,
-                                    textInputAction: TextInputAction.next,
-                                    onEditingComplete: () {
-                                      if (!_isRegisterMode) {
-                                        final email = _emailController.text.trim();
-                                        final password = _passwordController.text.trim();
-                                        if (email.isNotEmpty && password.isNotEmpty) {
-                                          FocusScope.of(context).unfocus(); // Hide keyboard
-                                          _login();
-                                        } else {
-                                          FocusScope.of(context).nextFocus();
-                                        }
-                                      } else {
-                                        FocusScope.of(context).nextFocus();
-                                      }
-                                    },
-                                    onSubmitted: (_) {
-                                      if (!_isRegisterMode) {
-                                        final email = _emailController.text.trim();
-                                        final password = _passwordController.text.trim();
-                                        if (email.isNotEmpty && password.isNotEmpty) {
-                                          FocusScope.of(context).unfocus(); // Hide keyboard
-                                          _login();
-                                        } else {
-                                          FocusScope.of(context).nextFocus();
-                                        }
-                                      } else {
-                                        FocusScope.of(context).nextFocus();
-                                      }
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                ConstrainedBox(
-                                  constraints: const BoxConstraints(maxWidth: _formMaxWidth),
-                                  child: TextField(
-                                    controller: _passwordController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Password',
-                                      prefixIcon: Icon(Icons.lock_outline),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      suffixIcon: FocusScope(
-                                        canRequestFocus: false,
-                                        skipTraversal: true,
-                                        child: Padding(
-                                          padding: const EdgeInsetsDirectional.only(end: 8.0),
-                                          child: IconButton(
-                                            icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
-                                            onPressed: () {
-                                              setState(() {
-                                                _showPassword = !_showPassword;
-                                              });
-                                            },
-                                            tooltip: _showPassword ? 'Hide password' : 'Show password',
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    obscureText: !_showPassword,
-                                    autofillHints: !_isRegisterMode
-                                        ? const [AutofillHints.password]
-                                        : null,
-                                    textInputAction: _isRegisterMode ? TextInputAction.next : TextInputAction.done,
-                                    onEditingComplete: () {
-                                      if (_isRegisterMode) {
-                                        FocusScope.of(context).nextFocus();
-                                      } else {
-                                        // Try login if all required fields are filled
-                                        if (_emailController.text.trim().isNotEmpty && _passwordController.text.trim().isNotEmpty) {
-                                          FocusScope.of(context).unfocus(); // Hide keyboard
-                                          _login();
-                                        } else {
-                                          FocusScope.of(context).unfocus();
-                                        }
-                                      }
-                                    },
-                                    onSubmitted: (_) {
-                                      if (_isRegisterMode) {
-                                        FocusScope.of(context).nextFocus();
-                                      } else {
-                                        if (_emailController.text.trim().isNotEmpty && _passwordController.text.trim().isNotEmpty) {
-                                          FocusScope.of(context).unfocus(); // Hide keyboard
-                                          _login();
-                                        }
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ],
+                            child: _LoginFormFields(
+                              isRegisterMode: _isRegisterMode,
+                              firstNameController: _firstNameController,
+                              lastNameController: _lastNameController,
+                              emailController: _emailController,
+                              passwordController: _passwordController,
+                              confirmPasswordController: _confirmPasswordController,
+                              showPassword: _showPassword,
+                              showConfirmPassword: _showConfirmPassword,
+                              onTogglePassword: () => setState(() => _showPassword = !_showPassword),
+                              onToggleConfirmPassword: () => setState(() => _showConfirmPassword = !_showConfirmPassword),
+                              onLogin: _login,
                             ),
                           ),
                           SizeTransition(
                             sizeFactor: _registerFieldsAnim,
                             axisAlignment: -1.0,
-                            child: Column(
-                              children: [
-                                const SizedBox(height: 16),
-                                ConstrainedBox(
-                                  constraints: const BoxConstraints(maxWidth: _formMaxWidth),
-                                  child: TextField(
-                                    controller: _confirmPasswordController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Confirm Password',
-                                      prefixIcon: Icon(Icons.lock_reset),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      suffixIcon: FocusScope(
-                                        canRequestFocus: false,
-                                        skipTraversal: true,
-                                        child: Padding(
-                                          padding: const EdgeInsetsDirectional.only(end: 8.0),
-                                          child: IconButton(
-                                            icon: Icon(_showConfirmPassword ? Icons.visibility_off : Icons.visibility),
-                                            onPressed: () {
-                                              setState(() {
-                                                _showConfirmPassword = !_showConfirmPassword;
-                                              });
-                                            },
-                                            tooltip: _showConfirmPassword ? 'Hide password' : 'Show password',
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    obscureText: !_showConfirmPassword,
-                                    textInputAction: TextInputAction.next,
-                                    onSubmitted: (_) => FocusScope.of(context).nextFocus(),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                ConstrainedBox(
-                                  constraints: const BoxConstraints(maxWidth: _formMaxWidth),
-                                  child: DropdownButtonFormField<Place>(
-                                    value: _selectedPlace,
-                                    isExpanded: true,
-                                    icon: const Icon(Icons.keyboard_arrow_down),
-                                    items: _places.map((place) => DropdownMenuItem<Place>(
-                                      value: place,
-                                      child: Row(
-                                        children: [
-                                          const Icon(Icons.place_outlined, size: 18),
-                                          const SizedBox(width: 8),
-                                          Text(place.displayName, style: const TextStyle(fontSize: 16)),
-                                        ],
-                                      ),
-                                    )).toList(),
-                                    onChanged: (val) => setState(() => _selectedPlace = val),
-                                    decoration: InputDecoration(
-                                      labelText: 'Select Place',
-                                      prefixIcon: Icon(Icons.domain_outlined),
-                                      suffixIcon: _selectedPlace != null
-                                          ? IconButton(
-                                              icon: const Icon(Icons.clear),
-                                              onPressed: () => setState(() => _selectedPlace = null),
-                                              tooltip: 'Clear selection',
-                                            )
-                                          : null,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                    ),
-                                    menuMaxHeight: 300,
-                                  )
-                                ),
-                              ],
+                            child: _RegisterExtraFields(
+                              confirmPasswordController: _confirmPasswordController,
+                              showConfirmPassword: _showConfirmPassword,
+                              onToggleConfirmPassword: () => setState(() => _showConfirmPassword = !_showConfirmPassword),
+                              selectedPlace: _selectedPlace,
+                              places: _places,
+                              onPlaceChanged: (val) => setState(() => _selectedPlace = val),
+                              onClearPlace: () => setState(() => _selectedPlace = null),
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -639,4 +444,273 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       ),
     );
   }
+
 }
+
+// Modularized form fields widget
+class _LoginFormFields extends StatelessWidget {
+  final bool isRegisterMode;
+  final TextEditingController firstNameController;
+  final TextEditingController lastNameController;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final TextEditingController confirmPasswordController;
+  final bool showPassword;
+  final bool showConfirmPassword;
+  final VoidCallback onTogglePassword;
+  final VoidCallback onToggleConfirmPassword;
+  final VoidCallback onLogin;
+
+  const _LoginFormFields({
+    required this.isRegisterMode,
+    required this.firstNameController,
+    required this.lastNameController,
+    required this.emailController,
+    required this.passwordController,
+    required this.confirmPasswordController,
+    required this.showPassword,
+    required this.showConfirmPassword,
+    required this.onTogglePassword,
+    required this.onToggleConfirmPassword,
+    required this.onLogin,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        if (isRegisterMode) ...[
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _LoginPageState._formMaxWidth),
+            child: TextField(
+              controller: firstNameController,
+              decoration: InputDecoration(
+                labelText: 'First Name',
+                prefixIcon: Icon(Icons.person_outline),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.givenName],
+              onEditingComplete: () => FocusScope.of(context).nextFocus(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _LoginPageState._formMaxWidth),
+            child: TextField(
+              controller: lastNameController,
+              decoration: InputDecoration(
+                labelText: 'Last Name',
+                prefixIcon: Icon(Icons.person_outline),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.familyName],
+              onEditingComplete: () => FocusScope.of(context).nextFocus(),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _LoginPageState._formMaxWidth),
+          child: TextField(
+            controller: emailController,
+            decoration: InputDecoration(
+              labelText: 'Email',
+              prefixIcon: Icon(Icons.email_outlined),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            keyboardType: TextInputType.emailAddress,
+            autofillHints: !isRegisterMode
+                ? const [AutofillHints.username, AutofillHints.email]
+                : null,
+            autofocus: false,
+            textInputAction: TextInputAction.next,
+            onEditingComplete: () {
+              if (!isRegisterMode) {
+                final email = emailController.text.trim();
+                final password = passwordController.text.trim();
+                if (email.isNotEmpty && password.isNotEmpty) {
+                  FocusScope.of(context).unfocus();
+                  onLogin();
+                } else {
+                  FocusScope.of(context).nextFocus();
+                }
+              } else {
+                FocusScope.of(context).nextFocus();
+              }
+            },
+            onSubmitted: (_) {
+              if (!isRegisterMode) {
+                final email = emailController.text.trim();
+                final password = passwordController.text.trim();
+                if (email.isNotEmpty && password.isNotEmpty) {
+                  FocusScope.of(context).unfocus();
+                  onLogin();
+                } else {
+                  FocusScope.of(context).nextFocus();
+                }
+              } else {
+                FocusScope.of(context).nextFocus();
+              }
+            },
+          ),
+        ),
+        const SizedBox(height: 16),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _LoginPageState._formMaxWidth),
+          child: TextField(
+            controller: passwordController,
+            decoration: InputDecoration(
+              labelText: 'Password',
+              prefixIcon: Icon(Icons.lock_outline),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              suffixIcon: FocusScope(
+                canRequestFocus: false,
+                skipTraversal: true,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.only(end: 8.0),
+                  child: IconButton(
+                    icon: Icon(showPassword ? Icons.visibility_off : Icons.visibility),
+                    onPressed: onTogglePassword,
+                    tooltip: showPassword ? 'Hide password' : 'Show password',
+                  ),
+                ),
+              ),
+            ),
+            obscureText: !showPassword,
+            autofillHints: !isRegisterMode
+                ? const [AutofillHints.password]
+                : null,
+            textInputAction: isRegisterMode ? TextInputAction.next : TextInputAction.done,
+            onEditingComplete: () {
+              if (isRegisterMode) {
+                FocusScope.of(context).nextFocus();
+              } else {
+                if (emailController.text.trim().isNotEmpty && passwordController.text.trim().isNotEmpty) {
+                  FocusScope.of(context).unfocus();
+                  onLogin();
+                } else {
+                  FocusScope.of(context).unfocus();
+                }
+              }
+            },
+            onSubmitted: (_) {
+              if (isRegisterMode) {
+                FocusScope.of(context).nextFocus();
+              } else {
+                if (emailController.text.trim().isNotEmpty && passwordController.text.trim().isNotEmpty) {
+                  FocusScope.of(context).unfocus();
+                  onLogin();
+                }
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// Modularized register extra fields (confirm password and place dropdown)
+class _RegisterExtraFields extends StatelessWidget {
+  final TextEditingController confirmPasswordController;
+  final bool showConfirmPassword;
+  final VoidCallback onToggleConfirmPassword;
+  final Place? selectedPlace;
+  final List<Place> places;
+  final ValueChanged<Place?> onPlaceChanged;
+  final VoidCallback onClearPlace;
+
+  const _RegisterExtraFields({
+    required this.confirmPasswordController,
+    required this.showConfirmPassword,
+    required this.onToggleConfirmPassword,
+    required this.selectedPlace,
+    required this.places,
+    required this.onPlaceChanged,
+    required this.onClearPlace,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 16),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _LoginPageState._formMaxWidth),
+          child: TextField(
+            controller: confirmPasswordController,
+            decoration: InputDecoration(
+              labelText: 'Confirm Password',
+              prefixIcon: Icon(Icons.lock_reset),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              suffixIcon: FocusScope(
+                canRequestFocus: false,
+                skipTraversal: true,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.only(end: 8.0),
+                  child: IconButton(
+                    icon: Icon(showConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                    onPressed: onToggleConfirmPassword,
+                    tooltip: showConfirmPassword ? 'Hide password' : 'Show password',
+                  ),
+                ),
+              ),
+            ),
+            obscureText: !showConfirmPassword,
+            textInputAction: TextInputAction.next,
+            onSubmitted: (_) => FocusScope.of(context).nextFocus(),
+          ),
+        ),
+        const SizedBox(height: 16),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _LoginPageState._formMaxWidth),
+          child: DropdownButtonFormField<Place>(
+            value: selectedPlace,
+            isExpanded: true,
+            icon: const Icon(Icons.keyboard_arrow_down),
+            items: places.map((place) => DropdownMenuItem<Place>(
+              value: place,
+              child: Row(
+                children: [
+                  const Icon(Icons.place_outlined, size: 18),
+                  const SizedBox(width: 8),
+                  Text(place.displayName, style: const TextStyle(fontSize: 16)),
+                ],
+              ),
+            )).toList(),
+            onChanged: onPlaceChanged,
+            decoration: InputDecoration(
+              labelText: 'Select Place',
+              prefixIcon: Icon(Icons.domain_outlined),
+              suffixIcon: selectedPlace != null
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: onClearPlace,
+                      tooltip: 'Clear selection',
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            ),
+            menuMaxHeight: 300,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
