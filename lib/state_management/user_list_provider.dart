@@ -1,4 +1,3 @@
-import 'package:faunty/models/places.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_entity.dart';
@@ -20,7 +19,7 @@ final usersByCurrentPlaceProvider = StreamProvider<List<UserEntity>>((ref) {
   }
   return FirebaseFirestore.instance
       .collection('user_list')
-      .where('place', isEqualTo: user.place.name)
+      .where('placeId', isEqualTo: user.placeId)
       .snapshots()
       .map((snapshot) => snapshot.docs
           .map((doc) => UserEntity.fromMap(doc.data()))

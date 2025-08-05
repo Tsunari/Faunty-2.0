@@ -22,6 +22,11 @@ class GlobalsState {
 
 
 class GlobalsNotifier extends StateNotifier<GlobalsState> {
+
+  /// Static method to check registrationMode for a given placeId (no user required)
+  static Future<bool?> getRegistrationModeForPlace(String placeId) {
+    return GlobalsFirestoreService.getRegistrationModeForPlace(placeId);
+  }
   final GlobalsFirestoreService? _service;
   final bool _enabled;
 

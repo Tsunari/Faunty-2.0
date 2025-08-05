@@ -1,4 +1,4 @@
-import '../models/places.dart';
+// import '../models/place_model.dart';
 import '../models/user_roles.dart';
 
 class UserEntity {
@@ -7,7 +7,7 @@ class UserEntity {
   final String firstName;
   final String lastName;
   final UserRole role;
-  final Place place;
+  final String placeId;
 
   UserEntity({
     required this.uid,
@@ -15,7 +15,7 @@ class UserEntity {
     required this.firstName,
     required this.lastName,
     required this.role,
-    required this.place,
+    required this.placeId,
   });
 
   Map<String, dynamic> toMap() {
@@ -25,7 +25,7 @@ class UserEntity {
       'firstName': firstName,
       'lastName': lastName,
       'role': role.name,
-      'place': place.name,
+      'placeId': placeId,
     };
   }
 
@@ -36,7 +36,7 @@ class UserEntity {
       firstName: map['firstName'] as String? ?? '',
       lastName: map['lastName'] as String? ?? '',
       role: UserRoleExtension.fromString(map['role'] as String),
-      place: PlaceExtension.fromString(map['place'] as String),
+      placeId: map['placeId'] ?? '',
     );
   }
 }
@@ -57,5 +57,5 @@ UserEntity testUser = UserEntity(
   firstName: 'Test',
   lastName: 'User',
   role: UserRole.superuser,
-  place: Place.munihFatih,
+  placeId: 'munihFatih',
 );

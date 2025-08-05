@@ -1,25 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_entity.dart';
-import '../models/places.dart';
+// import '../models/places.dart';
 
 class ProgramFirestoreService {
   final UserEntity user;
   ProgramFirestoreService(this.user);
 
   DocumentReference get _docRef {
-    final placeName = user.place.name;
+    final placeId = user.placeId;
     return FirebaseFirestore.instance
         .collection('places')
-        .doc(placeName)
+        .doc(placeId)
         .collection('program')
         .doc('weekProgram');
   }
 
   CollectionReference get _templatesColRef {
-    final placeName = user.place.name;
+    final placeId = user.placeId;
     return FirebaseFirestore.instance
         .collection('places')
-        .doc(placeName)
+        .doc(placeId)
         .collection('program')
         .doc('templates')
         .collection('templates');

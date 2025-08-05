@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../firestore/user_firestore_service.dart';
 import '../models/user_entity.dart';
 
-import '../models/places.dart';
 import '../models/user_roles.dart';
 
 class UserNotifier extends StateNotifier<UserEntity?> {
@@ -26,7 +25,7 @@ class UserNotifier extends StateNotifier<UserEntity?> {
     required String email,
     required String firstName,
     required String lastName,
-    required Place place,
+    required String placeId,
   }) async {
     // Always create as UserRole.user for registration
     final user = UserEntity(
@@ -35,7 +34,7 @@ class UserNotifier extends StateNotifier<UserEntity?> {
       firstName: firstName,
       lastName: lastName,
       role: UserRole.user,
-      place: place,
+      placeId: placeId,
     );
     await _firestoreService.createUser(user);
     return await loadUser(uid: uid);

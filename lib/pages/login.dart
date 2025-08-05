@@ -1,5 +1,6 @@
 import 'package:faunty/helper/logging.dart';
-import 'package:faunty/models/places.dart';
+import 'package:faunty/models/place_model.dart';
+import 'package:faunty/firestore/place_firestore_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -56,8 +57,8 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
   bool _isLoading = false;
   String? _error;
   bool _isRegisterMode = false;
-  Place? _selectedPlace;
-  List<Place> _places = Place.values.toList();
+  PlaceModel? _selectedPlace;
+  List<PlaceModel> _places = [];
   late AnimationController _animController;
   late Animation<double> _registerFieldsAnim;
   bool _showPassword = false;
@@ -78,26 +79,24 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
   }
 
   Future<void> _fetchPlaces() async {
-    // Fetch places from Firestore (assuming collection 'places' with 'name' field) TODO: use firestore service
+    // Ensure at least one place exists before fetching
+    await PlaceFirestoreService.ensureAtLeastOnePlaceExists();
     try {
       final snapshot = await FirebaseFirestore.instance.collection('places').get();
       printInfo('Fetched places: ${snapshot.docs.length}');
       if (!mounted) return;
       setState(() {
-        if (snapshot.docs.isNotEmpty) {
-          _places = snapshot.docs
-              .map((doc) => PlaceExtension.fromString(doc['name'] as String))
-              .toList();
-        } else {
-          _places = Place.values.toList();
+        _places = snapshot.docs.map((doc) => PlaceModel.fromFirestore(doc)).where((p) => (p.displayName ?? '').isNotEmpty).toList();
+        // If only one place, select it by default in register mode TODO
+        if (_isRegisterMode && _places.length == 1) {
+          _selectedPlace = _places.first;
         }
       });
     } catch (e) {
-      // fallback or ignore
       if (!mounted) return;
       printError('Error fetching places: $e');
       setState(() {
-        _places = Place.values.toList();
+        _places = [];
       });
     }
   }
@@ -128,19 +127,19 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       // Always fetch user doc from Firestore after login
       final doc = await FirebaseFirestore.instance.collection('user_list').doc(user.uid).get();
       printInfo('[DEBUG] Firestore user doc: ${doc.data()}');
-      Place? place;
+      String? placeId;
       if (doc.exists && doc.data() != null) {
         final data = doc.data()!;
-        if (data['place'] != null) {
-          place = data['place'] != null ? PlaceExtension.fromString(data['place'] as String) : null;
-          printInfo('[DEBUG] Place field exists: $place');
+        if (data['placeId'] != null) {
+          placeId = data['placeId'] as String;
+          printInfo('[DEBUG] placeId field exists: $placeId');
         } else {
-          printInfo('[DEBUG] User doc exists but no place field.');
+          printInfo('[DEBUG] User doc exists but no placeId field.');
         }
       } else {
         printInfo('[DEBUG] User doc does not exist or is null.');
       }
-      if (place == null) {
+      if (placeId == null || placeId.isEmpty) {
         setState(() {
           _error = 'Could not determine your place. Please contact support.';
         });
@@ -207,20 +206,35 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       });
       return;
     }
-    if (_selectedPlace == null) {
+    if (_selectedPlace == null || _selectedPlace!.id.isEmpty) {
       setState(() {
         _isLoading = false;
         _error = 'Please select a place.';
       });
       return;
     }
+
+    // Check registrationMode for the selected place
+    final regMode = await FirebaseFirestore.instance
+        .collection('places')
+        .doc(_selectedPlace!.id)
+        .get()
+        .then((doc) => doc.data()?['registrationMode'] as bool? ?? false);
+    if (!regMode) {
+      setState(() {
+        _isLoading = false;
+        _error = 'Registration is currently disabled for this place.';
+      });
+      return;
+    }
+
     final (user, regError) = await registerWithEmail(email, password);
     if (user != null) {
-      // Save all required user fields in user_list for login and provider TODO: use firestore service
+      // Save all required user fields in user_list for login and provider
       await FirebaseFirestore.instance.collection('user_list').doc(user.uid).set({
         'uid': user.uid,
         'email': email,
-        'place': _selectedPlace!.name,
+        'placeId': _selectedPlace!.id,
         'firstName': firstName,
         'lastName': lastName,
         'role': 'User',
@@ -228,7 +242,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       final success = await ref.read(userProvider.notifier).createUser(
         uid: user.uid,
         email: email,
-        place: _selectedPlace!,
+        placeId: _selectedPlace!.id,
         firstName: firstName,
         lastName: lastName,
       );
@@ -625,9 +639,9 @@ class _RegisterExtraFields extends StatelessWidget {
   final TextEditingController confirmPasswordController;
   final bool showConfirmPassword;
   final VoidCallback onToggleConfirmPassword;
-  final Place? selectedPlace;
-  final List<Place> places;
-  final ValueChanged<Place?> onPlaceChanged;
+  final PlaceModel? selectedPlace;
+  final List<PlaceModel> places;
+  final ValueChanged<PlaceModel?> onPlaceChanged;
   final VoidCallback onClearPlace;
 
   const _RegisterExtraFields({
@@ -676,17 +690,17 @@ class _RegisterExtraFields extends StatelessWidget {
         const SizedBox(height: 16),
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: _LoginPageState._formMaxWidth),
-          child: DropdownButtonFormField<Place>(
+          child: DropdownButtonFormField<PlaceModel>(
             value: selectedPlace,
             isExpanded: true,
             icon: const Icon(Icons.keyboard_arrow_down),
-            items: places.map((place) => DropdownMenuItem<Place>(
+            items: places.map((place) => DropdownMenuItem<PlaceModel>(
               value: place,
               child: Row(
                 children: [
                   const Icon(Icons.place_outlined, size: 18),
                   const SizedBox(width: 8),
-                  Text(place.displayName, style: const TextStyle(fontSize: 16)),
+                  Text(place.displayName ?? '', style: const TextStyle(fontSize: 16)),
                 ],
               ),
             )).toList(),

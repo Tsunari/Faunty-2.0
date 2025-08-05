@@ -2,7 +2,7 @@ import 'package:faunty/helper/logging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/places.dart';
+// import '../models/places.dart';
 import '../state_management/user_provider.dart';
 import '../models/user_entity.dart';
 import '../state_management/user_list_provider.dart';
@@ -32,8 +32,8 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       if (allUsersAsync is AsyncData<List<UserEntity>>) {
         final allUsers = allUsersAsync.value;
         final userEntity = allUsers.where((u) => u.uid == user.uid).toList();
-        final placeName = userEntity.isNotEmpty ? userEntity.first.place.name : null;
-        if (placeName != null) {
+        final placeId = userEntity.isNotEmpty ? userEntity.first.placeId : null;
+        if (placeId != null && placeId.isNotEmpty) {
           final success = await ref.read(userProvider.notifier).loadUser(uid: user.uid);
           if (success) {
             _navigated = true;
