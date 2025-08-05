@@ -61,7 +61,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           'to': event['to']! ,
           'event': event['event']! ,
         });
-        if (upcoming.length >= 5) return upcoming;
+        if (upcoming.length >= 10) return upcoming;
       }
     }
     return upcoming;
@@ -111,241 +111,245 @@ class _HomePageState extends ConsumerState<HomePage> {
       appBar: CustomAppBar(
         title: 'Home'
       ),
-      body: Column(
-        children: [
-          SizedBox(
-            width: width,
-            child: Card(
-              margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Program',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 12),
-                    weekProgramAsync.when(
-                      data: (data) {
-                        final appointments = getNextAppointments(data);
-                        if (appointments.isEmpty) {
-                          return const Text('No program entries found for this week.');
-                        }
-                        return Column(
-                          children: appointments.asMap().entries.map((entry) {
-                            final a = entry.value;
-                            bool isCurrent = false;
-                            final now = DateTime.now();
-                            final todayIdx = now.weekday - 1;
-                            final nowTime = TimeOfDay(hour: now.hour, minute: now.minute);
-                            final eventDayIdx = weekDaysShort.indexOf(a['day']!);
-                            if (eventDayIdx == todayIdx) {
-                              final fromParts = a['from']!.split(':');
-                              final toParts = a['to']!.split(':');
-                              final from = TimeOfDay(hour: int.parse(fromParts[0]), minute: int.parse(fromParts[1]));
-                              final to = TimeOfDay(hour: int.parse(toParts[0]), minute: int.parse(toParts[1]));
-                              bool afterFrom = nowTime.hour > from.hour || (nowTime.hour == from.hour && nowTime.minute >= from.minute);
-                              bool beforeTo = nowTime.hour < to.hour || (nowTime.hour == to.hour && nowTime.minute <= to.minute);
-                              isCurrent = afterFrom && beforeTo;
-                            }
-                            bool isNewDay = false;
-                            if (entry.key == 0) {
-                              isNewDay = true;
-                            } else {
-                              final prev = appointments[entry.key - 1];
-                              isNewDay = a['day'] != prev['day'];
+      body: Scrollbar(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(
+                width: width,
+                child: Card(
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Program',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 12),
+                        weekProgramAsync.when(
+                          data: (data) {
+                            final appointments = getNextAppointments(data);
+                            if (appointments.isEmpty) {
+                              return const Text('No program entries found for this week.');
                             }
                             return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (isNewDay && entry.key != 0) const SizedBox(height: 10),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).brightness == Brightness.dark ? Colors.green.shade900 : Colors.green.shade100,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: isCurrent ? Colors.red : Colors.green.shade700,
-                                        width: 2,
+                              children: appointments.asMap().entries.map((entry) {
+                                final a = entry.value;
+                                bool isCurrent = false;
+                                final now = DateTime.now();
+                                final todayIdx = now.weekday - 1;
+                                final nowTime = TimeOfDay(hour: now.hour, minute: now.minute);
+                                final eventDayIdx = weekDaysShort.indexOf(a['day']!);
+                                if (eventDayIdx == todayIdx) {
+                                  final fromParts = a['from']!.split(':');
+                                  final toParts = a['to']!.split(':');
+                                  final from = TimeOfDay(hour: int.parse(fromParts[0]), minute: int.parse(fromParts[1]));
+                                  final to = TimeOfDay(hour: int.parse(toParts[0]), minute: int.parse(toParts[1]));
+                                  bool afterFrom = nowTime.hour > from.hour || (nowTime.hour == from.hour && nowTime.minute >= from.minute);
+                                  bool beforeTo = nowTime.hour < to.hour || (nowTime.hour == to.hour && nowTime.minute <= to.minute);
+                                  isCurrent = afterFrom && beforeTo;
+                                }
+                                bool isNewDay = false;
+                                if (entry.key == 0) {
+                                  isNewDay = true;
+                                } else {
+                                  final prev = appointments[entry.key - 1];
+                                  isNewDay = a['day'] != prev['day'];
+                                }
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (isNewDay && entry.key != 0) const SizedBox(height: 10),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).brightness == Brightness.dark ? Colors.green.shade900 : Colors.green.shade100,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: isCurrent ? Colors.red : Colors.green.shade700,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              '${a['day']} ',
+                                              style: const TextStyle(fontWeight: FontWeight.bold),
+                                            ),
+                                            Text('${a['from']} - ${a['to']}: '),
+                                            Expanded(child: Text(a['event']!)),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          '${a['day']} ',
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
-                                        ),
-                                        Text('${a['from']} - ${a['to']}: '),
-                                        Expanded(child: Text(a['event']!)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
+                                  ],
+                                );
+                              }).toList(),
                             );
-                          }).toList(),
-                        );
-                      },
-                      loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (e, s) => Text('Fehler beim Laden des Programms: $e'), // TODO: send to support with error
+                          },
+                          loading: () => const Center(child: CircularProgressIndicator()),
+                          error: (e, s) => Text('Fehler beim Laden des Programms: $e'), // TODO: send to support with error
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-          Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  const Icon(Icons.dining, color: Colors.green),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: cateringAsync.when(
-                      data: (data) {
-                        // data ist List<List<List<String>>> (siehe Provider)
-                        // Wir suchen den nächsten Termin für den aktuellen User
-                        final user = ref.read(userProvider);
-                        if (user == null) {
-                          return const Text('No user loaded.');
-                        }
-                        final now = DateTime.now();
-                        final todayIdx = now.weekday - 1; // Monday=0
-                        // Find the next assignment for the user from today/now
-                        // Find the next day (from today) where the user is assigned to at least one meal
-                        for (int offset = 0; offset < 7; offset++) {
-                          final dayIdx = (todayIdx + offset) % 7;
-                          final List<int> assignedMeals = [];
-                          final fullName = "${user.firstName} ${user.lastName}";
-                          for (int meal = 0; meal < data[dayIdx].length; meal++) {
-                            final names = data[dayIdx][meal];
-                            if (names.contains(fullName)) {
-                              assignedMeals.add(meal);
+              Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.dining, color: Colors.green),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: cateringAsync.when(
+                          data: (data) {
+                            // data ist List<List<List<String>>> (siehe Provider)
+                            // Wir suchen den nächsten Termin für den aktuellen User
+                            final user = ref.read(userProvider);
+                            if (user == null) {
+                              return const Text('No user loaded.');
                             }
-                          }
-                          if (assignedMeals.isNotEmpty) {
-                            final isToday = offset == 0;
-                            final weekday = isToday ? 'Today' : weekDaysFull[dayIdx];
+                            final now = DateTime.now();
+                            final todayIdx = now.weekday - 1; // Monday=0
+                            // Find the next assignment for the user from today/now
+                            // Find the next day (from today) where the user is assigned to at least one meal
+                            for (int offset = 0; offset < 7; offset++) {
+                              final dayIdx = (todayIdx + offset) % 7;
+                              final List<int> assignedMeals = [];
+                              final fullName = "${user.firstName} ${user.lastName}";
+                              for (int meal = 0; meal < data[dayIdx].length; meal++) {
+                                final names = data[dayIdx][meal];
+                                if (names.contains(fullName)) {
+                                  assignedMeals.add(meal);
+                                }
+                              }
+                              if (assignedMeals.isNotEmpty) {
+                                final isToday = offset == 0;
+                                final weekday = isToday ? 'Today' : weekDaysFull[dayIdx];
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Your next catering assignment:',
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          weekday,
+                                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+                                        ),
+                                        const Text(': '),
+                                        ...assignedMeals.asMap().entries.map((entry) => Row(
+                                          children: [
+                                            Text(
+                                              mealNames[entry.value],
+                                              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                                            ),
+                                            if (entry.key != assignedMeals.length - 1)
+                                              const Text(', '),
+                                          ],
+                                        )),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              }
+                            }
+                            return const Text('No upcoming catering assignment found.');
+                          },
+                          loading: () => const Text('Catering wird geladen...'),
+                          error: (e, s) => const Text('Fehler beim Laden des Caterings.'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Cleaning assignment widget
+              Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Icon(Icons.cleaning_services, color: Colors.green),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: cleaningAsync.when(
+                          data: (data) {
+                            final user = ref.read(userProvider);
+                            if (user == null) {
+                              return const Text('No user loaded.');
+                            }
+                            final places = data as Map<String, dynamic>? ?? {};
+                            // print('DEBUG: Firestore cleaning places: $places');
+                            // print('DEBUG: Current user.uid: ${user.uid}');
+                            if (places.isEmpty) {
+                              return const Text('No cleaning assignments found.');
+                            }
+                            // Find all place names where the user is assigned
+                            final userPlaces = <String>[];
+                            places.forEach((placeId, placeData) {
+                              // print('DEBUG: placeId=$placeId, placeData=$placeData');
+                              if (placeData is Map) {
+                                final assignees = placeData['assignees'];
+                                // print('DEBUG:   assignees=$assignees');
+                                if (assignees is List && assignees.any((a) {
+                                  if (a is String) {
+                                    final assigneeUid = a.split('_').first;
+                                    return assigneeUid == user.uid;
+                                  }
+                                  return false;
+                                })) {
+                                  // print('DEBUG:   MATCH for user.uid in $assignees');
+                                  userPlaces.add(placeData['name'] as String? ?? placeId);
+                                }
+                              }
+                            });
+                            // print('DEBUG: userPlaces=$userPlaces');
+                            if (userPlaces.isEmpty) {
+                              return const Text('You have no cleaning assignment');
+                            }
+                            // if (userPlaces.length == places.length) {
+                            //   return const Text('You are assigned to all cleaning places this week.');
+                            // }
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Your next catering assignment:',
+                                  'Your cleaning assignment:',
                                   style: const TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      weekday,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
-                                    ),
-                                    const Text(': '),
-                                    ...assignedMeals.asMap().entries.map((entry) => Row(
-                                      children: [
-                                        Text(
-                                          mealNames[entry.value],
-                                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
-                                        ),
-                                        if (entry.key != assignedMeals.length - 1)
-                                          const Text(', '),
-                                      ],
+                                ...userPlaces.map((place) => Text( 
+                                      place,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.blue,
+                                      ),
                                     )),
-                                  ],
-                                ),
                               ],
                             );
-                          }
-                        }
-                        return const Text('No upcoming catering assignment found.');
-                      },
-                      loading: () => const Text('Catering wird geladen...'),
-                      error: (e, s) => const Text('Fehler beim Laden des Caterings.'),
-                    ),
+                          },
+                          loading: () => const Text('Cleaning assignments are loading...'),
+                          error: (e, s) => const Text('Fehler beim Laden der Cleaning-Daten.'),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-          // Cleaning assignment widget
-          Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Icon(Icons.cleaning_services, color: Colors.green),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: cleaningAsync.when(
-                      data: (data) {
-                        final user = ref.read(userProvider);
-                        if (user == null) {
-                          return const Text('No user loaded.');
-                        }
-                        final places = data as Map<String, dynamic>? ?? {};
-                        // print('DEBUG: Firestore cleaning places: $places');
-                        // print('DEBUG: Current user.uid: ${user.uid}');
-                        if (places.isEmpty) {
-                          return const Text('No cleaning assignments found.');
-                        }
-                        // Find all place names where the user is assigned
-                        final userPlaces = <String>[];
-                        places.forEach((placeId, placeData) {
-                          // print('DEBUG: placeId=$placeId, placeData=$placeData');
-                          if (placeData is Map) {
-                            final assignees = placeData['assignees'];
-                            // print('DEBUG:   assignees=$assignees');
-                            if (assignees is List && assignees.any((a) {
-                              if (a is String) {
-                                final assigneeUid = a.split('_').first;
-                                return assigneeUid == user.uid;
-                              }
-                              return false;
-                            })) {
-                              // print('DEBUG:   MATCH for user.uid in $assignees');
-                              userPlaces.add(placeData['name'] as String? ?? placeId);
-                            }
-                          }
-                        });
-                        // print('DEBUG: userPlaces=$userPlaces');
-                        if (userPlaces.isEmpty) {
-                          return const Text('You have no cleaning assignment');
-                        }
-                        // if (userPlaces.length == places.length) {
-                        //   return const Text('You are assigned to all cleaning places this week.');
-                        // }
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Your cleaning assignment:',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            ...userPlaces.map((place) => Text( 
-                                  place,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue,
-                                  ),
-                                )),
-                          ],
-                        );
-                      },
-                      loading: () => const Text('Cleaning assignments are loading...'),
-                      error: (e, s) => const Text('Fehler beim Laden der Cleaning-Daten.'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   } // Ende build
