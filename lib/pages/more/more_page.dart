@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/globals_provider.dart';
+import 'users_page.dart';
 
 class MorePage extends ConsumerWidget {
   const MorePage({super.key});
@@ -74,7 +75,13 @@ class MorePage extends ConsumerWidget {
         ListTile(
           leading: Icon(Icons.group_outlined, color: primaryColor),
           title: const Text('Users'),
-          onTap: () {},
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const UsersPage(),
+              ),
+            );
+          },
         ),
         ListTile(
           leading: Icon(Icons.bar_chart_outlined, color: primaryColor),

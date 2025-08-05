@@ -1,4 +1,6 @@
+import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/firebase_options.dart';
+import 'package:faunty/models/user_roles.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,11 +86,27 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: NavBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onDestinationSelected,
+    return RoleGate(
+        minRole: UserRole.talebe,
+        fallback: Builder(
+          builder: (context) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const UserWelcomePage(),
+                  settings: const RouteSettings(name: '/user-welcome'),
+                ),
+              );
+            });
+            return const SizedBox.shrink();
+          },
+        ),
+        child: Scaffold(
+        body: _pages[_selectedIndex],
+        bottomNavigationBar: NavBar(
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: _onDestinationSelected,
+        ),
       ),
     );
   }
