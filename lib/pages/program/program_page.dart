@@ -131,10 +131,10 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(
-                                width: 56,
-                                height: 54,
+                                width: 50,
+                                height: 50,
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                                  // padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
                                   decoration: BoxDecoration(
                                     color: isToday
                                         ? Colors.blue.shade400
@@ -143,27 +143,29 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                                             : Colors.blue.shade50,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        dayShort,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                          color: isToday ? Colors.white : isDark ? Colors.white : null,
+                                  child: Center(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          dayShort,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                            color: isToday ? Colors.white : isDark ? Colors.white : null,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: isToday ? Colors.white : isDark ? Colors.white70 : Colors.black87,
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: isToday ? Colors.white : isDark ? Colors.white70 : Colors.black87,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -177,7 +179,7 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                                       final entryIdx = entryMap.key;
                                       final isCurrent = isToday && currentEventIdx == entryIdx;
                                       return Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                        padding: const EdgeInsets.only(bottom: 4.0),
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                           decoration: BoxDecoration(
