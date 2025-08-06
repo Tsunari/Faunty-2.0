@@ -1,11 +1,10 @@
-import 'package:faunty/pages/more/user_list_with_scrollbar.dart';
+import 'package:faunty/pages/more/user_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/user_list_provider.dart';
 import '../../state_management/user_provider.dart';
 import '../../models/user_entity.dart';
 import '../../models/user_roles.dart';
-import '../../components/role_gate.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UsersPage extends ConsumerWidget {

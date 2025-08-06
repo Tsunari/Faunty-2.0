@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/globals_provider.dart';
 import 'users_page.dart';
+import '../../components/custom_chip.dart';
 
 class MorePage extends ConsumerWidget {
   const MorePage({super.key});
@@ -25,7 +26,10 @@ class MorePage extends ConsumerWidget {
             child: GestureDetector(
               onTap: () async {
                 await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacementNamed(context, '/login');
+                if (context.mounted) {
+                  // Navigate to login page
+                  Navigator.of(context).pushReplacementNamed('/login');
+                }
               },
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -58,7 +62,13 @@ class MorePage extends ConsumerWidget {
           minRole: UserRole.hoca,
           child: SwitchListTile(
             secondary: Icon(Icons.app_registration_outlined, color: primaryColor),
-            title: const Text('Registration Mode'),
+            title: Row(
+              children: [
+                const Text('Registration Mode'),
+                  const SizedBox(width: 4),
+                  CustomChip(label: 'Active'),
+              ],
+            ),
             subtitle: const Text('Enable or disable registration'),
             value: globals.registrationMode,
             onChanged: (val) {
@@ -74,7 +84,15 @@ class MorePage extends ConsumerWidget {
         ),
         ListTile(
           leading: Icon(Icons.group_outlined, color: primaryColor),
-          title: const Text('Users'),
+          title: Row(
+            children: [
+              const Text('Users'),
+              const SizedBox(width: 4),
+              CustomChip(
+                label: 'Active',
+              ),
+            ],
+          ),
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
