@@ -1,3 +1,4 @@
+import 'package:faunty/components/custom_confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../components/custom_app_bar.dart';
@@ -207,7 +208,7 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
                       context: context,
                       builder: (context) => _TemplateSelectionDialog(
                         templates: templates,
-                        loadedTemplateName: loadedTemplateName,
+                        // loadedTemplateName: loadedTemplateName, // TODO: Cool? not cool?
                         onDelete: (name) async {
                           await service.deleteTemplate(name);
                           if (context.mounted) {
@@ -371,24 +372,7 @@ class _TemplateSelectionDialogState extends State<_TemplateSelectionDialog> {
                               icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
                               tooltip: 'Delete template',
                               onPressed: () async {
-                                final confirm = await showDialog<bool>(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Delete Template?'),
-                                    content: Text('Do you really want to delete the template: $name'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context, false),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () => Navigator.pop(context, true),
-                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                        child: const Text('Delete'),
-                                      ),
-                                    ],
-                                  ),
-                                );
+                                final confirm = await showDeleteDialog(context: context);
                                 if (confirm == true) {
                                   await widget.onDelete(name);
                                   setState(() {
