@@ -205,7 +205,7 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
                     var templates = await service.getTemplates();
                     if (!mounted) return;
                     final selected = await showDialog<String>(
-                      context: context,
+                      context: context, // TODO: Solution for this
                       builder: (context) => _TemplateSelectionDialog(
                         templates: templates,
                         // loadedTemplateName: loadedTemplateName, // TODO: Cool? not cool?

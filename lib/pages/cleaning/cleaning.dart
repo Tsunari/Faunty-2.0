@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'cleaning_assign.dart';
 import '../../components/custom_app_bar.dart';
 import '../../state_management/cleaning_provider.dart';
-import '../../state_management/user_list_provider.dart';
 
 class CleaningPage extends ConsumerWidget {
   const CleaningPage({super.key});
@@ -23,12 +22,14 @@ class CleaningPage extends ConsumerWidget {
       body: cleaningDataAsync.when(
         data: (data) {
           final places = data.entries.toList();
+          final placesNoUser = ref.watch(placesEmptyProvider);
+          print('Places empty: $placesNoUser');
           return Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (places.isNotEmpty)
+                if (places.isNotEmpty && !placesNoUser)
                   Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.onPrimary,
@@ -50,7 +51,7 @@ class CleaningPage extends ConsumerWidget {
                     ),
                   ),
                 Expanded(
-                  child: places.isEmpty
+                  child: (places.isEmpty || placesNoUser)
                       ? Center(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 64.0, horizontal: 24.0),
@@ -61,7 +62,7 @@ class CleaningPage extends ConsumerWidget {
                                 Icon(Icons.cleaning_services_rounded, size: 64, color: notFoundIconColor(context)),
                                 const SizedBox(height: 24),
                                 Text(
-                                  'No cleaning places yet!',
+                                  placesNoUser && places.isEmpty ? 'No cleaning places yet!' : 'No users assigned to any places.',
                                   style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
@@ -75,7 +76,9 @@ class CleaningPage extends ConsumerWidget {
                                 RoleGate(
                                   minRole: UserRole.baskan,
                                   child: Text(
-                                    'Tap below to create your first place and start assigning users.',
+                                    placesNoUser && places.isEmpty 
+                                    ? 'Tap below to create your first place and start assigning users.' 
+                                    : 'Assign users to your existing places using the action button below.',
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: Theme.of(context).brightness == Brightness.dark
@@ -86,7 +89,7 @@ class CleaningPage extends ConsumerWidget {
                                   ),
                                 ),
                                 const SizedBox(height: 28),
-                                RoleGate(
+                                placesNoUser && places.isEmpty ? RoleGate(
                                   minRole: UserRole.baskan,
                                   child: ElevatedButton.icon(
                                     icon: Icon(Icons.add_box, color: notFoundIconColor(context)),
@@ -119,7 +122,7 @@ class CleaningPage extends ConsumerWidget {
                                       }
                                     },
                                   ),
-                                ),
+                                ) : const SizedBox.shrink(),
                               ],
                             ),
                           ),

@@ -16,3 +16,18 @@ final cleaningDataProvider = StreamProvider<Map<String, dynamic>>((ref) {
   final service = ref.watch(cleaningFirestoreServiceProvider);
   return service.watchCleaning();
 });
+
+// Checks if all places are empty (no users assigned)
+final placesEmptyProvider = Provider<bool>((ref) {
+  final cleaningData = ref.watch(cleaningDataProvider).maybeWhen(
+    data: (data) => data,
+    orElse: () => {},
+  );
+  if (cleaningData.isEmpty) return true;
+  final places = cleaningData.entries.toList();
+  return places.every((e) {
+    final placeData = e.value as Map<String, dynamic>;
+    final assigned = (placeData['assignees'] as List?)?.cast<String>() ?? [];
+    return assigned.isEmpty;
+  });
+});
