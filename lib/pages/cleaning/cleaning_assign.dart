@@ -155,7 +155,7 @@ class _CleaningAssignPageState extends ConsumerState<CleaningAssignPage> {
                 final placeName = place['name'] ?? '';
                 final assignees = (place['assignees'] as List?)?.cast<String>() ?? [];
                 return Card(
-                  margin: const EdgeInsets.all(8.0),
+                  margin: const EdgeInsets.fromLTRB(24.0, 8.0, 24.0, 0),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -179,29 +179,37 @@ class _CleaningAssignPageState extends ConsumerState<CleaningAssignPage> {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8.0,
-                          children: [
-                            ...users.map((user) {
-                              final userName = user.firstName + ' ' + user.lastName;
-                              final entry = '${user.uid}_${user.firstName}_${user.lastName}';
-                              final isAssigned = assignees.contains(entry);
-                              return FilterChip(
-                                label: Text(userName),
-                                selected: isAssigned,
-                                onSelected: (_) => _toggleAssignee(placeId, user),
-                              );
-                            }),
-                            // Show assigned users as Chips (for visual feedback)
-                            ...assignees.where((entry) {
-                              final parts = entry.split('_');
-                              return parts.length >= 3 && !users.any((u) => u.uid == parts[0]);
-                            }).map((entry) {
-                              final parts = entry.split('_');
-                              final label = parts.length >= 3 ? '${parts[1]} ${parts[2]}' : entry;
-                              return Chip(label: Text(label));
-                            }),
-                          ],
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            maxHeight: 120, // Set your desired max height here
+                          ),
+                          child: SingleChildScrollView(
+                            child: Wrap(
+                              spacing: 4.0,
+                              runSpacing: 4.0,
+                              children: [
+                                ...users.map((user) {
+                                  final userName = '${user.firstName} ${user.lastName}';
+                                  final entry = '${user.uid}_${user.firstName}_${user.lastName}';
+                                  final isAssigned = assignees.contains(entry);
+                                  return FilterChip(
+                                    label: Text(userName),
+                                    selected: isAssigned,
+                                    onSelected: (_) => _toggleAssignee(placeId, user),
+                                  );
+                                }),
+                                // Show assigned users as Chips (for visual feedback)
+                                ...assignees.where((entry) {
+                                  final parts = entry.split('_');
+                                  return parts.length >= 3 && !users.any((u) => u.uid == parts[0]);
+                                }).map((entry) {
+                                  final parts = entry.split('_');
+                                  final label = parts.length >= 3 ? '${parts[1]} ${parts[2]}' : entry;
+                                  return Chip(label: Text(label));
+                                }),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
