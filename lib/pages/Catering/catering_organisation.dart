@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/catering_provider.dart';
+import '../../components/custom_confirm_dialog.dart';
 
 class CateringOrganisationPage extends ConsumerStatefulWidget {
   final List<List<List<String>>> weekPlan;
   final List<String> users;
   final List<String> meals;
 
-  const CateringOrganisationPage({Key? key, required this.weekPlan, required this.users, required this.meals}) : super(key: key);
+  const CateringOrganisationPage({super.key, required this.weekPlan, required this.users, required this.meals});
 
   @override
   ConsumerState<CateringOrganisationPage> createState() => _CateringOrganisationPageState();
@@ -53,7 +54,6 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final users = widget.users;
-    final weekPlanAsync = ref.watch(cateringWeekPlanProvider);
     if (localWeekPlan == null) {
       // Show loading until Firestore data is available
       return const Scaffold(
@@ -102,39 +102,40 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                                   ),
                                   const Spacer(),
                                   IconButton(
-                                    icon: Icon(Icons.delete_outline, 
+                                    icon: Icon(
+                                      Icons.delete_outline,
                                       color: isDark ? Colors.white : Colors.black,
                                       size: 20,
                                     ),
                                     padding: const EdgeInsets.all(0),
                                     constraints: const BoxConstraints(),
-                                    onPressed: () {
-                                      showDialog(
+                                    onPressed: () async {
+                                      final confirm = await showConfirmDialog(
                                         context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            title: const Text('Delete Day'),
-                                            content: Text('Are you sure you want to delete all entries for ${getWeekday(dayIdx)}?'),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
-                                                child: const Text('Cancel'),
+                                        title: 'Delete Day',
+                                        content: RichText(
+                                          text: TextSpan(
+                                            style: DefaultTextStyle.of(context).style,
+                                            children: [
+                                              const TextSpan(text: 'Are you sure you want to delete all entries for '),
+                                              TextSpan(
+                                                text: getWeekday(dayIdx),
+                                                style: TextStyle(
+                                                  color: Colors.redAccent,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  setState(() {
-                                                    localWeekPlan![dayIdx] = List.generate(widget.meals.length, (_) => []);
-                                                  });
-                                                  Navigator.of(context).pop();
-                                                },
-                                                child: const Text('Delete'),
-                                              ),
+                                              const TextSpan(text: '?'),
                                             ],
-                                          );
-                                        },
+                                          ),
+                                        ),
+                                        confirmText: 'Delete',
                                       );
+                                      if (confirm == true) {
+                                        setState(() {
+                                          localWeekPlan![dayIdx] = List.generate(widget.meals.length, (_) => []);
+                                        });
+                                      }
                                     },
                                   ),
                                 ],
@@ -308,10 +309,10 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                 setState(() => isSaving = false);
                 if (mounted) Navigator.pop(context, localWeekPlan);
               },
-        child: isSaving ? const CircularProgressIndicator() : const Icon(Icons.save),
         tooltip: 'Save and go back',
         backgroundColor: isDark ? Colors.teal[400] : null,
         foregroundColor: isDark ? Colors.black : null,
+        child: isSaving ? const CircularProgressIndicator() : const Icon(Icons.save),
       ),
     );
   }

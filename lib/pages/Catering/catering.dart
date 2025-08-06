@@ -33,7 +33,8 @@ class _CateringPageState extends ConsumerState<CateringPage> {
     final now = DateTime.now();
     final monday = now.subtract(Duration(days: now.weekday - 1));
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    final usersAsync = ref.watch(allUsersProvider);
+    final roles = [UserRole.baskan, UserRole.talebe].map((r) => r.name).join(','); 
+    final usersAsync = ref.watch(usersByRolesProvider(roles));
     return usersAsync.when(
       data: (userList) {
         final userNames = userList.map((u) => '${u.firstName} ${u.lastName}').toList();
@@ -193,8 +194,8 @@ class _CateringPageState extends ConsumerState<CateringPage> {
                       await service.setWeekPlan(result);
                     }
                   },
-                  child: const Icon(Icons.edit),
                   tooltip: 'Bearbeiten',
+                  child: const Icon(Icons.edit),
                 ),
               ),
             );

@@ -25,3 +25,15 @@ final usersByCurrentPlaceProvider = StreamProvider<List<UserEntity>>((ref) {
           .map((doc) => UserEntity.fromMap(doc.data()))
           .toList());
 });
+
+final usersByRolesProvider = StreamProvider.family<List<UserEntity>, String>((ref, rolesKey) {
+  // Use a stable key (basic Type like String, int) for Riverpod family to avoid rebuild issues
+  final roleNames = rolesKey.split(',');
+  return FirebaseFirestore.instance
+      .collection('user_list')
+      .where('role', whereIn: roleNames)
+      .snapshots()
+      .map((snapshot) => snapshot.docs
+          .map((doc) => UserEntity.fromMap(doc.data()))
+          .toList());
+});

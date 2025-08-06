@@ -1,4 +1,5 @@
-
+import 'package:faunty/components/custom_confirm_dialog.dart';
+import 'package:faunty/models/user_roles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/user_list_provider.dart';
@@ -72,10 +73,37 @@ class _CleaningAssignPageState extends ConsumerState<CleaningAssignPage> {
     }
   }
 
-  void _deletePlace(String placeId) {
-    setState(() {
-      places.remove(placeId);
-    });
+  Future<void> _deletePlace(String placeId, String placeName) async {
+    final confirm = await showConfirmDialog(
+      context: context,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 48),
+          const SizedBox(height: 16),
+          Text(
+        'Delete $placeName?',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+          color: Theme.of(context).colorScheme.error,
+        ),
+        textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+        'This action cannot be undone.',
+        style: TextStyle(fontSize: 15, color: Theme.of(context).colorScheme.onSurface),
+        textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      setState(() {
+        places.remove(placeId);
+      });
+    }
   }
 
   void _toggleAssignee(String placeId, dynamic user) {
@@ -103,7 +131,8 @@ class _CleaningAssignPageState extends ConsumerState<CleaningAssignPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final usersAsync = ref.watch(allUsersProvider);
+    final rolesKey = [UserRole.talebe, UserRole.baskan].map((r) => r.name).join(',');
+    final usersAsync = ref.watch(usersByRolesProvider(rolesKey));
 
     return Scaffold(
       appBar: AppBar(
@@ -174,7 +203,7 @@ class _CleaningAssignPageState extends ConsumerState<CleaningAssignPage> {
                             IconButton(
                               icon: const Icon(Icons.delete),
                               tooltip: 'Delete Place',
-                              onPressed: () => _deletePlace(placeId),
+                              onPressed: () => _deletePlace(placeId, placeName),
                             ),
                           ],
                         ),
