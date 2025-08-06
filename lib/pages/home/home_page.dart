@@ -1,7 +1,4 @@
-import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/helper/logging.dart';
-import 'package:faunty/models/user_roles.dart';
-import 'package:faunty/pages/welcome/user_welcome_page.dart';
 import 'package:flutter/material.dart';
 import '../../components/custom_app_bar.dart';
 
@@ -20,6 +17,12 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   bool _navigated = false;
+  final _scrollController = ScrollController();
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   static const List<String> weekDaysFull = [
     'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
@@ -67,8 +70,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     return upcoming;
   }
 
- 
-
   @override
   void initState() {
     super.initState();
@@ -112,7 +113,9 @@ class _HomePageState extends ConsumerState<HomePage> {
         title: 'Home'
       ),
       body: Scrollbar(
+        controller: _scrollController,
         child: SingleChildScrollView(
+          controller: _scrollController,
           child: Column(
             children: [
               SizedBox(
