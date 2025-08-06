@@ -157,7 +157,7 @@ class _CleaningAssignPageState extends ConsumerState<CleaningAssignPage> {
                 return Card(
                   margin: const EdgeInsets.fromLTRB(24.0, 8.0, 24.0, 0),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.fromLTRB(16.0, 8.0, 8.0, 16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
