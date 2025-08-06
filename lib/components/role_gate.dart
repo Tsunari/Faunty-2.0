@@ -9,12 +9,14 @@ class RoleGate extends ConsumerWidget {
   final UserRole minRole;
   final Widget child;
   final Widget? fallback;
+  final List<String>? showChildOnPages;
 
   const RoleGate({
     super.key,
     required this.minRole,
     required this.child,
     this.fallback,
+    this.showChildOnPages,
   });
 
   /// Returns the index of the role in the hierarchy (lower index = higher privilege).
@@ -36,8 +38,14 @@ class RoleGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(userProviderStream);
+    final ModalRoute<Object?>? route = ModalRoute.of(context);
+    final String? routeName = route?.settings.name;
     return userAsync.when(
       data: (user) {
+        // If showChildOnPages is set and routeName matches any, always show child
+        if (showChildOnPages != null && routeName != null && showChildOnPages!.contains(routeName)) {
+          return child;
+        }
         if (user == null) {
           // Not logged in or user not loaded
           return fallback ?? const SizedBox.shrink();
@@ -50,7 +58,20 @@ class RoleGate extends ConsumerWidget {
         }
       },
       loading: () => const SizedBox.shrink(),
-      error: (e, st) => fallback ?? const SizedBox.shrink(),
+      error: (e, st) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, color: Colors.red, size: 48),
+            const SizedBox(height: 12),
+            Text('An error occurred loading user data in RoleGate.', style: TextStyle(color: Colors.red, fontSize: 16)),
+            ...[
+            const SizedBox(height: 8),
+            Text(e.toString(), style: TextStyle(color: Colors.redAccent, fontSize: 12)),
+          ],
+          ],
+        ),
+      ),
     );
   }
 }

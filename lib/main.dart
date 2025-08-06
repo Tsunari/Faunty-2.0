@@ -88,6 +88,7 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return RoleGate(
         minRole: UserRole.talebe,
+        showChildOnPages: ['/login'],
         fallback: Builder(
           builder: (context) {
             WidgetsBinding.instance.addPostFrameCallback((_) {

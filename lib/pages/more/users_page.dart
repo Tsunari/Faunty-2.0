@@ -1,3 +1,4 @@
+import 'package:faunty/pages/more/user_list_with_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/user_list_provider.dart';
@@ -70,43 +71,10 @@ class UsersPage extends ConsumerWidget {
                       ),
                       Card(
                         color: colorScheme.surface,
-                        child: ListView.separated(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: grouped[role]!.length,
-                            separatorBuilder: (_, __) => Divider(height: 1, color: colorScheme.outline.withOpacity(0.2)),
-                            itemBuilder: (context, idx) {
-                              final u = grouped[role]![idx];
-                            return ListTile(
-                              leading: Icon(Icons.person_outline, color: colorScheme.primary),
-                              title: Text('${u.firstName} ${u.lastName}', style: TextStyle(color: colorScheme.onSurface)),
-                              subtitle: user.role == UserRole.superuser
-                                  ? Text(u.email, style: TextStyle(color: colorScheme.onSurface.withOpacity(0.7)))
-                                  : null,
-                              trailing: (u.uid == user.uid)
-                                  ? null
-                                  : SizedBox(
-                                      width: 90,
-                                      child: RoleDropdown(
-                                        user: u,
-                                        colorScheme: colorScheme,
-                                        enabled: user.role.index >= UserRole.hoca.index || user.role == UserRole.superuser,
-                                      ),
-                                    ),
-                              // onTap: (user.role.index >= UserRole.hoca.index || user.role == UserRole.superuser) && u.uid != user.uid
-                              //     ? () async {
-                              //         await showDialog(
-                              //           context: context,
-                              //           builder: (context) => _EditNameDialog(user: u, colorScheme: colorScheme),
-                              //         );
-                              //       }
-                              //     : null,
-                              splashColor: Colors.transparent,
-                              focusColor: Colors.transparent,
-                              // hoverColor: Colors.transparent,
-                              // highlightColor: Colors.transparent,
-                            );
-                          },
+                        child: UserListWithScrollbar(
+                          users: grouped[role]!,
+                          colorScheme: colorScheme,
+                          currentUser: user,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -185,9 +153,11 @@ class _RoleDropdownState extends State<RoleDropdown> {
                           .update({'role': newRole.name});
                       setState(() => _selectedRole = newRole);
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed to update role: $e')),
-                      );
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to update role: $e')),
+                          );
+                        }
                     } finally {
                       if (mounted) setState(() => _loading = false);
                     }
