@@ -1,5 +1,6 @@
 import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/models/user_roles.dart';
+import 'package:faunty/pages/more/about_page.dart';
 import 'package:faunty/pages/more/account_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -139,7 +140,13 @@ class MorePage extends ConsumerWidget {
                 CustomChip(label: 'Active'),
               ],
             ),
-          onTap: () {},
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const AboutPage(),
+              ),
+            );
+          },
         ),
         ListTile(
           leading: Icon(Icons.help_outline, color: primaryColor),
