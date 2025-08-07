@@ -124,6 +124,7 @@ class _UserWelcomePageState extends ConsumerState<UserWelcomePage> {
 
   void _logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
+    ref.invalidate(userProvider);
     if (context.mounted) {
       Navigator.of(context).pushReplacementNamed('/login');
     }

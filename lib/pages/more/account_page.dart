@@ -256,6 +256,7 @@ class AccountPage extends ConsumerWidget {
                       label: const Text('Sign Out'),
                       onPressed: () async {
                         await FirebaseAuth.instance.signOut();
+                        ref.invalidate(userProvider);
                         if (context.mounted) {
                           Navigator.of(context).pushReplacementNamed('/login');
                         }

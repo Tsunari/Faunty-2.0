@@ -2,6 +2,7 @@ import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/models/user_roles.dart';
 import 'package:faunty/pages/more/about_page.dart';
 import 'package:faunty/pages/more/account_page.dart';
+import 'package:faunty/state_management/user_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +29,7 @@ class MorePage extends ConsumerWidget {
             child: GestureDetector(
               onTap: () async {
                 await FirebaseAuth.instance.signOut();
+                ref.invalidate(userProvider);
                 if (context.mounted) {
                   // Navigate to login page
                   Navigator.of(context).pushReplacementNamed('/login');
