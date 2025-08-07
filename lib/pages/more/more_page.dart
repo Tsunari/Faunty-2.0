@@ -1,4 +1,5 @@
 import 'package:faunty/components/role_gate.dart';
+import 'package:faunty/firestore/globals_firestore_service.dart';
 import 'package:faunty/models/user_roles.dart';
 import 'package:faunty/pages/more/about_page.dart';
 import 'package:faunty/pages/more/account_page.dart';
@@ -16,8 +17,7 @@ class MorePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Color primaryColor = Theme.of(context).colorScheme.primary;
-    final globals = ref.watch(globalsProvider);
-    final globalsNotifier = ref.read(globalsProvider.notifier);
+
     return ListView(
       padding: EdgeInsets.zero,
       children: [
@@ -64,19 +64,41 @@ class MorePage extends ConsumerWidget {
         // ),
         RoleGate(
           minRole: UserRole.hoca,
-          child: SwitchListTile(
-            secondary: Icon(Icons.app_registration_outlined, color: primaryColor),
-            title: Row(
-              children: [
-                const Text('Registration Mode'),
-                const SizedBox(width: 4),
-                CustomChip(label: 'Active'),
-              ],
-            ),
-            subtitle: const Text('Enable or disable registration'),
-            value: globals.registrationMode,
-            onChanged: (val) {
-              globalsNotifier.setRegistrationMode(val);
+          child: Consumer(
+            builder: (context, ref, _) {
+              final globalsAsync = ref.watch(globalsProvider);
+              final userAsync = ref.watch(userProvider);
+              final user = userAsync.asData?.value;
+              return globalsAsync.when(
+                loading: () => const SwitchListTile(
+                  secondary: Icon(Icons.app_registration_outlined),
+                  title: Text('Registration Mode'),
+                  value: false,
+                  onChanged: null,
+                ),
+                error: (e, st) => ListTile(
+                  leading: Icon(Icons.error, color: Colors.red),
+                  title: Text('Error loading registration mode'),
+                  subtitle: Text(e.toString()),
+                ),
+                data: (globals) => SwitchListTile(
+                  secondary: Icon(Icons.app_registration_outlined, color: primaryColor),
+                  title: Row(
+                    children: [
+                      const Text('Registration Mode'),
+                      const SizedBox(width: 4),
+                      CustomChip(label: globals.registrationMode ? 'Active' : 'Inactive'),
+                    ],
+                  ),
+                  subtitle: const Text('Enable or disable registration'),
+                  value: globals.registrationMode,
+                  onChanged: (val) async {
+                    if (user == null) return;
+                    final service = GlobalsFirestoreService(user.placeId);
+                    await service.setGlobalField('registrationMode', val);
+                  },
+                ),
+              );
             },
           ),
         ),
