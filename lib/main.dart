@@ -13,6 +13,7 @@ import 'components/navigation_bar.dart';
 import 'pages/program/program_page.dart';
 import 'pages/splash_page.dart';
 import 'pages/welcome/user_welcome_page.dart';
+import 'pages/inngo/inngo_page.dart';
 
 
 void main() async {
@@ -75,6 +76,7 @@ class _MainPageState extends State<MainPage> {
     CleaningPage(),
     CateringPage(),
     ProgramPage(),
+    InngoPage(),
     MorePage(),
   ];
 

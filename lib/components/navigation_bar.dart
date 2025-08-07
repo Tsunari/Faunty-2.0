@@ -23,6 +23,10 @@ class NavBar extends StatelessWidget {
       label: 'Program',
     ),
     NavigationDestination(
+      icon: Icon(Icons.sailing),
+      label: 'Inngo',
+    ),
+    NavigationDestination(
       icon: Icon(Icons.more_horiz_outlined),
       label: 'More',
     ),
