@@ -1,4 +1,5 @@
 import 'package:faunty/helper/logging.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../components/custom_app_bar.dart';
 
@@ -18,8 +19,10 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   bool _navigated = false;
   final _scrollController = ScrollController();
+  late Timer _timer;
   @override
   void dispose() {
+    _timer.cancel();
     _scrollController.dispose();
     super.dispose();
   }
@@ -73,6 +76,16 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
+    // Sync timer to next full minute
+    final now = DateTime.now();
+    final secondsToNextMinute = 60 - now.second;
+    _timer = Timer(Duration(seconds: secondsToNextMinute), () {
+      if (mounted) setState(() {});
+      // After first tick, switch to periodic 1-minute timer
+      _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+        if (mounted) setState(() {});
+      });
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userAsync = ref.read(userProvider);
       final user = userAsync.asData?.value;
@@ -140,22 +153,30 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 if (appointments.isEmpty) {
                                   return const Text('No program entries found for this week.');
                                 }
+                                final now = DateTime.now();
+                                final todayIdx = now.weekday - 1;
+                                final nowTime = TimeOfDay(hour: now.hour, minute: now.minute);
                                 return Column(
                                   children: appointments.asMap().entries.map((entry) {
                                     final a = entry.value;
                                     bool isCurrent = false;
-                                    final now = DateTime.now();
-                                    final todayIdx = now.weekday - 1;
-                                    final nowTime = TimeOfDay(hour: now.hour, minute: now.minute);
                                     final eventDayIdx = weekDaysShort.indexOf(a['day']!);
                                     if (eventDayIdx == todayIdx) {
                                       final fromParts = a['from']!.split(':');
-                                      final toParts = a['to']!.split(':');
                                       final from = TimeOfDay(hour: int.parse(fromParts[0]), minute: int.parse(fromParts[1]));
-                                      final to = TimeOfDay(hour: int.parse(toParts[0]), minute: int.parse(toParts[1]));
+                                      // Find next event for today
+                                      TimeOfDay? nextFrom;
+                                      if (entry.key < appointments.length - 1) {
+                                        final next = appointments[entry.key + 1];
+                                        final nextDayIdx = weekDaysShort.indexOf(next['day']!);
+                                        if (nextDayIdx == todayIdx) {
+                                          final nextFromParts = next['from']!.split(':');
+                                          nextFrom = TimeOfDay(hour: int.parse(nextFromParts[0]), minute: int.parse(nextFromParts[1]));
+                                        }
+                                      }
                                       bool afterFrom = nowTime.hour > from.hour || (nowTime.hour == from.hour && nowTime.minute >= from.minute);
-                                      bool beforeTo = nowTime.hour < to.hour || (nowTime.hour == to.hour && nowTime.minute <= to.minute);
-                                      isCurrent = afterFrom && beforeTo;
+                                      bool beforeNext = nextFrom == null || (nowTime.hour < nextFrom.hour || (nowTime.hour == nextFrom.hour && nowTime.minute < nextFrom.minute));
+                                      isCurrent = afterFrom && beforeNext;
                                     }
                                     bool isNewDay = false;
                                     if (entry.key == 0) {
