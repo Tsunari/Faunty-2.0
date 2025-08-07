@@ -13,7 +13,8 @@ final allUsersProvider = StreamProvider<List<UserEntity>>((ref) {
 });
 
 final usersByCurrentPlaceProvider = StreamProvider<List<UserEntity>>((ref) {
-  final user = ref.watch(userProvider);
+  final userAsync = ref.watch(userProvider);
+  final user = userAsync.asData?.value;
   if (user == null) {
     return const Stream<List<UserEntity>>.empty();
   }

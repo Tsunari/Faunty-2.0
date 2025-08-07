@@ -14,9 +14,8 @@ class AccountPage extends ConsumerWidget {
     final primaryColor = theme.colorScheme.primary;
     final surfaceColor = theme.colorScheme.surface;
     final onSurface = theme.colorScheme.onSurface;
-    final secondary = theme.colorScheme.secondary;
 
-    final userAsync = ref.watch(userProviderStream);
+    final userAsync = ref.watch(userProvider);
 
     return Scaffold(
       appBar: AppBar(

@@ -12,7 +12,7 @@ class UsersPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userAsync = ref.watch(userProviderStream);
+    final userAsync = ref.watch(userProvider);
     final colorScheme = Theme.of(context).colorScheme;
     return userAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),

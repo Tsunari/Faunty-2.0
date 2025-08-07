@@ -3,7 +3,8 @@ import '../firestore/program_firestore_service.dart';
 import 'user_provider.dart';
 
 final programFirestoreServiceProvider = Provider<ProgramFirestoreService>((ref) {
-  final user = ref.watch(userProvider);
+  final userAsync = ref.watch(userProvider);
+  final user = userAsync.asData?.value;
   if (user == null) {
     throw Exception('User must be loaded before using ProgramFirestoreService');
   }

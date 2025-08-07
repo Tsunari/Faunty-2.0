@@ -4,7 +4,8 @@ import '../models/user_entity.dart';
 import 'user_provider.dart';
 
 final globalsProvider = StateNotifierProvider<GlobalsNotifier, GlobalsState>((ref) {
-  final user = ref.watch(userProvider);
+  final userAsync = ref.watch(userProvider);
+  final user = userAsync.asData?.value;
   if (user == null) {
     // Return a dummy notifier that does nothing if user is not loaded yet
     return GlobalsNotifier.nullUser();

@@ -37,7 +37,7 @@ class RoleGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userAsync = ref.watch(userProviderStream);
+    final userAsync = ref.watch(userProvider);
     final ModalRoute<Object?>? route = ModalRoute.of(context);
     final String? routeName = route?.settings.name;
     return userAsync.when(

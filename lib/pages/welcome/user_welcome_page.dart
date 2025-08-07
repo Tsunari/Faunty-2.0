@@ -18,7 +18,7 @@ class _UserWelcomePageState extends ConsumerState<UserWelcomePage> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final userAsync = ref.watch(userProviderStream);
+    final userAsync = ref.watch(userProvider);
 
     userAsync.when(
       data: (user) {
