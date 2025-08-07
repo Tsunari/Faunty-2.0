@@ -126,45 +126,21 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       _isLoading = false;
     });
     if (user != null) {
-      // Always fetch user doc from Firestore after login
+      // Fetch user document to determine role
       final doc = await FirebaseFirestore.instance.collection('user_list').doc(user.uid).get();
-      printInfo('[DEBUG] Firestore user doc: ${doc.data()}');
-      String? placeId;
+      String? role;
       if (doc.exists && doc.data() != null) {
         final data = doc.data()!;
-        if (data['placeId'] != null) {
-          placeId = data['placeId'] as String;
-          printInfo('[DEBUG] placeId field exists: $placeId');
-        } else {
-          printInfo('[DEBUG] User doc exists but no placeId field.');
-        }
-      } else {
-        printInfo('[DEBUG] User doc does not exist or is null.');
+        role = data['role'] as String?;
       }
-      if (placeId == null || placeId.isEmpty) {
-        if (!mounted) return;
-        setState(() {
-          _error = 'Could not determine your place. Please contact support.';
-        });
-        return;
-      }
-      final success = await ref.read(userProvider.notifier).loadUser(uid: user.uid);
-      if (success) {
-        final userEntity = ref.read(userProvider);
-        if (userEntity != null && userEntity.role == UserRole.user) {
-          if (context.mounted) {
-            Navigator.of(context).pushReplacementNamed('/user-welcome');
-          }
+      // Invalidate userProvider to ensure fresh user state from StreamProvider
+      ref.invalidate(userProvider);
+      if (context.mounted) {
+        if (role == 'User') {
+          Navigator.of(context).pushReplacementNamed('/user-welcome');
         } else {
-          if (context.mounted) {
-            Navigator.of(context).pushReplacementNamed('/home');
-          }
+          Navigator.of(context).pushReplacementNamed('/home');
         }
-      } else {
-        if (!mounted) return;
-        setState(() {
-          _error = 'User data not found or incomplete. Please contact support.';
-        });
       }
     } else {
       if (!mounted) return;
@@ -250,29 +226,10 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
         'lastName': lastName,
         'role': 'User',
       });
-      final success = await ref.read(userProvider.notifier).createUser(
-        uid: user.uid,
-        email: email,
-        placeId: _selectedPlace!.id,
-        firstName: firstName,
-        lastName: lastName,
-      );
-      if (success) {
-        final userEntity = ref.read(userProvider);
-        if (userEntity != null && userEntity.role == UserRole.user) {
-          if (context.mounted) {
-            Navigator.of(context).pushReplacementNamed('/user-welcome');
-          }
-        } else {
-          if (context.mounted) {
-            Navigator.of(context).pushReplacementNamed('/home');
-          }
-        }
-      } else {
-        if (!mounted) return;
-        setState(() {
-          _error = 'Failed to create user. Please try again.';
-        });
+      // Invalidate userProvider to ensure fresh user state from StreamProvider
+      ref.invalidate(userProvider);
+      if (context.mounted) {
+        Navigator.of(context).pushReplacementNamed('/user-welcome');
       }
     } else {
       if (!mounted) return;
@@ -385,6 +342,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                           ),
                           const SizedBox(height: 24),
                           if (_error != null) ...[
+                            // Error message container
                             Container(
                               margin: const EdgeInsets.only(bottom: 12),
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
