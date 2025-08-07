@@ -47,12 +47,6 @@ class RoleGate extends ConsumerWidget {
           return child;
         }
         if (user == null) {
-          // Not logged in or user not loaded
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (ModalRoute.of(context)?.settings.name != '/login') {
-              Navigator.of(context).pushReplacementNamed('/login');
-            }
-          });
           return fallback ?? const SizedBox.shrink();
         }
         final userRole = user.role;

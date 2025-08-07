@@ -23,7 +23,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
           if (_navigated) return;
           if (user == null) {
             _navigated = true;
-            Navigator.of(context).pushReplacementNamed('/login');
+            Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
             return;
           }
           if (user.placeId.isNotEmpty) {
@@ -36,7 +36,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
           } else {
             _navigated = true;
             if (context.mounted) {
-              Navigator.of(context).pushReplacementNamed('/login');
+              Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
             }
           }
         });

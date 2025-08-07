@@ -135,12 +135,13 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       }
       // Invalidate userProvider to ensure fresh user state from StreamProvider
       ref.invalidate(userProvider);
-      if (context.mounted) {
-        if (role == 'User') {
-          Navigator.of(context).pushReplacementNamed('/user-welcome');
-        } else {
-          Navigator.of(context).pushReplacementNamed('/home');
-        }
+
+      if (role == 'User') {
+        if (!mounted) return;
+        Navigator.of(context).pushReplacementNamed('/user-welcome');
+      } else {
+        if (!mounted) return;
+        Navigator.of(context).pushReplacementNamed('/home');
       }
     } else {
       if (!mounted) return;
