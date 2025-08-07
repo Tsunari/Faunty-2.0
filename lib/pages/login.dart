@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../state_management/user_provider.dart';
-import '../models/user_roles.dart';
 
 Future<(User?, String?)> registerWithEmail(String email, String password) async {
   try {
@@ -15,16 +14,25 @@ Future<(User?, String?)> registerWithEmail(String email, String password) async 
     return (credential.user, null);
   } on FirebaseAuthException catch (e) {
     printError('Registration error: $e');
-    if (e.code == 'email-already-in-use') {
-      return (null, 'This email is already registered.');
-    } else if (e.code == 'weak-password') {
-      return (null, 'Password is too weak. Please use at least 6 characters.');
-    } else {
-      return (null, 'Registration failed. ${e.message ?? ''}');
+    switch (e.code) {
+      case 'email-already-in-use':
+        return (null, 'This email is already registered.');
+      case 'weak-password':
+        return (null, 'Password is too weak. Please use at least 6 characters.');
+      case 'invalid-email':
+        return (null, 'Please enter a valid email address.');
+      case 'operation-not-allowed':
+        return (null, 'Registration is currently disabled.');
+      case 'network-request-failed':
+        return (null, 'No internet connection. Please check your network and try again.');
+      default:
+        return (null, 'Registration failed. ${e.message ?? ''}');
     }
-
   } catch (e) {
     printError('Registration error: $e');
+    if (e.toString().contains('SocketException')) {
+      return (null, 'No internet connection. Please check your network and try again.');
+    }
     return (null, 'Registration failed. Please try again.');
   }
 }
@@ -34,9 +42,28 @@ Future<User?> loginWithEmail(String email, String password) async {
     final credential = await FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password);
     return credential.user;
+  } on FirebaseAuthException catch (e) {
+    printError('Login error: $e');
+    switch (e.code) {
+      case 'user-not-found':
+        throw 'No account found for this email.';
+      case 'invalid-credential':
+        throw 'Incorrect email or password. Please try again.';
+      case 'invalid-email':
+        throw 'Please enter a valid email address.';
+      case 'user-disabled':
+        throw 'This account has been disabled.';
+      case 'network-request-failed':
+        throw 'No internet connection. Please check your network and try again.';
+      default:
+        throw 'Login failed. ${e.message ?? ''}';
+    }
   } catch (e) {
     printError('Login error: $e');
-    return null;
+    if (e.toString().contains('SocketException')) {
+      throw 'No internet connection. Please check your network and try again.';
+    }
+    throw 'Login failed. Please try again.';
   }
 }
 
@@ -120,39 +147,36 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
     });
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
-    final user = await loginWithEmail(email, password);
-    if (!mounted) return;
-    setState(() {
-      _isLoading = false;
-    });
-    if (user != null) {
-      // Fetch user document to determine role
-      final doc = await FirebaseFirestore.instance.collection('user_list').doc(user.uid).get();
-      String? role;
-      if (doc.exists && doc.data() != null) {
-        final data = doc.data()!;
-        role = data['role'] as String?;
-      }
-      // Invalidate userProvider to ensure fresh user state from StreamProvider
-      ref.invalidate(userProvider);
-
-      if (role == 'User') {
-        if (!mounted) return;
-        Navigator.of(context).pushReplacementNamed('/user-welcome');
-      } else {
-        if (!mounted) return;
-        Navigator.of(context).pushReplacementNamed('/home');
-      }
-    } else {
+    try {
+      final user = await loginWithEmail(email, password);
       if (!mounted) return;
       setState(() {
-        if (email.isEmpty || password.isEmpty) {
-          _error = 'Please enter both your email and password.';
-        } else if (!email.contains('@')) {
-          _error = 'Please enter a valid email address.';
-        } else {
-          _error = 'Incorrect email or password. Please try again.';
+        _isLoading = false;
+      });
+      if (user != null) {
+        // Fetch user document to determine role
+        final doc = await FirebaseFirestore.instance.collection('user_list').doc(user.uid).get();
+        String? role;
+        if (doc.exists && doc.data() != null) {
+          final data = doc.data()!;
+          role = data['role'] as String?;
         }
+        // Invalidate userProvider to ensure fresh user state from StreamProvider
+        ref.invalidate(userProvider);
+
+        if (role == 'User') {
+          if (!mounted) return;
+          Navigator.of(context).pushReplacementNamed('/user-welcome');
+        } else {
+          if (!mounted) return;
+          Navigator.of(context).pushReplacementNamed('/home');
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _error = e.toString();
       });
     }
   }
