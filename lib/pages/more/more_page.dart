@@ -1,5 +1,6 @@
 import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/models/user_roles.dart';
+import 'package:faunty/pages/more/account_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,7 +23,7 @@ class MorePage extends ConsumerWidget {
         // Hero image at the top
         Center(
           child: Hero(
-            tag: 'mosque',
+            tag: 'logo',
             child: GestureDetector(
               onTap: () async {
                 await FirebaseAuth.instance.signOut();
@@ -65,8 +66,8 @@ class MorePage extends ConsumerWidget {
             title: Row(
               children: [
                 const Text('Registration Mode'),
-                  const SizedBox(width: 4),
-                  CustomChip(label: 'Active'),
+                const SizedBox(width: 4),
+                CustomChip(label: 'Active'),
               ],
             ),
             subtitle: const Text('Enable or disable registration'),
@@ -79,8 +80,20 @@ class MorePage extends ConsumerWidget {
         RoleGate(minRole: UserRole.hoca, child: const Divider()),
         ListTile(
           leading: Icon(Icons.account_circle_outlined, color: primaryColor),
-          title: const Text('Account'),
-          onTap: () {},
+          title: Row(
+              children: [
+                const Text('Account'),
+                const SizedBox(width: 4),
+                CustomChip(label: 'Active'),
+              ],
+            ),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const AccountPage(),
+              ),
+            );
+          },
         ),
         ListTile(
           leading: Icon(Icons.group_outlined, color: primaryColor),
@@ -119,7 +132,13 @@ class MorePage extends ConsumerWidget {
         ),
         ListTile(
           leading: Icon(Icons.info_outline, color: primaryColor),
-          title: const Text('About'),
+          title: Row(
+              children: [
+                const Text('About'),
+                const SizedBox(width: 4),
+                CustomChip(label: 'Active'),
+              ],
+            ),
           onTap: () {},
         ),
         ListTile(
