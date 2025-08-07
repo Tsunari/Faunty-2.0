@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Faunty App - Inngo Integration Demo</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .phone-mockup { max-width: 400px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); overflow: hidden; }
+        .app-bar { background: #2e7d32; color: white; padding: 15px; text-align: center; font-weight: bold; }
+        .content { padding: 20px; min-height: 400px; }
+        .nav-bar { display: flex; background: #f0f0f0; border-top: 1px solid #ddd; }
+        .nav-item { flex: 1; text-align: center; padding: 10px 5px; cursor: pointer; font-size: 12px; }
+        .nav-item.active { background: #e8f5e9; color: #2e7d32; }
+        .nav-item:hover { background: #e0e0e0; }
+        .icon { font-size: 20px; margin-bottom: 5px; }
+        .card { background: white; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { font-size: 24px; font-weight: bold; margin-bottom: 16px; }
+        .feature-icon { color: #1976d2; margin-right: 8px; }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Faunty App - Inngo Integration</h1>
+    
+    <div class="phone-mockup">
+        <div class="app-bar">Inngo</div>
+        
+        <div class="content">
+            <div class="header">Welcome to Inngo</div>
+            <p>Inngo is now part of the application. This page provides access to inngo functionality.</p>
+            
+            <div class="card">
+                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                    <span class="feature-icon">⛵</span>
+                    <span style="font-size: 18px; font-weight: bold;">Inngo Features</span>
+                </div>
+                <p>This is where inngo functionality will be implemented. The feature is now integrated into the main navigation flow.</p>
+            </div>
+        </div>
+        
+        <div class="nav-bar">
+            <div class="nav-item">
+                <div class="icon">🏠</div>
+                <div>Home</div>
+            </div>
+            <div class="nav-item">
+                <div class="icon">🧹</div>
+                <div>Cleaning</div>
+            </div>
+            <div class="nav-item">
+                <div class="icon">🍽️</div>
+                <div>Catering</div>
+            </div>
+            <div class="nav-item">
+                <div class="icon">📅</div>
+                <div>Program</div>
+            </div>
+            <div class="nav-item active">
+                <div class="icon">⛵</div>
+                <div>Inngo</div>
+            </div>
+            <div class="nav-item">
+                <div class="icon">⋯</div>
+                <div>More</div>
+            </div>
+        </div>
+    </div>
+    
+    <div style="max-width: 400px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px;">
+        <h3>Implementation Summary</h3>
+        <ul>
+            <li>✅ Created new InngoPage following existing patterns</li>
+            <li>✅ Added Inngo to navigation bar with sailing icon (⛵)</li>
+            <li>✅ Integrated into main navigation flow</li>
+            <li>✅ Updated tests to verify integration</li>
+            <li>✅ Positioned between Program and More tabs</li>
+        </ul>
+        <p><strong>Result:</strong> "Inngo" is now part of the application and accessible through the main navigation, fulfilling the requirement to "Make inngo part of it" and integrate it into the boot/navigation process.</p>
+    </div>
+</body>
+</html>
