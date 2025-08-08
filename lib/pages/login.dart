@@ -201,7 +201,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
     }
 
     // Check registrationMode for the selected place
-    final regMode = await FirebaseFirestore.instance
+    final regMode = await FirebaseFirestore.instance 
         .collection('places')
         .doc(_selectedPlace!.id)
         .get()
@@ -210,7 +210,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _error = 'Registration is currently disabled for this place.';
+        _error = 'Registration is currently disabled for this place. Please ask the Hooca of this place to enable registration.';
       });
       return;
     }
