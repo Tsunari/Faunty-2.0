@@ -176,8 +176,7 @@ class AccountPage extends ConsumerWidget {
                                                                           actions: [
                                                                             TextButton(
                                                                               onPressed: () {
-                                                                                Navigator.of(context).pop();
-                                                                                Navigator.of(context).pushReplacementNamed('/login');
+                                                                                Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
                                                                               },
                                                                               child: const Text('Log In'),
                                                                             ),
@@ -257,7 +256,7 @@ class AccountPage extends ConsumerWidget {
                         await FirebaseAuth.instance.signOut();
                         ref.invalidate(userProvider);
                         if (context.mounted) {
-                          Navigator.of(context).pushReplacementNamed('/login');
+                          Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
                         }
                       },
                     ),

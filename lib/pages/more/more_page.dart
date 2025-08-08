@@ -32,7 +32,7 @@ class MorePage extends ConsumerWidget {
                 ref.invalidate(userProvider);
                 if (context.mounted) {
                   // Navigate to login page
-                  Navigator.of(context).pushReplacementNamed('/login');
+                  Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
                 }
               },
               child: Column(

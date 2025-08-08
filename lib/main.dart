@@ -13,6 +13,7 @@ import 'components/navigation_bar.dart';
 import 'pages/program/program_page.dart';
 import 'pages/splash_page.dart';
 import 'pages/welcome/user_welcome_page.dart';
+import 'state_management/user_provider.dart';
 
 
 void main() async {
@@ -87,22 +88,27 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return RoleGate(
-        minRole: UserRole.talebe,
-        showChildOnPages: ['/login'],
-        fallback: Builder(
-          builder: (context) {
+      minRole: UserRole.talebe,
+      showChildOnPages: ['/login'],
+      fallback: Consumer(
+        builder: (context, ref, _) {
+          final userAsync = ref.watch(userProvider);
+          if (userAsync is AsyncData && userAsync.value != null && userAsync.value!.role == UserRole.user) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => const UserWelcomePage(),
-                  settings: const RouteSettings(name: '/user-welcome'),
-                ),
-              );
+              if (ModalRoute.of(context)?.settings.name != '/user-welcome') {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => const UserWelcomePage(),
+                    settings: const RouteSettings(name: '/user-welcome'),
+                  ),
+                );
+              }
             });
-            return const SizedBox.shrink();
-          },
-        ),
-        child: Scaffold(
+          }
+          return const SizedBox.shrink();
+        },
+      ),
+      child: Scaffold(
         body: _pages[_selectedIndex],
         bottomNavigationBar: NavBar(
           selectedIndex: _selectedIndex,

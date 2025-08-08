@@ -126,7 +126,7 @@ class _UserWelcomePageState extends ConsumerState<UserWelcomePage> {
     await FirebaseAuth.instance.signOut();
     ref.invalidate(userProvider);
     if (context.mounted) {
-      Navigator.of(context).pushReplacementNamed('/login');
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
     }
   }
 }
