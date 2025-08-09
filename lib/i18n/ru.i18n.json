@@ -137,5 +137,13 @@
   "enter_amount": "Введите сумму",
   "other_users": "Другие пользователи",
   "no_other_users_found": "Другие пользователи не найдены",
-  "debt": "Долг"
+  "debt": "Долг",
+    "paypal": "PayPal",
+  "did_you_pay": "Вы заплатили",
+  "via_paypal": " € через PayPal?",
+  "yes": "Да",
+  "reset_debt": "Сбросить долг",
+  "are_you_sure_you_want_to_reset_your_debt_to_0": "Вы уверены, что хотите сбросить свой долг до 0?",
+  "confirm": "Подтвердить",
+  "debt_reset": "Долг сброшен!"
 }

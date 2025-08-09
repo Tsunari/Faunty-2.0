@@ -137,5 +137,13 @@
   "a_positive_value_means_you_owe_money_a_negative_value_means_you_have_credit": "A positive value means you owe money. A negative value means you have credit.",
   "enter_amount": "Enter amount",
   "other_users": "Other users",
-  "no_other_users_found": "No other users found"
+  "no_other_users_found": "No other users found",
+  "paypal": "PayPal",
+  "did_you_pay": "Did you pay ",
+  "via_paypal": " € via PayPal?",
+  "yes": "Yes",
+  "reset_debt": "Reset debt",
+  "are_you_sure_you_want_to_reset_your_debt_to_0": "Are you sure you want to reset your debt to 0?",
+  "confirm": "Confirm",
+  "debt_reset": "Debt reset!"
 }

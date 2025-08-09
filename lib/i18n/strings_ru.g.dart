@@ -175,6 +175,14 @@ class TranslationsRu implements Translations {
 	@override String get other_users => 'Другие пользователи';
 	@override String get no_other_users_found => 'Другие пользователи не найдены';
 	@override String get debt => 'Долг';
+	@override String get paypal => 'PayPal';
+	@override String get did_you_pay => 'Вы заплатили';
+	@override String get via_paypal => ' € через PayPal?';
+	@override String get yes => 'Да';
+	@override String get reset_debt => 'Сбросить долг';
+	@override String get are_you_sure_you_want_to_reset_your_debt_to_0 => 'Вы уверены, что хотите сбросить свой долг до 0?';
+	@override String get confirm => 'Подтвердить';
+	@override String get debt_reset => 'Долг сброшен!';
 }
 
 /// Flat map(s) containing all translations.
@@ -321,6 +329,14 @@ extension on TranslationsRu {
 			case 'other_users': return 'Другие пользователи';
 			case 'no_other_users_found': return 'Другие пользователи не найдены';
 			case 'debt': return 'Долг';
+			case 'paypal': return 'PayPal';
+			case 'did_you_pay': return 'Вы заплатили';
+			case 'via_paypal': return ' € через PayPal?';
+			case 'yes': return 'Да';
+			case 'reset_debt': return 'Сбросить долг';
+			case 'are_you_sure_you_want_to_reset_your_debt_to_0': return 'Вы уверены, что хотите сбросить свой долг до 0?';
+			case 'confirm': return 'Подтвердить';
+			case 'debt_reset': return 'Долг сброшен!';
 			default: return null;
 		}
 	}

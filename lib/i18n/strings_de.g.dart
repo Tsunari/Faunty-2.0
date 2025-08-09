@@ -175,6 +175,14 @@ class TranslationsDe implements Translations {
 	@override String get other_users => 'Andere Nutzer';
 	@override String get no_other_users_found => 'Keine anderen Nutzer gefunden';
 	@override String get debt => 'Schulden';
+	@override String get paypal => 'PayPal';
+	@override String get did_you_pay => 'Haben Sie bezahlt';
+	@override String get via_paypal => ' € via PayPal?';
+	@override String get yes => 'Ja';
+	@override String get reset_debt => 'Schulden zurücksetzen';
+	@override String get are_you_sure_you_want_to_reset_your_debt_to_0 => 'Sind Sie sicher, dass Sie Ihre Schulden auf 0 zurücksetzen möchten?';
+	@override String get confirm => 'Bestätigen';
+	@override String get debt_reset => 'Schulden zurückgesetzt!';
 }
 
 /// Flat map(s) containing all translations.
@@ -321,6 +329,14 @@ extension on TranslationsDe {
 			case 'other_users': return 'Andere Nutzer';
 			case 'no_other_users_found': return 'Keine anderen Nutzer gefunden';
 			case 'debt': return 'Schulden';
+			case 'paypal': return 'PayPal';
+			case 'did_you_pay': return 'Haben Sie bezahlt';
+			case 'via_paypal': return ' € via PayPal?';
+			case 'yes': return 'Ja';
+			case 'reset_debt': return 'Schulden zurücksetzen';
+			case 'are_you_sure_you_want_to_reset_your_debt_to_0': return 'Sind Sie sicher, dass Sie Ihre Schulden auf 0 zurücksetzen möchten?';
+			case 'confirm': return 'Bestätigen';
+			case 'debt_reset': return 'Schulden zurückgesetzt!';
 			default: return null;
 		}
 	}

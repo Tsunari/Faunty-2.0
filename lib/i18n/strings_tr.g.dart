@@ -175,6 +175,14 @@ class TranslationsTr implements Translations {
 	@override String get other_users => 'Diğer kullanıcılar';
 	@override String get no_other_users_found => 'Başka kullanıcı bulunamadı';
 	@override String get debt => 'Borç';
+	@override String get paypal => 'PayPal';
+	@override String get did_you_pay => 'Ödedin mi';
+	@override String get via_paypal => ' € PayPal ile?';
+	@override String get yes => 'Evet';
+	@override String get reset_debt => 'Borcu sıfırla';
+	@override String get are_you_sure_you_want_to_reset_your_debt_to_0 => 'Borcu sıfırlamak istediğine emin misin?';
+	@override String get confirm => 'Onayla';
+	@override String get debt_reset => 'Borç sıfırlandı!';
 }
 
 /// Flat map(s) containing all translations.
@@ -321,6 +329,14 @@ extension on TranslationsTr {
 			case 'other_users': return 'Diğer kullanıcılar';
 			case 'no_other_users_found': return 'Başka kullanıcı bulunamadı';
 			case 'debt': return 'Borç';
+			case 'paypal': return 'PayPal';
+			case 'did_you_pay': return 'Ödedin mi';
+			case 'via_paypal': return ' € PayPal ile?';
+			case 'yes': return 'Evet';
+			case 'reset_debt': return 'Borcu sıfırla';
+			case 'are_you_sure_you_want_to_reset_your_debt_to_0': return 'Borcu sıfırlamak istediğine emin misin?';
+			case 'confirm': return 'Onayla';
+			case 'debt_reset': return 'Borç sıfırlandı!';
 			default: return null;
 		}
 	}

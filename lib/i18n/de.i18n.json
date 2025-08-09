@@ -137,5 +137,13 @@
 	"enter_amount": "Betrag eingeben",
 	"other_users": "Andere Nutzer",
 	"no_other_users_found": "Keine anderen Nutzer gefunden",
-  	"debt": "Schulden"
+  	"debt": "Schulden",
+	"paypal": "PayPal",
+	"did_you_pay": "Haben Sie bezahlt",
+	"via_paypal": " € via PayPal?",
+	"yes": "Ja",
+	"reset_debt": "Schulden zurücksetzen",
+	"are_you_sure_you_want_to_reset_your_debt_to_0": "Sind Sie sicher, dass Sie Ihre Schulden auf 0 zurücksetzen möchten?",
+	"confirm": "Bestätigen",
+	"debt_reset": "Schulden zurückgesetzt!"
 }

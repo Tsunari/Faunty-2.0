@@ -456,6 +456,30 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'No other users found'
 	String get no_other_users_found => 'No other users found';
+
+	/// en: 'PayPal'
+	String get paypal => 'PayPal';
+
+	/// en: 'Did you pay '
+	String get did_you_pay => 'Did you pay ';
+
+	/// en: ' € via PayPal?'
+	String get via_paypal => ' € via PayPal?';
+
+	/// en: 'Yes'
+	String get yes => 'Yes';
+
+	/// en: 'Reset debt'
+	String get reset_debt => 'Reset debt';
+
+	/// en: 'Are you sure you want to reset your debt to 0?'
+	String get are_you_sure_you_want_to_reset_your_debt_to_0 => 'Are you sure you want to reset your debt to 0?';
+
+	/// en: 'Confirm'
+	String get confirm => 'Confirm';
+
+	/// en: 'Debt reset!'
+	String get debt_reset => 'Debt reset!';
 }
 
 /// Flat map(s) containing all translations.
@@ -602,6 +626,14 @@ extension on Translations {
 			case 'enter_amount': return 'Enter amount';
 			case 'other_users': return 'Other users';
 			case 'no_other_users_found': return 'No other users found';
+			case 'paypal': return 'PayPal';
+			case 'did_you_pay': return 'Did you pay ';
+			case 'via_paypal': return ' € via PayPal?';
+			case 'yes': return 'Yes';
+			case 'reset_debt': return 'Reset debt';
+			case 'are_you_sure_you_want_to_reset_your_debt_to_0': return 'Are you sure you want to reset your debt to 0?';
+			case 'confirm': return 'Confirm';
+			case 'debt_reset': return 'Debt reset!';
 			default: return null;
 		}
 	}
