@@ -44,34 +44,34 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 	String get more => 'More';
 
 	/// en: 'Mo'
-	String get Mo => 'Mo';
+	String get mo => 'Mo';
 
 	/// en: 'Tue'
-	String get Tue => 'Tue';
+	String get tue => 'Tue';
 
 	/// en: 'Wed'
-	String get Wed => 'Wed';
+	String get wed => 'Wed';
 
 	/// en: 'Thu'
-	String get Thu => 'Thu';
+	String get thu => 'Thu';
 
 	/// en: 'Fr'
-	String get Fr => 'Fr';
+	String get fr => 'Fr';
 
 	/// en: 'Sat'
-	String get Sat => 'Sat';
+	String get sat => 'Sat';
 
 	/// en: 'Sun'
-	String get Sun => 'Sun';
+	String get sun => 'Sun';
 
 	/// en: 'Faunty'
-	String get Faunty => 'Faunty';
+	String get faunty => 'Faunty';
 
 	/// en: 'Register'
-	String get Register => 'Register';
+	String get register => 'Register';
 
 	/// en: 'Login'
-	String get Login => 'Login';
+	String get login => 'Login';
 
 	/// en: 'Monday'
 	String get monday => 'Monday';
@@ -440,16 +440,16 @@ extension on Translations {
 	dynamic _flatMapFunction(String path) {
 		switch (path) {
 			case 'more': return 'More';
-			case 'Mo': return 'Mo';
-			case 'Tue': return 'Tue';
-			case 'Wed': return 'Wed';
-			case 'Thu': return 'Thu';
-			case 'Fr': return 'Fr';
-			case 'Sat': return 'Sat';
-			case 'Sun': return 'Sun';
-			case 'Faunty': return 'Faunty';
-			case 'Register': return 'Register';
-			case 'Login': return 'Login';
+			case 'mo': return 'Mo';
+			case 'tue': return 'Tue';
+			case 'wed': return 'Wed';
+			case 'thu': return 'Thu';
+			case 'fr': return 'Fr';
+			case 'sat': return 'Sat';
+			case 'sun': return 'Sun';
+			case 'faunty': return 'Faunty';
+			case 'register': return 'Register';
+			case 'login': return 'Login';
 			case 'monday': return 'Monday';
 			case 'tuesday': return 'Tuesday';
 			case 'wednesday': return 'Wednesday';

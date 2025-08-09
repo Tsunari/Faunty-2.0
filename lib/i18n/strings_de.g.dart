@@ -37,21 +37,21 @@ class TranslationsDe implements Translations {
 
 	// Translations
 	@override String get more => 'Mehr';
-	@override String get Mo => 'Mo';
-	@override String get Tue => 'Di';
-	@override String get Wed => 'Mi';
-	@override String get Thu => 'Do';
-	@override String get Fr => 'Fr';
-	@override String get Sat => 'Sa';
-	@override String get Sun => 'So';
+	@override String get mo => 'Mo';
+	@override String get tue => 'Di';
+	@override String get wed => 'Mi';
+	@override String get thu => 'Do';
+	@override String get fr => 'Fr';
+	@override String get sat => 'Sa';
+	@override String get sun => 'So';
 	@override String get registration_mode => 'Registrierungsmodus';
 	@override String get inactive => 'Inaktiv';
 	@override String get enable_or_disable_registration => 'Registrierung aktivieren oder deaktivieren';
 	@override String get language => 'Sprache';
 	@override String get help => 'Hilfe';
-	@override String get Faunty => 'Faunty';
-	@override String get Register => 'Registrieren';
-	@override String get Login => 'Anmelden';
+	@override String get faunty => 'Faunty';
+	@override String get register => 'Registrieren';
+	@override String get login => 'Anmelden';
 	@override String get monday => 'Montag';
 	@override String get tuesday => 'Dienstag';
 	@override String get wednesday => 'Mittwoch';
@@ -175,21 +175,21 @@ extension on TranslationsDe {
 	dynamic _flatMapFunction(String path) {
 		switch (path) {
 			case 'more': return 'Mehr';
-			case 'Mo': return 'Mo';
-			case 'Tue': return 'Di';
-			case 'Wed': return 'Mi';
-			case 'Thu': return 'Do';
-			case 'Fr': return 'Fr';
-			case 'Sat': return 'Sa';
-			case 'Sun': return 'So';
+			case 'mo': return 'Mo';
+			case 'tue': return 'Di';
+			case 'wed': return 'Mi';
+			case 'thu': return 'Do';
+			case 'fr': return 'Fr';
+			case 'sat': return 'Sa';
+			case 'sun': return 'So';
 			case 'registration_mode': return 'Registrierungsmodus';
 			case 'inactive': return 'Inaktiv';
 			case 'enable_or_disable_registration': return 'Registrierung aktivieren oder deaktivieren';
 			case 'language': return 'Sprache';
 			case 'help': return 'Hilfe';
-			case 'Faunty': return 'Faunty';
-			case 'Register': return 'Registrieren';
-			case 'Login': return 'Anmelden';
+			case 'faunty': return 'Faunty';
+			case 'register': return 'Registrieren';
+			case 'login': return 'Anmelden';
 			case 'monday': return 'Montag';
 			case 'tuesday': return 'Dienstag';
 			case 'wednesday': return 'Mittwoch';

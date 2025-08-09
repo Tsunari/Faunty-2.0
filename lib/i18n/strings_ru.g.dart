@@ -37,21 +37,21 @@ class TranslationsRu implements Translations {
 
 	// Translations
 	@override String get more => 'Ещё';
-	@override String get Mo => 'Пн';
-	@override String get Tue => 'Вт';
-	@override String get Wed => 'Ср';
-	@override String get Thu => 'Чт';
-	@override String get Fr => 'Пт';
-	@override String get Sat => 'Сб';
-	@override String get Sun => 'Вс';
+	@override String get mo => 'Пн';
+	@override String get tue => 'Вт';
+	@override String get wed => 'Ср';
+	@override String get thu => 'Чт';
+	@override String get fr => 'Пт';
+	@override String get sat => 'Сб';
+	@override String get sun => 'Вс';
 	@override String get registration_mode => 'Режим регистрации';
 	@override String get inactive => 'Неактивно';
 	@override String get enable_or_disable_registration => 'Включить или отключить регистрацию';
 	@override String get language => 'Язык';
 	@override String get help => 'Помощь';
-	@override String get Faunty => 'Faunty';
-	@override String get Register => 'Регистрация';
-	@override String get Login => 'Войти';
+	@override String get faunty => 'Faunty';
+	@override String get register => 'Регистрация';
+	@override String get login => 'Войти';
 	@override String get monday => 'Понедельник';
 	@override String get tuesday => 'Вторник';
 	@override String get wednesday => 'Среда';
@@ -175,21 +175,21 @@ extension on TranslationsRu {
 	dynamic _flatMapFunction(String path) {
 		switch (path) {
 			case 'more': return 'Ещё';
-			case 'Mo': return 'Пн';
-			case 'Tue': return 'Вт';
-			case 'Wed': return 'Ср';
-			case 'Thu': return 'Чт';
-			case 'Fr': return 'Пт';
-			case 'Sat': return 'Сб';
-			case 'Sun': return 'Вс';
+			case 'mo': return 'Пн';
+			case 'tue': return 'Вт';
+			case 'wed': return 'Ср';
+			case 'thu': return 'Чт';
+			case 'fr': return 'Пт';
+			case 'sat': return 'Сб';
+			case 'sun': return 'Вс';
 			case 'registration_mode': return 'Режим регистрации';
 			case 'inactive': return 'Неактивно';
 			case 'enable_or_disable_registration': return 'Включить или отключить регистрацию';
 			case 'language': return 'Язык';
 			case 'help': return 'Помощь';
-			case 'Faunty': return 'Faunty';
-			case 'Register': return 'Регистрация';
-			case 'Login': return 'Войти';
+			case 'faunty': return 'Faunty';
+			case 'register': return 'Регистрация';
+			case 'login': return 'Войти';
 			case 'monday': return 'Понедельник';
 			case 'tuesday': return 'Вторник';
 			case 'wednesday': return 'Среда';

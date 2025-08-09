@@ -447,17 +447,18 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                                     ),
                                   ],
                                 ),
-                                // Language selector at the bottom
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 24.0),
-                                  child: Center(
-                                    child: LanguageDropdown(
-                                      borderColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
-                                      borderRadius: 20,
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                // Language selector at the bottom (only in login mode)
+                                if (!_isRegisterMode)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 24.0),
+                                    child: Center(
+                                      child: LanguageDropdown(
+                                        borderColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                                        borderRadius: 20,
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      ),
                                     ),
                                   ),
-                                ),
                         ],
                       ),
                     ),

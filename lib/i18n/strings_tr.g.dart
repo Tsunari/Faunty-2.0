@@ -37,21 +37,21 @@ class TranslationsTr implements Translations {
 
 	// Translations
 	@override String get more => 'Daha';
-	@override String get Mo => 'Pzt';
-	@override String get Tue => 'Sal';
-	@override String get Wed => 'Çar';
-	@override String get Thu => 'Per';
-	@override String get Fr => 'Cum';
-	@override String get Sat => 'Cmt';
-	@override String get Sun => 'Paz';
+	@override String get mo => 'Pzt';
+	@override String get tue => 'Sal';
+	@override String get wed => 'Çar';
+	@override String get thu => 'Per';
+	@override String get fr => 'Cum';
+	@override String get sat => 'Cmt';
+	@override String get sun => 'Paz';
 	@override String get registration_mode => 'Kayıt Modu';
 	@override String get inactive => 'Aktif Değil';
 	@override String get enable_or_disable_registration => 'Kaydı etkinleştir veya devre dışı bırak';
 	@override String get language => 'Dil';
 	@override String get help => 'Yardım';
-	@override String get Faunty => 'Faunty';
-	@override String get Register => 'Kayıt Ol';
-	@override String get Login => 'Giriş Yap';
+	@override String get faunty => 'Faunty';
+	@override String get register => 'Kayıt Ol';
+	@override String get login => 'Giriş Yap';
 	@override String get monday => 'Pazartesi';
 	@override String get tuesday => 'Salı';
 	@override String get wednesday => 'Çarşamba';
@@ -175,21 +175,21 @@ extension on TranslationsTr {
 	dynamic _flatMapFunction(String path) {
 		switch (path) {
 			case 'more': return 'Daha';
-			case 'Mo': return 'Pzt';
-			case 'Tue': return 'Sal';
-			case 'Wed': return 'Çar';
-			case 'Thu': return 'Per';
-			case 'Fr': return 'Cum';
-			case 'Sat': return 'Cmt';
-			case 'Sun': return 'Paz';
+			case 'mo': return 'Pzt';
+			case 'tue': return 'Sal';
+			case 'wed': return 'Çar';
+			case 'thu': return 'Per';
+			case 'fr': return 'Cum';
+			case 'sat': return 'Cmt';
+			case 'sun': return 'Paz';
 			case 'registration_mode': return 'Kayıt Modu';
 			case 'inactive': return 'Aktif Değil';
 			case 'enable_or_disable_registration': return 'Kaydı etkinleştir veya devre dışı bırak';
 			case 'language': return 'Dil';
 			case 'help': return 'Yardım';
-			case 'Faunty': return 'Faunty';
-			case 'Register': return 'Kayıt Ol';
-			case 'Login': return 'Giriş Yap';
+			case 'faunty': return 'Faunty';
+			case 'register': return 'Kayıt Ol';
+			case 'login': return 'Giriş Yap';
 			case 'monday': return 'Pazartesi';
 			case 'tuesday': return 'Salı';
 			case 'wednesday': return 'Çarşamba';
