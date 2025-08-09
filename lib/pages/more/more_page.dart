@@ -3,6 +3,7 @@ import 'package:faunty/firestore/globals_firestore_service.dart';
 import 'package:faunty/models/user_roles.dart';
 import 'package:faunty/pages/more/about_page.dart';
 import 'package:faunty/pages/more/account_page.dart';
+import 'package:faunty/pages/more/kantin_page.dart';
 import 'package:faunty/state_management/user_provider.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -152,6 +153,17 @@ class MorePage extends ConsumerWidget {
           leading: Icon(Icons.bar_chart_outlined, color: primaryColor),
           title: Text(translation(context: context, 'Statistics')),
           onTap: () {},
+        ),
+        ListTile(
+          leading: Icon(Icons.local_cafe_outlined, color: primaryColor),
+          title: Text(translation(context: context, 'Kantin')),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const KantinPage(),
+              ),
+            );
+          },
         ),
         const Divider(),
         ListTile(

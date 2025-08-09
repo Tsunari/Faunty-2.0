@@ -129,5 +129,6 @@
   "save_and_go_back": "Kaydet ve geri dön",
   "no_program_entries_for_this_week": "Bu hafta için program girişi yok!",
   "tap_the_edit_button_below_to_add_a_program_for_the_week": "Hafta için program eklemek için aşağıdaki düzenle düğmesine dokunun.",
-  "edit_program": "Programı düzenle"
+  "edit_program": "Programı düzenle",
+  "debt": "Borç"
 }

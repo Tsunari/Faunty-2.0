@@ -129,5 +129,6 @@
   "save_and_go_back": "Сохранить и вернуться",
   "no_program_entries_for_this_week": "Нет записей программы на эту неделю!",
   "tap_the_edit_button_below_to_add_a_program_for_the_week": "Нажмите кнопку редактирования ниже, чтобы добавить программу на неделю.",
-  "edit_program": "Редактировать программу"
+  "edit_program": "Редактировать программу",
+  "debt": "Долг"
 }

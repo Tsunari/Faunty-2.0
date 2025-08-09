@@ -167,6 +167,8 @@ class TranslationsDe implements Translations {
 	@override String get no_program_entries_for_this_week => 'Keine Programmeinträge für diese Woche!';
 	@override String get tap_the_edit_button_below_to_add_a_program_for_the_week => 'Tippen Sie unten auf die Bearbeiten-Schaltfläche, um ein Programm für die Woche hinzuzufügen.';
 	@override String get edit_program => 'Programm bearbeiten';
+	@override String get debt => 'Schulden';
+	
 }
 
 /// Flat map(s) containing all translations.
@@ -305,7 +307,7 @@ extension on TranslationsDe {
 			case 'no_program_entries_for_this_week': return 'Keine Programmeinträge für diese Woche!';
 			case 'tap_the_edit_button_below_to_add_a_program_for_the_week': return 'Tippen Sie unten auf die Bearbeiten-Schaltfläche, um ein Programm für die Woche hinzuzufügen.';
 			case 'edit_program': return 'Programm bearbeiten';
-			default: return null;
+						default: return null;
 		}
 	}
 }
