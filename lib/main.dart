@@ -14,16 +14,23 @@ import 'pages/program/program_page.dart';
 import 'pages/splash_page.dart';
 import 'pages/welcome/user_welcome_page.dart';
 import 'state_management/user_provider.dart';
+import 'package:faunty/i18n/strings.g.dart';
+import 'package:faunty/tools/translation_helper.dart';
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  LocaleSettings.useDeviceLocale(); // Localization setup
+  // String storedLocale = loadFromStorage(); // with shared preferences or any other method
+  // LocaleSettings.setLocaleRaw(storedLocale);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(
-    ProviderScope(
-      child: Faunty(),
+    TranslationProvider(
+      child: ProviderScope(
+        child: Faunty(),
+      ),
     ),
   );
 }
@@ -33,9 +40,9 @@ class Faunty extends StatelessWidget {
 
   // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { 
     return MaterialApp(
-      title: 'Faunty',
+      title: translation(context, 'Faunty'),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),

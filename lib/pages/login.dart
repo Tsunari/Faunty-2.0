@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:faunty/tools/translation_helper.dart';
 import '../state_management/user_provider.dart';
 
 Future<(User?, String?)> registerWithEmail(String email, String password) async {
@@ -329,7 +330,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
-                            _isRegisterMode ? 'Register' : 'Login',
+                            _isRegisterMode ? translation(context, 'Register') : translation(context, 'Login'),
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
