@@ -15,8 +15,6 @@ class CateringFirestoreService {
         .doc('weekPlan');
   }
 
-  /// Watches the catering week plan: List<List<List<String>>> (7 days, 3 meals, users)
-  /// Stored in Firestore as Map<String, List<String>> where key is 'day_meal'
   Stream<List<List<List<String>>>> watchWeekPlan() {
     return _docRef.snapshots().map((snapshot) {
       final data = snapshot.data() as Map<String, dynamic>?;

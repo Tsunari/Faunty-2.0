@@ -1,4 +1,5 @@
 import 'package:faunty/helper/logging.dart';
+import 'package:faunty/pages/more/kantin_page.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -351,6 +352,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                     ),
                   ),
+                  Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    child: CantineWidget(placeId: user.placeId, userUid: user.uid, userRole: user.role))
                 ],
               ),
             ),

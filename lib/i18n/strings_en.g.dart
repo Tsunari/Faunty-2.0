@@ -432,6 +432,54 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Help'
 	String get help => 'Help';
+
+	/// en: 'Debt'
+	String get debt => 'Debt';
+
+	/// en: 'I sincerely apologize but you can not have more debt'
+	String get i_sincerely_apologize_but_you_can_not_have_more_debt => 'I sincerely apologize but you can not have more debt';
+
+	/// en: 'Bro pay your debt first'
+	String get bro_pay_your_debt_first => 'Bro pay your debt first';
+
+	/// en: 'Kantin'
+	String get kantin => 'Kantin';
+
+	/// en: 'A positive value means you owe money. A negative value means you have credit.'
+	String get a_positive_value_means_you_owe_money_a_negative_value_means_you_have_credit => 'A positive value means you owe money. A negative value means you have credit.';
+
+	/// en: 'Enter amount'
+	String get enter_amount => 'Enter amount';
+
+	/// en: 'Other users'
+	String get other_users => 'Other users';
+
+	/// en: 'No other users found'
+	String get no_other_users_found => 'No other users found';
+
+	/// en: 'PayPal'
+	String get paypal => 'PayPal';
+
+	/// en: 'Did you pay '
+	String get did_you_pay => 'Did you pay ';
+
+	/// en: ' € via PayPal?'
+	String get via_paypal => ' € via PayPal?';
+
+	/// en: 'Yes'
+	String get yes => 'Yes';
+
+	/// en: 'Reset debt'
+	String get reset_debt => 'Reset debt';
+
+	/// en: 'Are you sure you want to reset your debt to 0?'
+	String get are_you_sure_you_want_to_reset_your_debt_to_0 => 'Are you sure you want to reset your debt to 0?';
+
+	/// en: 'Confirm'
+	String get confirm => 'Confirm';
+
+	/// en: 'Debt reset!'
+	String get debt_reset => 'Debt reset!';
 }
 
 /// Flat map(s) containing all translations.
@@ -570,6 +618,22 @@ extension on Translations {
 			case 'enable_or_disable_registration': return 'Enable or disable registration';
 			case 'language': return 'Language';
 			case 'help': return 'Help';
+			case 'debt': return 'Debt';
+			case 'i_sincerely_apologize_but_you_can_not_have_more_debt': return 'I sincerely apologize but you can not have more debt';
+			case 'bro_pay_your_debt_first': return 'Bro pay your debt first';
+			case 'kantin': return 'Kantin';
+			case 'a_positive_value_means_you_owe_money_a_negative_value_means_you_have_credit': return 'A positive value means you owe money. A negative value means you have credit.';
+			case 'enter_amount': return 'Enter amount';
+			case 'other_users': return 'Other users';
+			case 'no_other_users_found': return 'No other users found';
+			case 'paypal': return 'PayPal';
+			case 'did_you_pay': return 'Did you pay ';
+			case 'via_paypal': return ' € via PayPal?';
+			case 'yes': return 'Yes';
+			case 'reset_debt': return 'Reset debt';
+			case 'are_you_sure_you_want_to_reset_your_debt_to_0': return 'Are you sure you want to reset your debt to 0?';
+			case 'confirm': return 'Confirm';
+			case 'debt_reset': return 'Debt reset!';
 			default: return null;
 		}
 	}

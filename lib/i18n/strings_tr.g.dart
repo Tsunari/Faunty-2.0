@@ -59,9 +59,9 @@ class TranslationsTr implements Translations {
 	@override String get friday => 'Cuma';
 	@override String get saturday => 'Cumartesi';
 	@override String get sunday => 'Pazar';
-	@override String get catering => 'Yemek';
-	@override String get no_catering_assignments_yet => 'Henüz yemek görevlendirmesi yok!';
-	@override String get tap_the_edit_button_below_to_assign_users_to_meals_for_the_week => 'Hafta için kullanıcılara yemek görevi atamak için aşağıdaki düzenle düğmesine dokunun.';
+	@override String get catering => 'Yemekcilik';
+	@override String get no_catering_assignments_yet => 'Henüz yemekcilik görevlendirmesi yok!';
+	@override String get tap_the_edit_button_below_to_assign_users_to_meals_for_the_week => 'Hafta için kullanıcılara yemekcilik görevi atamak için aşağıdaki düzenle düğmesine dokunun.';
 	@override String get edit => 'Düzenle';
 	@override String get cleaning => 'Temizlik';
 	@override String get place => 'Yer';
@@ -88,10 +88,10 @@ class TranslationsTr implements Translations {
 	@override String get no_program_entries_found_for_this_week => 'Bu hafta için program girişi bulunamadı.';
 	@override String get error_loading_program_placeholder => 'Program yüklenirken hata: {placeholder}';
 	@override String get today => 'Bugün';
-	@override String get your_next_catering_assignment => 'Bir sonraki yemek göreviniz:';
-	@override String get no_upcoming_catering_assignment_found => 'Yaklaşan yemek görevi bulunamadı.';
-	@override String get catering_wird_geladen => 'Yemek yükleniyor...';
-	@override String get error_loading_catering => 'Yemek yüklenirken hata.';
+	@override String get your_next_catering_assignment => 'Bir sonraki yemekcilik göreviniz:';
+	@override String get no_upcoming_catering_assignment_found => 'Yaklaşan yemekcilik görevi bulunamadı.';
+	@override String get catering_wird_geladen => 'Yemekcilik yükleniyor...';
+	@override String get error_loading_catering => 'Yemekcilik yüklenirken hata.';
 	@override String get no_cleaning_assignments_found => 'Temizlik görevi bulunamadı.';
 	@override String get you_have_no_cleaning_assignment => 'Temizlik göreviniz yok';
 	@override String get your_cleaning_assignment => 'Temizlik göreviniz:';
@@ -122,7 +122,7 @@ class TranslationsTr implements Translations {
 	@override String get features => 'Özellikler';
 	@override String get team_community_management => 'Takım & Topluluk Yönetimi';
 	@override String get weekly_program_assignments => 'Haftalık Program & Görevler';
-	@override String get catering_cleaning_schedules => 'Yemek & Temizlik Takvimleri';
+	@override String get catering_cleaning_schedules => 'Yemekcilik & Temizlik Takvimleri';
 	@override String get secure_authentication => 'Güvenli Kimlik Doğrulama';
 	@override String get custom_notifications => 'Özel Bildirimler';
 	@override String get responsive_mobile_friendly => 'Duyarlı & Mobil Uyumlu';
@@ -167,6 +167,22 @@ class TranslationsTr implements Translations {
 	@override String get no_program_entries_for_this_week => 'Bu hafta için program girişi yok!';
 	@override String get tap_the_edit_button_below_to_add_a_program_for_the_week => 'Hafta için program eklemek için aşağıdaki düzenle düğmesine dokunun.';
 	@override String get edit_program => 'Programı düzenle';
+	@override String get i_sincerely_apologize_but_you_can_not_have_more_debt => 'Gerçekten özür dilerim ama daha fazla borcun olamaz.';
+	@override String get bro_pay_your_debt_first => 'Kanka önce borcunu öde.';
+	@override String get kantin => 'Kantin';
+	@override String get a_positive_value_means_you_owe_money_a_negative_value_means_you_have_credit => 'Pozitif değer borcun olduğunu, negatif değer alacağın olduğunu gösterir.';
+	@override String get enter_amount => 'Tutar gir';
+	@override String get other_users => 'Diğer kullanıcılar';
+	@override String get no_other_users_found => 'Başka kullanıcı bulunamadı';
+	@override String get debt => 'Borç';
+	@override String get paypal => 'PayPal';
+	@override String get did_you_pay => 'Ödedin mi ';
+	@override String get via_paypal => ' € PayPal ile?';
+	@override String get yes => 'Evet';
+	@override String get reset_debt => 'Borcu sıfırla';
+	@override String get are_you_sure_you_want_to_reset_your_debt_to_0 => 'Borcu sıfırlamak istediğine emin misin?';
+	@override String get confirm => 'Onayla';
+	@override String get debt_reset => 'Borç sıfırlandı!';
 }
 
 /// Flat map(s) containing all translations.
@@ -197,9 +213,9 @@ extension on TranslationsTr {
 			case 'friday': return 'Cuma';
 			case 'saturday': return 'Cumartesi';
 			case 'sunday': return 'Pazar';
-			case 'catering': return 'Yemek';
-			case 'no_catering_assignments_yet': return 'Henüz yemek görevlendirmesi yok!';
-			case 'tap_the_edit_button_below_to_assign_users_to_meals_for_the_week': return 'Hafta için kullanıcılara yemek görevi atamak için aşağıdaki düzenle düğmesine dokunun.';
+			case 'catering': return 'Yemekcilik';
+			case 'no_catering_assignments_yet': return 'Henüz yemekcilik görevlendirmesi yok!';
+			case 'tap_the_edit_button_below_to_assign_users_to_meals_for_the_week': return 'Hafta için kullanıcılara yemekcilik görevi atamak için aşağıdaki düzenle düğmesine dokunun.';
 			case 'edit': return 'Düzenle';
 			case 'cleaning': return 'Temizlik';
 			case 'place': return 'Yer';
@@ -226,10 +242,10 @@ extension on TranslationsTr {
 			case 'no_program_entries_found_for_this_week': return 'Bu hafta için program girişi bulunamadı.';
 			case 'error_loading_program_placeholder': return 'Program yüklenirken hata: {placeholder}';
 			case 'today': return 'Bugün';
-			case 'your_next_catering_assignment': return 'Bir sonraki yemek göreviniz:';
-			case 'no_upcoming_catering_assignment_found': return 'Yaklaşan yemek görevi bulunamadı.';
-			case 'catering_wird_geladen': return 'Yemek yükleniyor...';
-			case 'error_loading_catering': return 'Yemek yüklenirken hata.';
+			case 'your_next_catering_assignment': return 'Bir sonraki yemekcilik göreviniz:';
+			case 'no_upcoming_catering_assignment_found': return 'Yaklaşan yemekcilik görevi bulunamadı.';
+			case 'catering_wird_geladen': return 'Yemekcilik yükleniyor...';
+			case 'error_loading_catering': return 'Yemekcilik yüklenirken hata.';
 			case 'no_cleaning_assignments_found': return 'Temizlik görevi bulunamadı.';
 			case 'you_have_no_cleaning_assignment': return 'Temizlik göreviniz yok';
 			case 'your_cleaning_assignment': return 'Temizlik göreviniz:';
@@ -260,7 +276,7 @@ extension on TranslationsTr {
 			case 'features': return 'Özellikler';
 			case 'team_community_management': return 'Takım & Topluluk Yönetimi';
 			case 'weekly_program_assignments': return 'Haftalık Program & Görevler';
-			case 'catering_cleaning_schedules': return 'Yemek & Temizlik Takvimleri';
+			case 'catering_cleaning_schedules': return 'Yemekcilik & Temizlik Takvimleri';
 			case 'secure_authentication': return 'Güvenli Kimlik Doğrulama';
 			case 'custom_notifications': return 'Özel Bildirimler';
 			case 'responsive_mobile_friendly': return 'Duyarlı & Mobil Uyumlu';
@@ -305,6 +321,22 @@ extension on TranslationsTr {
 			case 'no_program_entries_for_this_week': return 'Bu hafta için program girişi yok!';
 			case 'tap_the_edit_button_below_to_add_a_program_for_the_week': return 'Hafta için program eklemek için aşağıdaki düzenle düğmesine dokunun.';
 			case 'edit_program': return 'Programı düzenle';
+			case 'i_sincerely_apologize_but_you_can_not_have_more_debt': return 'Gerçekten özür dilerim ama daha fazla borcun olamaz.';
+			case 'bro_pay_your_debt_first': return 'Kanka önce borcunu öde.';
+			case 'kantin': return 'Kantin';
+			case 'a_positive_value_means_you_owe_money_a_negative_value_means_you_have_credit': return 'Pozitif değer borcun olduğunu, negatif değer alacağın olduğunu gösterir.';
+			case 'enter_amount': return 'Tutar gir';
+			case 'other_users': return 'Diğer kullanıcılar';
+			case 'no_other_users_found': return 'Başka kullanıcı bulunamadı';
+			case 'debt': return 'Borç';
+			case 'paypal': return 'PayPal';
+			case 'did_you_pay': return 'Ödedin mi ';
+			case 'via_paypal': return ' € PayPal ile?';
+			case 'yes': return 'Evet';
+			case 'reset_debt': return 'Borcu sıfırla';
+			case 'are_you_sure_you_want_to_reset_your_debt_to_0': return 'Borcu sıfırlamak istediğine emin misin?';
+			case 'confirm': return 'Onayla';
+			case 'debt_reset': return 'Borç sıfırlandı!';
 			default: return null;
 		}
 	}

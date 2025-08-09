@@ -7,11 +7,11 @@ class LanguageDropdown extends ConsumerWidget {
   final double borderRadius;
   final EdgeInsetsGeometry padding;
   const LanguageDropdown({
-    Key? key,
+    super.key,
     this.borderColor,
     this.borderRadius = 16,
     this.padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
