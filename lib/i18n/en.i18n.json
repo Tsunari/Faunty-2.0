@@ -130,5 +130,12 @@
   "enable_or_disable_registration": "Enable or disable registration",
   "language": "Language",
   "help": "Help",
-  "debt": "Debt"
+  "debt": "Debt",
+  "i_sincerely_apologize_but_you_can_not_have_more_debt": "I sincerely apologize but you can not have more debt",
+  "bro_pay_your_debt_first": "Bro pay your debt first",
+  "kantin": "Kantin",
+  "a_positive_value_means_you_owe_money_a_negative_value_means_you_have_credit": "A positive value means you owe money. A negative value means you have credit.",
+  "enter_amount": "Enter amount",
+  "other_users": "Other users",
+  "no_other_users_found": "No other users found"
 }

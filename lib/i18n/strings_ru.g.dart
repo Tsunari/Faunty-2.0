@@ -167,6 +167,14 @@ class TranslationsRu implements Translations {
 	@override String get no_program_entries_for_this_week => 'Нет записей программы на эту неделю!';
 	@override String get tap_the_edit_button_below_to_add_a_program_for_the_week => 'Нажмите кнопку редактирования ниже, чтобы добавить программу на неделю.';
 	@override String get edit_program => 'Редактировать программу';
+	@override String get i_sincerely_apologize_but_you_can_not_have_more_debt => 'Я искренне извиняюсь, но у вас не может быть больше долга.';
+	@override String get bro_pay_your_debt_first => 'Бро, сначала погаси свой долг.';
+	@override String get kantin => 'Кантин';
+	@override String get a_positive_value_means_you_owe_money_a_negative_value_means_you_have_credit => 'Положительное значение означает, что вы должны деньги. Отрицательное значение — у вас есть кредит.';
+	@override String get enter_amount => 'Введите сумму';
+	@override String get other_users => 'Другие пользователи';
+	@override String get no_other_users_found => 'Другие пользователи не найдены';
+	@override String get debt => 'Долг';
 }
 
 /// Flat map(s) containing all translations.
@@ -305,6 +313,14 @@ extension on TranslationsRu {
 			case 'no_program_entries_for_this_week': return 'Нет записей программы на эту неделю!';
 			case 'tap_the_edit_button_below_to_add_a_program_for_the_week': return 'Нажмите кнопку редактирования ниже, чтобы добавить программу на неделю.';
 			case 'edit_program': return 'Редактировать программу';
+			case 'i_sincerely_apologize_but_you_can_not_have_more_debt': return 'Я искренне извиняюсь, но у вас не может быть больше долга.';
+			case 'bro_pay_your_debt_first': return 'Бро, сначала погаси свой долг.';
+			case 'kantin': return 'Кантин';
+			case 'a_positive_value_means_you_owe_money_a_negative_value_means_you_have_credit': return 'Положительное значение означает, что вы должны деньги. Отрицательное значение — у вас есть кредит.';
+			case 'enter_amount': return 'Введите сумму';
+			case 'other_users': return 'Другие пользователи';
+			case 'no_other_users_found': return 'Другие пользователи не найдены';
+			case 'debt': return 'Долг';
 			default: return null;
 		}
 	}

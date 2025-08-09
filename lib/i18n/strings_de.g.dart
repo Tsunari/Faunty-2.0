@@ -59,8 +59,8 @@ class TranslationsDe implements Translations {
 	@override String get friday => 'Freitag';
 	@override String get saturday => 'Samstag';
 	@override String get sunday => 'Sonntag';
-	@override String get catering => 'Verpflegung';
-	@override String get no_catering_assignments_yet => 'Noch keine Verpflegungsaufgaben!';
+	@override String get catering => 'Küchendienst';
+	@override String get no_catering_assignments_yet => 'Noch keine Küchendienstaufgaben!';
 	@override String get tap_the_edit_button_below_to_assign_users_to_meals_for_the_week => 'Tippen Sie unten auf die Bearbeiten-Schaltfläche, um Benutzer den Mahlzeiten der Woche zuzuweisen.';
 	@override String get edit => 'Bearbeiten';
 	@override String get cleaning => 'Reinigung';
@@ -88,10 +88,10 @@ class TranslationsDe implements Translations {
 	@override String get no_program_entries_found_for_this_week => 'Keine Programmeinträge für diese Woche gefunden.';
 	@override String get error_loading_program_placeholder => 'Fehler beim Laden des Programms: {placeholder}';
 	@override String get today => 'Heute';
-	@override String get your_next_catering_assignment => 'Ihre nächste Verpflegungsaufgabe:';
-	@override String get no_upcoming_catering_assignment_found => 'Keine bevorstehende Verpflegungsaufgabe gefunden.';
-	@override String get catering_wird_geladen => 'Verpflegung wird geladen...';
-	@override String get error_loading_catering => 'Fehler beim Laden der Verpflegung.';
+	@override String get your_next_catering_assignment => 'Ihre nächste Küchendienstaufgabe:';
+	@override String get no_upcoming_catering_assignment_found => 'Keine bevorstehende Küchendienstaufgabe gefunden.';
+	@override String get catering_wird_geladen => 'Küchendienst wird geladen...';
+	@override String get error_loading_catering => 'Fehler beim Laden des Küchendienstes.';
 	@override String get no_cleaning_assignments_found => 'Keine Reinigungsaufgaben gefunden.';
 	@override String get you_have_no_cleaning_assignment => 'Sie haben keine Reinigungsaufgabe';
 	@override String get your_cleaning_assignment => 'Ihre Reinigungsaufgabe:';
@@ -122,7 +122,7 @@ class TranslationsDe implements Translations {
 	@override String get features => 'Funktionen';
 	@override String get team_community_management => 'Team- & Gemeinschaftsverwaltung';
 	@override String get weekly_program_assignments => 'Wöchentliche Programme & Aufgaben';
-	@override String get catering_cleaning_schedules => 'Verpflegungs- & Reinigungspläne';
+	@override String get catering_cleaning_schedules => 'Küchendienst- & Reinigungspläne';
 	@override String get secure_authentication => 'Sichere Authentifizierung';
 	@override String get custom_notifications => 'Benutzerdefinierte Benachrichtigungen';
 	@override String get responsive_mobile_friendly => 'Responsiv & Mobilfreundlich';
@@ -167,8 +167,14 @@ class TranslationsDe implements Translations {
 	@override String get no_program_entries_for_this_week => 'Keine Programmeinträge für diese Woche!';
 	@override String get tap_the_edit_button_below_to_add_a_program_for_the_week => 'Tippen Sie unten auf die Bearbeiten-Schaltfläche, um ein Programm für die Woche hinzuzufügen.';
 	@override String get edit_program => 'Programm bearbeiten';
+	@override String get i_sincerely_apologize_but_you_can_not_have_more_debt => 'Ich entschuldige mich aufrichtig, aber Sie können nicht mehr Schulden haben.';
+	@override String get bro_pay_your_debt_first => 'Bro, zahl erst deine Schulden.';
+	@override String get kantin => 'Kantin';
+	@override String get a_positive_value_means_you_owe_money_a_negative_value_means_you_have_credit => 'Ein positiver Wert bedeutet, dass Sie Geld schulden. Ein negativer Wert bedeutet, Sie haben Guthaben.';
+	@override String get enter_amount => 'Betrag eingeben';
+	@override String get other_users => 'Andere Nutzer';
+	@override String get no_other_users_found => 'Keine anderen Nutzer gefunden';
 	@override String get debt => 'Schulden';
-	
 }
 
 /// Flat map(s) containing all translations.
@@ -199,8 +205,8 @@ extension on TranslationsDe {
 			case 'friday': return 'Freitag';
 			case 'saturday': return 'Samstag';
 			case 'sunday': return 'Sonntag';
-			case 'catering': return 'Verpflegung';
-			case 'no_catering_assignments_yet': return 'Noch keine Verpflegungsaufgaben!';
+			case 'catering': return 'Küchendienst';
+			case 'no_catering_assignments_yet': return 'Noch keine Küchendienstaufgaben!';
 			case 'tap_the_edit_button_below_to_assign_users_to_meals_for_the_week': return 'Tippen Sie unten auf die Bearbeiten-Schaltfläche, um Benutzer den Mahlzeiten der Woche zuzuweisen.';
 			case 'edit': return 'Bearbeiten';
 			case 'cleaning': return 'Reinigung';
@@ -228,10 +234,10 @@ extension on TranslationsDe {
 			case 'no_program_entries_found_for_this_week': return 'Keine Programmeinträge für diese Woche gefunden.';
 			case 'error_loading_program_placeholder': return 'Fehler beim Laden des Programms: {placeholder}';
 			case 'today': return 'Heute';
-			case 'your_next_catering_assignment': return 'Ihre nächste Verpflegungsaufgabe:';
-			case 'no_upcoming_catering_assignment_found': return 'Keine bevorstehende Verpflegungsaufgabe gefunden.';
-			case 'catering_wird_geladen': return 'Verpflegung wird geladen...';
-			case 'error_loading_catering': return 'Fehler beim Laden der Verpflegung.';
+			case 'your_next_catering_assignment': return 'Ihre nächste Küchendienstaufgabe:';
+			case 'no_upcoming_catering_assignment_found': return 'Keine bevorstehende Küchendienstaufgabe gefunden.';
+			case 'catering_wird_geladen': return 'Küchendienst wird geladen...';
+			case 'error_loading_catering': return 'Fehler beim Laden des Küchendienstes.';
 			case 'no_cleaning_assignments_found': return 'Keine Reinigungsaufgaben gefunden.';
 			case 'you_have_no_cleaning_assignment': return 'Sie haben keine Reinigungsaufgabe';
 			case 'your_cleaning_assignment': return 'Ihre Reinigungsaufgabe:';
@@ -262,7 +268,7 @@ extension on TranslationsDe {
 			case 'features': return 'Funktionen';
 			case 'team_community_management': return 'Team- & Gemeinschaftsverwaltung';
 			case 'weekly_program_assignments': return 'Wöchentliche Programme & Aufgaben';
-			case 'catering_cleaning_schedules': return 'Verpflegungs- & Reinigungspläne';
+			case 'catering_cleaning_schedules': return 'Küchendienst- & Reinigungspläne';
 			case 'secure_authentication': return 'Sichere Authentifizierung';
 			case 'custom_notifications': return 'Benutzerdefinierte Benachrichtigungen';
 			case 'responsive_mobile_friendly': return 'Responsiv & Mobilfreundlich';
@@ -307,7 +313,15 @@ extension on TranslationsDe {
 			case 'no_program_entries_for_this_week': return 'Keine Programmeinträge für diese Woche!';
 			case 'tap_the_edit_button_below_to_add_a_program_for_the_week': return 'Tippen Sie unten auf die Bearbeiten-Schaltfläche, um ein Programm für die Woche hinzuzufügen.';
 			case 'edit_program': return 'Programm bearbeiten';
-						default: return null;
+			case 'i_sincerely_apologize_but_you_can_not_have_more_debt': return 'Ich entschuldige mich aufrichtig, aber Sie können nicht mehr Schulden haben.';
+			case 'bro_pay_your_debt_first': return 'Bro, zahl erst deine Schulden.';
+			case 'kantin': return 'Kantin';
+			case 'a_positive_value_means_you_owe_money_a_negative_value_means_you_have_credit': return 'Ein positiver Wert bedeutet, dass Sie Geld schulden. Ein negativer Wert bedeutet, Sie haben Guthaben.';
+			case 'enter_amount': return 'Betrag eingeben';
+			case 'other_users': return 'Andere Nutzer';
+			case 'no_other_users_found': return 'Keine anderen Nutzer gefunden';
+			case 'debt': return 'Schulden';
+			default: return null;
 		}
 	}
 }

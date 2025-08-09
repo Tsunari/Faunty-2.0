@@ -1,6 +1,9 @@
+import 'package:faunty/components/custom_app_bar.dart';
 import 'package:faunty/components/custom_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:faunty/firestore/kantin_firestore_service.dart';
+import 'package:faunty/components/custom_chip.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'package:faunty/components/custom_snackbar.dart';
 import 'package:faunty/state_management/kantin_provider.dart';
@@ -9,6 +12,12 @@ import 'package:faunty/state_management/user_provider.dart';
 import 'package:faunty/state_management/user_list_provider.dart';
 import 'package:faunty/models/user_roles.dart';
 
+// Dummy-Produkte für die Chips
+final List<Map<String, dynamic>> _dummyProducts = [
+  {'name': 'Eis groß', 'price': 1.0},
+  {'name': 'Eis klein', 'price': 0.5},
+  {'name': 'Spezi', 'price': 1.0},
+];
 
 class KantinPage extends ConsumerStatefulWidget {
   const KantinPage({super.key});
@@ -21,27 +30,6 @@ class _KantinPageState extends ConsumerState<KantinPage> {
   double _localDebt = 0.0;
   bool _isLoading = false;
 
-  // Dummy-Produkte für die Chips
-  final List<Map<String, dynamic>> _dummyProducts = [
-    {'name': 'Eis', 'price': 1.0},
-    {'name': 'Spezi', 'price': 1.5},
-    {'name': 'Cola', 'price': 1.2},
-    {'name': 'Wasser', 'price': 0.5},
-  ];
-
-  Future<void> _setDebt(double newDebt, String placeId, String userUid) async {
-    if (newDebt > 999) {
-      showCustomSnackBar(context, 'Bro pay your debt first');
-      return;
-    }
-    setState(() => _isLoading = true);
-    await KantinFirestoreService(placeId).updateUserDebt(userUid, newDebt);
-    setState(() {
-      _localDebt = newDebt;
-      _isLoading = false;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -49,6 +37,7 @@ class _KantinPageState extends ConsumerState<KantinPage> {
     final user = ref.watch(userProvider);
     final placeId = user.value?.placeId ?? '';
     final userUid = user.value?.uid ?? '';
+    final userRole = user.value?.role;
     final kantinAsync = ref.watch(kantinProvider(placeId));
 
     // Get all debts (Map<String, double>)
@@ -58,10 +47,37 @@ class _KantinPageState extends ConsumerState<KantinPage> {
     // For local UI update before Firestore stream updates
     final displayDebt = _isLoading ? _localDebt : currentDebt;
 
+    Future<void> setDebt(double newDebt, String placeId, String userUid) async {
+      if (newDebt > 999) {
+        userRole == UserRole.hoca || userRole == UserRole.superuser
+          ? showCustomSnackBar(context, translation(context: context, 'I sincerely apologize but you can not have more debt'))
+          : showCustomSnackBar(context, translation(context: context, 'Bro pay your debt first'));
+        return;
+      }
+      setState(() => _isLoading = true);
+      await KantinFirestoreService(placeId).updateUserDebt(userUid, newDebt);
+      setState(() {
+        _localDebt = newDebt;
+        _isLoading = false;
+      });
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(translation(context: context, 'Kantin')),
-        centerTitle: true,
+      appBar: CustomAppBar(
+        title: translation(context: context, 'Kantin'),
+        // centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () {
+              showCustomSnackBar(
+                context,
+                translation(context: context, 'A positive value means you owe money. A negative value means you have credit.'),
+              );
+            },
+          ),
+          SizedBox(width: 8),
+        ],
       ),
       body: kantinAsync.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -83,7 +99,7 @@ class _KantinPageState extends ConsumerState<KantinPage> {
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: _isLoading || userUid.isEmpty ? null : () => _setDebt(displayDebt - 1.0, placeId, userUid),
+                      onPressed: _isLoading || userUid.isEmpty ? null : () => setDebt(displayDebt - 1.0, placeId, userUid),
                       child: const Text('-1', style: TextStyle(fontSize: 18)),
                     ),
                   ),
@@ -95,7 +111,7 @@ class _KantinPageState extends ConsumerState<KantinPage> {
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: _isLoading || userUid.isEmpty ? null : () => _setDebt(displayDebt - 0.5, placeId, userUid),
+                      onPressed: _isLoading || userUid.isEmpty ? null : () => setDebt(displayDebt - 0.5, placeId, userUid),
                       child: const Text('-0,5', style: TextStyle(fontSize: 18)),
                     ),
                   ),
@@ -131,7 +147,9 @@ class _KantinPageState extends ConsumerState<KantinPage> {
                               final parsed = double.tryParse(value.replaceAll(',', '.'));
                               if (parsed != null) {
                                 if (parsed > 999) {
-                                  showCustomSnackBar(context, 'Bro pay your debt first');
+                                    userRole == UserRole.hoca || userRole == UserRole.superuser
+                                      ? showCustomSnackBar(context, translation(context: context, 'I sincerely apologize but you can not have more debt'))
+                                      : showCustomSnackBar(context, translation(context: context, 'Bro pay your debt first'));
                                   Navigator.pop(context);
                                   return;
                                 }
@@ -154,7 +172,9 @@ class _KantinPageState extends ConsumerState<KantinPage> {
                                 final value = double.tryParse(controller.text.replaceAll(',', '.'));
                                 if (value != null) {
                                   if (value > 999) {
-                                    showCustomSnackBar(context, 'Bro pay your debt first');
+                                    userRole == UserRole.hoca || userRole == UserRole.superuser
+                                      ? showCustomSnackBar(context, translation(context: context, 'I sincerely apologize but you can not have more debt'))
+                                      : showCustomSnackBar(context, translation(context: context, 'Bro pay your debt first'));
                                     Navigator.pop(context);
                                     return;
                                   }
@@ -169,7 +189,7 @@ class _KantinPageState extends ConsumerState<KantinPage> {
                         ),
                       );
                       if (result != null) {
-                        await _setDebt(result, placeId, userUid);
+                        await setDebt(result, placeId, userUid);
                       }
                     },
                     child: Text(
@@ -194,7 +214,7 @@ class _KantinPageState extends ConsumerState<KantinPage> {
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: _isLoading || userUid.isEmpty ? null : () => _setDebt(displayDebt + 1.0, placeId, userUid),
+                      onPressed: _isLoading || userUid.isEmpty ? null : () => setDebt(displayDebt + 1.0, placeId, userUid),
                       child: const Text('+1', style: TextStyle(fontSize: 18)),
                     ),
                   ),
@@ -206,7 +226,7 @@ class _KantinPageState extends ConsumerState<KantinPage> {
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: _isLoading || userUid.isEmpty ? null : () => _setDebt(displayDebt + 0.5, placeId, userUid),
+                      onPressed: _isLoading || userUid.isEmpty ? null : () => setDebt(displayDebt + 0.5, placeId, userUid),
                       child: const Text('+0,5', style: TextStyle(fontSize: 18)),
                     ),
                   ),
@@ -218,19 +238,23 @@ class _KantinPageState extends ConsumerState<KantinPage> {
           // Produktchips
           Wrap(
             spacing: 12,
-            runSpacing: 12,
+            runSpacing: 8,
             children: [
               for (final product in _dummyProducts)
                 InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  onTap: _isLoading || userUid.isEmpty ? null : () => _setDebt(displayDebt + (product['price'] as double), placeId, userUid),
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: _isLoading || userUid.isEmpty ? null : () => setDebt(displayDebt + (product['price'] as double), placeId, userUid),
                   child: CustomChip(
                     label: '${product['name']} ${product['price'].toString().replaceAll('.', ',')}',
-                    backgroundColor: theme.colorScheme.surfaceVariant,
-                    textColor: theme.colorScheme.primary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    // backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                    // textColor: theme.colorScheme.primary,
+                    fontSize: 12,
+                    // fontWeight: FontWeight.w600,
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    outlineColor: theme.colorScheme.primary.withAlpha(200),
+                    // borderColor: theme.colorScheme.primary.withOpacity(0.5),
+                    // borderWidth: 1.5,
+                    // borderRadius: 16,
                   ),
                 ),
             ],
@@ -262,9 +286,29 @@ class _KantinPageState extends ConsumerState<KantinPage> {
                 "Thinks debt is just snack points.",
                 "Always finds a reason to celebrate with food.",
                 "Buys drinks for the squad.",
-                "Snack shopping: their superpower."
+                "Snack shopping: their superpower.",
+                "Buys snacks faster than WiFi.",
+                "Thinks every coin is for the Kantin.",
+                "Can spot a discount from a mile away.",
+                "Snack debt collector in training.",
+                "Has a sixth sense for fresh pastries.",
+                "Can turn pocket change into a feast.",
+                "Snack budget: unlimited.",
+                "Knows the snack lady by name.",
+                "Can negotiate snack prices in three languages.",
+                "Snack run champion.",
+                "Invented the snack break.",
+                "Can eat three ice creams in one sitting.",
+                "Thinks calories don’t count in Kantin.",
+                "Snack connoisseur since birth.",
+                "Can make a meal out of snacks.",
+                "Snack math expert.",
+                "Has a snack radar.",
+                "Snack enthusiast, debt specialist.",
+                "Snack queue VIP.",
+                "Snack whisperer."
               ];
-              random(int seed) => jokes[(DateTime.now().millisecondsSinceEpoch + seed) % jokes.length];
+              randomJoke(int seed) => jokes[(DateTime.now().millisecondsSinceEpoch + seed) % jokes.length];
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
@@ -285,7 +329,7 @@ class _KantinPageState extends ConsumerState<KantinPage> {
                             child: ListTile(
                               leading: CircleAvatar(child: Text(user.firstName.isNotEmpty ? user.firstName[0].toUpperCase() : user.uid.substring(0, 2).toUpperCase())),
                               title: Text('${user.firstName} ${user.lastName}'),
-                              subtitle: Text(random(user.uid.hashCode)),
+                              subtitle: Text(randomJoke(user.uid.hashCode)),
                               trailing: Text('${(debts[user.uid] ?? 0.0).toStringAsFixed(2).replaceAll('.', ',')} €', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.primary)),
                             ),
                           ))
@@ -293,6 +337,95 @@ class _KantinPageState extends ConsumerState<KantinPage> {
                 ),
               );
             },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class CantineWidget extends ConsumerWidget {
+  final String placeId;
+  final String userUid;
+  final UserRole? userRole;
+  const CantineWidget({
+    super.key,
+    required this.placeId,
+    required this.userUid,
+    this.userRole,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final kantinAsync = ref.watch(kantinProvider(placeId));
+    final debts = kantinAsync.asData?.value ?? {};
+    final currentDebt = debts[userUid] ?? 0.0;
+
+    Future<void> setDebt(double newDebt) async {
+      if (newDebt > 999) {
+        userRole == UserRole.hoca || userRole == UserRole.superuser
+          ? showCustomSnackBar(context, translation(context: context, 'I sincerely apologize but you can not have more debt'))
+          : showCustomSnackBar(context, translation(context: context, 'Bro pay your debt first'));
+        return;
+      }
+      await KantinFirestoreService(placeId).updateUserDebt(userUid, newDebt);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.remove),
+                onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt - 1.0),
+                tooltip: '-1',
+              ),
+              IconButton(
+                icon: const Icon(Icons.remove),
+                onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt - 0.5),
+                tooltip: '-0.5',
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: Text(
+                  translation(context: context, 'Debt') + ': ' + currentDebt.toStringAsFixed(2).replaceAll('.', ','),
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt + 1.0),
+                tooltip: '+1',
+              ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt + 0.5),
+                tooltip: '+0.5',
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final product in _dummyProducts)
+                InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: userUid.isEmpty ? null : () => setDebt(currentDebt + (product['price'] as double)),
+                  child: CustomChip(
+                    label: '${product['name']} ${product['price'].toString().replaceAll('.', ',')}',
+                    fontSize: 11,
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                    outlineColor: theme.colorScheme.primary.withAlpha(180),
+                  ),
+                ),
+            ],
           ),
         ],
       ),

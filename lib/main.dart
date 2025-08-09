@@ -79,11 +79,11 @@ class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    MorePage(),
     HomePage(),
     CleaningPage(),
     CateringPage(),
     ProgramPage(),
+    MorePage(),
   ];
 
   void _onDestinationSelected(int index) {

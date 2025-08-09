@@ -42,7 +42,7 @@ class AccountPage extends ConsumerWidget {
                       CircleAvatar(
                         radius: 32,
                         backgroundColor: onSurface,
-                        child: Icon(Icons.account_circle, size: 48, color: primaryColor),
+                        child: Icon(Icons.account_circle, size: 54, color: primaryColor),
                       ),
                       const SizedBox(width: 16),
                       Expanded(

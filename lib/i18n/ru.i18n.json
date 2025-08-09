@@ -130,5 +130,12 @@
   "no_program_entries_for_this_week": "Нет записей программы на эту неделю!",
   "tap_the_edit_button_below_to_add_a_program_for_the_week": "Нажмите кнопку редактирования ниже, чтобы добавить программу на неделю.",
   "edit_program": "Редактировать программу",
+  "i_sincerely_apologize_but_you_can_not_have_more_debt": "Я искренне извиняюсь, но у вас не может быть больше долга.",
+  "bro_pay_your_debt_first": "Бро, сначала погаси свой долг.",
+  "kantin": "Кантин",
+  "a_positive_value_means_you_owe_money_a_negative_value_means_you_have_credit": "Положительное значение означает, что вы должны деньги. Отрицательное значение — у вас есть кредит.",
+  "enter_amount": "Введите сумму",
+  "other_users": "Другие пользователи",
+  "no_other_users_found": "Другие пользователи не найдены",
   "debt": "Долг"
 }
