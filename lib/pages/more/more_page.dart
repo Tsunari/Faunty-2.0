@@ -12,7 +12,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/globals_provider.dart';
 import 'users_page.dart';
 import '../../components/custom_chip.dart';
-import 'package:faunty/i18n/strings.g.dart';
 import 'package:faunty/components/language_dropdown.dart';
 
 

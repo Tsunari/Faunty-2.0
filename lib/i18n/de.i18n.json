@@ -129,5 +129,6 @@
 	"save_and_go_back": "Speichern und zurückgehen",
 	"no_program_entries_for_this_week": "Keine Programmeinträge für diese Woche!",
 	"tap_the_edit_button_below_to_add_a_program_for_the_week": "Tippen Sie unten auf die Bearbeiten-Schaltfläche, um ein Programm für die Woche hinzuzufügen.",
-	"edit_program": "Programm bearbeiten"
+	"edit_program": "Programm bearbeiten",
+  "debt": "Schulden"
 }

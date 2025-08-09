@@ -1,39 +1,71 @@
 import 'package:faunty/components/custom_chip.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'package:faunty/components/custom_snackbar.dart';
+import 'package:faunty/state_management/kantin_provider.dart';
+import 'package:faunty/firestore/kantin_firestore_service.dart';
+import 'package:faunty/state_management/user_provider.dart';
+import 'package:faunty/state_management/user_list_provider.dart';
+import 'package:faunty/models/user_roles.dart';
 
-class KantinPage extends StatefulWidget {
+
+class KantinPage extends ConsumerStatefulWidget {
   const KantinPage({super.key});
 
   @override
-  State<KantinPage> createState() => _KantinPageState();
+  ConsumerState<KantinPage> createState() => _KantinPageState();
 }
 
-class _KantinPageState extends State<KantinPage> {
-  double debt = 0.0;
+class _KantinPageState extends ConsumerState<KantinPage> {
+  double _localDebt = 0.0;
+  bool _isLoading = false;
 
-  void _changeDebt(double value) {
-    if (debt + value > 999) {
+  // Dummy-Produkte für die Chips
+  final List<Map<String, dynamic>> _dummyProducts = [
+    {'name': 'Eis', 'price': 1.0},
+    {'name': 'Spezi', 'price': 1.5},
+    {'name': 'Cola', 'price': 1.2},
+    {'name': 'Wasser', 'price': 0.5},
+  ];
+
+  Future<void> _setDebt(double newDebt, String placeId, String userUid) async {
+    if (newDebt > 999) {
       showCustomSnackBar(context, 'Bro pay your debt first');
       return;
     }
+    setState(() => _isLoading = true);
+    await KantinFirestoreService(placeId).updateUserDebt(userUid, newDebt);
     setState(() {
-      debt += value;
-      debt = double.parse(debt.toStringAsFixed(2));
+      _localDebt = newDebt;
+      _isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final buttonWidth = MediaQuery.of(context).size.width * 0.18;
+    // Get current user and placeId from providers
+    final user = ref.watch(userProvider);
+    final placeId = user.value?.placeId ?? '';
+    final userUid = user.value?.uid ?? '';
+    final kantinAsync = ref.watch(kantinProvider(placeId));
+
+    // Get all debts (Map<String, double>)
+    final debts = kantinAsync.asData?.value ?? {};
+    final currentDebt = debts[userUid] ?? 0.0;
+
+    // For local UI update before Firestore stream updates
+    final displayDebt = _isLoading ? _localDebt : currentDebt;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(translation(context: context, 'Kantin')),
         centerTitle: true,
       ),
-      body: Column(
+      body: kantinAsync.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
         children: [
           const SizedBox(height: 24),
           Row(
@@ -51,7 +83,7 @@ class _KantinPageState extends State<KantinPage> {
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: () => _changeDebt(-1.0),
+                      onPressed: _isLoading || userUid.isEmpty ? null : () => _setDebt(displayDebt - 1.0, placeId, userUid),
                       child: const Text('-1', style: TextStyle(fontSize: 18)),
                     ),
                   ),
@@ -63,7 +95,7 @@ class _KantinPageState extends State<KantinPage> {
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: () => _changeDebt(-0.5),
+                      onPressed: _isLoading || userUid.isEmpty ? null : () => _setDebt(displayDebt - 0.5, placeId, userUid),
                       child: const Text('-0,5', style: TextStyle(fontSize: 18)),
                     ),
                   ),
@@ -80,8 +112,10 @@ class _KantinPageState extends State<KantinPage> {
                   ),
                   const SizedBox(height: 8),
                   GestureDetector(
-                    onTap: () async {
-                      final controller = TextEditingController(text: debt.toStringAsFixed(2).replaceAll('.', ','));
+                    onTap: _isLoading || userUid.isEmpty
+                        ? null
+                        : () async {
+                      final controller = TextEditingController(text: displayDebt.toStringAsFixed(2).replaceAll('.', ','));
                       final result = await showDialog<double>(
                         context: context,
                         builder: (context) => AlertDialog(
@@ -97,13 +131,13 @@ class _KantinPageState extends State<KantinPage> {
                               final parsed = double.tryParse(value.replaceAll(',', '.'));
                               if (parsed != null) {
                                 if (parsed > 999) {
-                                  showCustomSnackBar(context, 'Bo pay your debt first');
-                                  Navigator.pop(context); // Dialog schließen, auch wenn ungültig
+                                  showCustomSnackBar(context, 'Bro pay your debt first');
+                                  Navigator.pop(context);
                                   return;
                                 }
                                 Navigator.pop(context, parsed);
                               } else {
-                                Navigator.pop(context); // Dialog schließen, auch wenn ungültig
+                                Navigator.pop(context);
                               }
                             },
                             onTap: () {
@@ -120,13 +154,13 @@ class _KantinPageState extends State<KantinPage> {
                                 final value = double.tryParse(controller.text.replaceAll(',', '.'));
                                 if (value != null) {
                                   if (value > 999) {
-                                    showCustomSnackBar(context, 'Bo pay your debt first');
-                                    Navigator.pop(context); // Dialog schließen, auch wenn ungültig
+                                    showCustomSnackBar(context, 'Bro pay your debt first');
+                                    Navigator.pop(context);
                                     return;
                                   }
                                   Navigator.pop(context, value);
                                 } else {
-                                  Navigator.pop(context); // Dialog schließen, auch wenn ungültig
+                                  Navigator.pop(context);
                                 }
                               },
                               child: Text(translation(context: context, 'Save')),
@@ -135,13 +169,11 @@ class _KantinPageState extends State<KantinPage> {
                         ),
                       );
                       if (result != null) {
-                        setState(() {
-                          debt = double.parse(result.toStringAsFixed(2));
-                        });
+                        await _setDebt(result, placeId, userUid);
                       }
                     },
                     child: Text(
-                        debt.toStringAsFixed(2).replaceAll('.', ','),
+                        displayDebt.toStringAsFixed(2).replaceAll('.', ','),
                       style: theme.textTheme.displaySmall?.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,
@@ -162,7 +194,7 @@ class _KantinPageState extends State<KantinPage> {
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: () => _changeDebt(1.0),
+                      onPressed: _isLoading || userUid.isEmpty ? null : () => _setDebt(displayDebt + 1.0, placeId, userUid),
                       child: const Text('+1', style: TextStyle(fontSize: 18)),
                     ),
                   ),
@@ -174,7 +206,7 @@ class _KantinPageState extends State<KantinPage> {
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: () => _changeDebt(0.5),
+                      onPressed: _isLoading || userUid.isEmpty ? null : () => _setDebt(displayDebt + 0.5, placeId, userUid),
                       child: const Text('+0,5', style: TextStyle(fontSize: 18)),
                     ),
                   ),
@@ -183,7 +215,7 @@ class _KantinPageState extends State<KantinPage> {
             ],
           ),
           const SizedBox(height: 32),
-          // Produktchips (Dummy-Liste für spätere Firebase-Anbindung)
+          // Produktchips
           Wrap(
             spacing: 12,
             runSpacing: 12,
@@ -191,7 +223,7 @@ class _KantinPageState extends State<KantinPage> {
               for (final product in _dummyProducts)
                 InkWell(
                   borderRadius: BorderRadius.circular(8),
-                  onTap: () => _changeDebt(product['price'] as double),
+                  onTap: _isLoading || userUid.isEmpty ? null : () => _setDebt(displayDebt + (product['price'] as double), placeId, userUid),
                   child: CustomChip(
                     label: '${product['name']} ${product['price'].toString().replaceAll('.', ',')}',
                     backgroundColor: theme.colorScheme.surfaceVariant,
@@ -203,16 +235,67 @@ class _KantinPageState extends State<KantinPage> {
                 ),
             ],
           ),
+          const SizedBox(height: 32),
+          // Other users' debts
+          Consumer(
+            builder: (context, ref, _) {
+              final usersAsync = ref.watch(usersByCurrentPlaceProvider);
+              final users = usersAsync.asData?.value ?? [];
+              final otherUsers = users.where((u) => u.uid != userUid && (u.role == UserRole.baskan || u.role == UserRole.talebe)).toList();
+              final jokes = [
+                "Buys snacks like they're stocks.",
+                "Thinks cola is a personality trait.",
+                "Has a PhD in impulse buying.",
+                "Can’t resist a good deal on water.",
+                "Eats ice cream for breakfast.",
+                "Believes Spezi is the drink of champions.",
+                "Always asks for extra napkins.",
+                "Thinks every day is treat day.",
+                "Has a secret stash of snacks.",
+                "Buys more than they can carry.",
+                "Knows the vending machine by heart.",
+                "Can’t say no to a bargain.",
+                "Thinks buying snacks is cardio.",
+                "Has a loyalty card for everything.",
+                "Snacks are their spirit animal.",
+                "Can turn any purchase into a story.",
+                "Thinks debt is just snack points.",
+                "Always finds a reason to celebrate with food.",
+                "Buys drinks for the squad.",
+                "Snack shopping: their superpower."
+              ];
+              random(int seed) => jokes[(DateTime.now().millisecondsSinceEpoch + seed) % jokes.length];
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      translation(context: context, 'Other users'),
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 12),
+                    if (otherUsers.isEmpty)
+                      Text(translation(context: context, 'No other users found'))
+                    else
+                      ...otherUsers.map((user) => Card(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            elevation: 2,
+                            margin: const EdgeInsets.symmetric(vertical: 6),
+                            child: ListTile(
+                              leading: CircleAvatar(child: Text(user.firstName.isNotEmpty ? user.firstName[0].toUpperCase() : user.uid.substring(0, 2).toUpperCase())),
+                              title: Text('${user.firstName} ${user.lastName}'),
+                              subtitle: Text(random(user.uid.hashCode)),
+                              trailing: Text('${(debts[user.uid] ?? 0.0).toStringAsFixed(2).replaceAll('.', ',')} €', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.primary)),
+                            ),
+                          ))
+                  ],
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
   }
-
-  // Dummy-Produkte für die Chips
-  final List<Map<String, dynamic>> _dummyProducts = [
-    {'name': 'Eis', 'price': 1.0},
-    {'name': 'Spezi', 'price': 1.5},
-    {'name': 'Cola', 'price': 1.2},
-    {'name': 'Wasser', 'price': 0.5},
-  ];
 }
