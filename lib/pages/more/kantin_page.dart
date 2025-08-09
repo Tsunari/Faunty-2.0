@@ -11,6 +11,7 @@ import 'package:faunty/firestore/kantin_firestore_service.dart';
 import 'package:faunty/state_management/user_provider.dart';
 import 'package:faunty/state_management/user_list_provider.dart';
 import 'package:faunty/models/user_roles.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Dummy-Produkte für die Chips
 final List<Map<String, dynamic>> _dummyProducts = [
@@ -26,9 +27,98 @@ class KantinPage extends ConsumerStatefulWidget {
   ConsumerState<KantinPage> createState() => _KantinPageState();
 }
 
-class _KantinPageState extends ConsumerState<KantinPage> {
+
+class _KantinPageState extends ConsumerState<KantinPage> with WidgetsBindingObserver {
   double _localDebt = 0.0;
   bool _isLoading = false;
+  bool _pendingPaypal = false;
+
+  @override
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.resumed && _pendingPaypal) {
+      _pendingPaypal = false;
+      final theme = Theme.of(context);
+      final user = ref.read(userProvider);
+      final placeId = user.value?.placeId ?? '';
+      final userUid = user.value?.uid ?? '';
+      final kantinAsync = ref.read(kantinProvider(placeId));
+      final debts = kantinAsync.asData?.value ?? {};
+      final currentDebt = debts[userUid] ?? 0.0;
+      final controller = TextEditingController(text: currentDebt.toStringAsFixed(2).replaceAll('.', ','));
+      await showDialog(
+        context: context,
+        builder: (ctx) {
+          bool showCustomAmount = false;
+          return StatefulBuilder(
+            builder: (context, setDialogState) => AlertDialog(
+              title: Text(translation(context: context, 'PayPal')),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(translation(context: context, 'Did you pay ') + currentDebt.toStringAsFixed(2).replaceAll('.', ',') + translation(context: context, ' € via PayPal?')),
+                  if (showCustomAmount) ...[
+                    const SizedBox(height: 12),
+                    Center(
+                      child: SizedBox(
+                        width: 180, // Reduced width
+                        child: TextField(
+                          controller: controller,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          decoration: InputDecoration(
+                            labelText: 'Enter amount here',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(translation(context: context, 'Cancel')),
+                ),
+                TextButton(
+                  onPressed: () => setDialogState(() => showCustomAmount = !showCustomAmount),
+                  child: Text('Different amount'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(ctx);
+                    double paid = showCustomAmount
+                      ? double.tryParse(controller.text.replaceAll(',', '.')) ?? currentDebt
+                      : currentDebt;
+                    double newDebt = currentDebt - paid;
+                    setState(() => _isLoading = true);
+                    await KantinFirestoreService(placeId).updateUserDebt(userUid, newDebt);
+                    setState(() {
+                      _localDebt = newDebt;
+                      _isLoading = false;
+                    });
+                    showCustomSnackBar(context, newDebt == 0 ? 'Debt reset!' : (newDebt < 0 ? 'You have credit!' : 'Debt updated!'));
+                  },
+                  child: Text(translation(context: context, 'Yes')),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +155,6 @@ class _KantinPageState extends ConsumerState<KantinPage> {
     return Scaffold(
       appBar: CustomAppBar(
         title: translation(context: context, 'Kantin'),
-        // centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),
@@ -75,6 +164,67 @@ class _KantinPageState extends ConsumerState<KantinPage> {
                 translation(context: context, 'A positive value means you owe money. A negative value means you have credit.'),
               );
             },
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: translation(context: context, 'Reset debt'),
+            onPressed: _isLoading || userUid.isEmpty || currentDebt == 0
+              ? null
+              : () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                  title: Text(translation(context: context, 'Reset debt')),
+                  content: Text(translation(context: context, 'Are you sure you want to reset your debt to 0?')),
+                  actions: [
+                    TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: Text(translation(context: context, 'Cancel')),
+                    ),
+                    ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: Text(translation(context: context, 'Confirm')),
+                    ),
+                  ],
+                  ),
+                );
+                if (confirmed == true) {
+                  setState(() => _isLoading = true);
+                  await KantinFirestoreService(placeId).updateUserDebt(userUid, 0.0);
+                  setState(() {
+                  _localDebt = 0.0;
+                  _isLoading = false;
+                  });
+                  showCustomSnackBar(context, translation(context: context, 'Debt reset!'));
+                }
+                },
+            ),
+          IconButton(
+            icon: const Icon(Icons.account_balance_wallet), // Use PayPal icon from font_awesome_flutter if available
+            onPressed: _isLoading || userUid.isEmpty || currentDebt <= 0
+                ? null
+                : () async {
+              final url = 'https://www.paypal.me/FatihKantin/${currentDebt.toStringAsFixed(2)}';
+              debugPrint('[PayPal] Attempting to open: $url');
+              _pendingPaypal = true;
+              try {
+                if (await canLaunch(url)) {
+                  debugPrint('[PayPal] Launching URL...');
+                  await launch(url);
+                  debugPrint('[PayPal] URL launched successfully.');
+                } else {
+                  debugPrint('[PayPal] canLaunch returned false for: $url');
+                  showCustomSnackBar(context, 'Could not open PayPal.');
+                  _pendingPaypal = false;
+                }
+              } catch (e, s) {
+                debugPrint('[PayPal] Exception: $e');
+                debugPrint('[PayPal] StackTrace: $s');
+                showCustomSnackBar(context, 'Could not open PayPal.');
+                _pendingPaypal = false;
+              }
+            },
+            tooltip: 'Pay with PayPal',
           ),
           SizedBox(width: 8),
         ],
@@ -124,7 +274,12 @@ class _KantinPageState extends ConsumerState<KantinPage> {
                 children: [
                   Text(
                     translation(context: context, 'Debt'),
-                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold, 
+                        color: displayDebt > 0
+                          ? Colors.red
+                          : (displayDebt < 0 ? Colors.green : null),
+                      ),
                   ),
                   const SizedBox(height: 8),
                   GestureDetector(
@@ -374,23 +529,40 @@ class CantineWidget extends ConsumerWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(
-                icon: const Icon(Icons.remove),
-                onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt - 1.0),
-                tooltip: '-1',
+              InkWell(
+                onTap: userUid.isEmpty ? null : () => setDebt(currentDebt - 1.0),
+                borderRadius: BorderRadius.circular(8),
+                child: CustomChip(
+                  label: "- 1", 
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                ),
               ),
-              IconButton(
-                icon: const Icon(Icons.remove),
-                onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt - 0.5),
-                tooltip: '-0.5',
+              SizedBox(width: 8),
+              InkWell(
+                onTap: userUid.isEmpty ? null : () => setDebt(currentDebt - 0.5),
+                borderRadius: BorderRadius.circular(8),
+                child: CustomChip(
+                  label: "- 0.5", 
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                ),
               ),
+              // IconButton(
+              //   icon: const Icon(Icons.remove),
+              //   onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt - 1.0),
+              //   tooltip: '-1',
+              // ),
+              // IconButton(
+              //   icon: const Icon(Icons.remove),
+              //   onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt - 0.5),
+              //   tooltip: '-0.5',
+              // ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: Text(
@@ -398,15 +570,32 @@ class CantineWidget extends ConsumerWidget {
                   style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt + 1.0),
-                tooltip: '+1',
+              // IconButton(
+              //   icon: const Icon(Icons.add),
+              //   onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt + 1.0),
+              //   tooltip: '+1',
+              // ),
+              // IconButton(
+              //   icon: const Icon(Icons.add),
+              //   onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt + 0.5),
+              //   tooltip: '+0.5',
+              // ),
+              InkWell(
+                onTap: userUid.isEmpty ? null : () => setDebt(currentDebt + 0.5),
+                borderRadius: BorderRadius.circular(8),
+                child: CustomChip(
+                  label: "+ 0,5", 
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                ),
               ),
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt + 0.5),
-                tooltip: '+0.5',
+              SizedBox(width: 8),
+              InkWell(
+                onTap: userUid.isEmpty ? null : () => setDebt(currentDebt + 1.0),
+                borderRadius: BorderRadius.circular(8),
+                child: CustomChip(
+                  label: "+ 1", 
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                ),
               ),
             ],
           ),
