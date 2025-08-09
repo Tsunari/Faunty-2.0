@@ -8,26 +8,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import '../state_management/user_provider.dart';
 
-Future<(User?, String?)> registerWithEmail(String email, String password) async {
+Future<(User?, String?)> registerWithEmail(BuildContext context, String email, String password) async {
   try {
     final credential = await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password);
     return (credential.user, null);
   } on FirebaseAuthException catch (e) {
     printError('Registration error: $e');
+    if (!context.mounted) return (null, 'Registration failed. Please try again.');
     switch (e.code) {
-      case 'email-already-in-use':
-        return (null, 'This email is already registered.');
-      case 'weak-password':
-        return (null, 'Password is too weak. Please use at least 6 characters.');
-      case 'invalid-email':
-        return (null, 'Please enter a valid email address.');
-      case 'operation-not-allowed':
-        return (null, 'Registration is currently disabled.');
-      case 'network-request-failed':
-        return (null, 'No internet connection. Please check your network and try again.');
+      // case 'email-already-in-use':
+      //   return (null, translation(context, 'This email is already registered.'));
+      // case 'weak-password':
+      //   return (null, translation(context, 'Password is too weak. Please use at least 6 characters.'));
+      // case 'invalid-email':
+      //   return (null, translation(context, 'Please enter a valid email address.'));
+      // case 'operation-not-allowed':
+      //   return (null, translation(context, 'Registration is currently disabled.'));
+      // case 'network-request-failed':
+      //   return (null, translation(context, 'No internet connection. Please check your network and try again.'));
       default:
-        return (null, 'Registration failed. ${e.message ?? ''}');
+        return (null, "${translation(context, 'Registration failed.')}\n${e.message ?? ''}");
     }
   } catch (e) {
     printError('Registration error: $e');
@@ -240,8 +241,8 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       });
       return;
     }
-
-    final (user, regError) = await registerWithEmail(email, password);
+    if (!mounted) return;
+    final (user, regError) = await registerWithEmail(context, email, password);
     if (user != null) {
       // Save all required user fields in user_list for login and provider
       await FirebaseFirestore.instance.collection('user_list').doc(user.uid).set({
