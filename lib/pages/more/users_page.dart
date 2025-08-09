@@ -1,4 +1,5 @@
 import 'package:faunty/pages/more/user_list.dart';
+import 'package:faunty/tools/translation_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/user_list_provider.dart';
@@ -19,12 +20,12 @@ class UsersPage extends ConsumerWidget {
       error: (e, st) => Center(child: Text('Error loading user: $e')),
       data: (user) {
         if (user == null) {
-          return const Center(child: Text('No user loaded.'));
+          return Center(child: Text(translation(context: context, 'No user loaded.')));
         }
         final usersByPlaceAsync = ref.watch(usersByCurrentPlaceProvider);
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Users'),
+            title: Text(translation(context: context, 'Users')),
             backgroundColor: colorScheme.surface,
             foregroundColor: colorScheme.onSurface,
             elevation: 0.5,
@@ -198,24 +199,24 @@ class _EditNameDialogState extends State<_EditNameDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Edit Name'),
+      title: Text(translation(context: context, 'Edit Name')),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: _firstNameController,
-            decoration: const InputDecoration(labelText: 'First Name'),
+            decoration: InputDecoration(labelText: translation(context: context, 'First Name')),
           ),
           TextField(
             controller: _lastNameController,
-            decoration: const InputDecoration(labelText: 'Last Name'),
+            decoration: InputDecoration(labelText: translation(context: context, 'Last Name')),
           ),
         ],
       ),
       actions: [
         TextButton(
           onPressed: _loading ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(translation(context: context, 'Cancel')),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -243,7 +244,7 @@ class _EditNameDialogState extends State<_EditNameDialog> {
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed to update name: $e')),
+                        SnackBar(content: Text(translation(context: context, 'Failed to update name: ') + e.toString())),
                       );
                     }
                   } finally {

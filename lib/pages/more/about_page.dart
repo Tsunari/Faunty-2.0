@@ -1,3 +1,4 @@
+import 'package:faunty/tools/translation_helper.dart';
 import 'package:flutter/material.dart';
 
 class AboutPage extends StatelessWidget {
@@ -14,7 +15,7 @@ class AboutPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('About'),
+        title: Text(translation(context: context, 'About')),
         backgroundColor: surface,
         foregroundColor: onSurface,
         elevation: 1,
@@ -34,7 +35,7 @@ class AboutPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'Welcome to Faunty 2.0',
+                translation(context: context, 'Welcome to Faunty 2.0'),
                 style: textTheme.headlineMedium?.copyWith(
                   color: primary,
                   fontWeight: FontWeight.bold,
@@ -42,7 +43,7 @@ class AboutPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Faunty is your modern management app, designed to simplify daily organization and communication for teams, communities, and organizations. Built with a focus on usability, security, and beautiful design, Faunty helps you stay connected and productive.',
+                translation(context: context, 'Faunty is your modern management app, designed to simplify daily organization and communication for teams, communities, and organizations. Built with a focus on usability, security, and beautiful design, Faunty helps you stay connected and productive.'),
                 style: textTheme.bodyLarge?.copyWith(color: onSurface),
               ),
               const SizedBox(height: 32),
@@ -55,14 +56,14 @@ class AboutPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Features', style: textTheme.titleLarge?.copyWith(color: primary, fontWeight: FontWeight.bold)),
+                      Text(translation(context: context, 'Features'), style: textTheme.titleLarge?.copyWith(color: primary, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
-                      FeatureTile(icon: Icons.group, label: 'Team & Community Management'),
-                      FeatureTile(icon: Icons.calendar_today, label: 'Weekly Program & Assignments'),
-                      FeatureTile(icon: Icons.dining, label: 'Catering & Cleaning Schedules'),
-                      FeatureTile(icon: Icons.lock, label: 'Secure Authentication'),
-                      FeatureTile(icon: Icons.notifications_active, label: 'Custom Notifications'),
-                      FeatureTile(icon: Icons.phone_android, label: 'Responsive & Mobile Friendly'),
+                      FeatureTile(icon: Icons.group, label: translation(context: context, 'Team & Community Management')),
+                      FeatureTile(icon: Icons.calendar_today, label: translation(context: context, 'Weekly Program & Assignments')),
+                      FeatureTile(icon: Icons.dining, label: translation(context: context, 'Catering & Cleaning Schedules')),
+                      FeatureTile(icon: Icons.lock, label: translation(context: context, 'Secure Authentication')),
+                      FeatureTile(icon: Icons.notifications_active, label: translation(context: context, 'Custom Notifications')),
+                      FeatureTile(icon: Icons.phone_android, label: translation(context: context, 'Responsive & Mobile Friendly')),
                     ],
                   ),
                 ),
@@ -77,10 +78,10 @@ class AboutPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('About the Project', style: textTheme.titleLarge?.copyWith(color: primary, fontWeight: FontWeight.bold)),
+                      Text(translation(context: context, 'About the Project'), style: textTheme.titleLarge?.copyWith(color: primary, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
                       Text(
-                        'Faunty 2.0 is built with Flutter and Firebase, ensuring fast performance and real-time updates. Our mission is to empower users with tools that make everyday management effortless and enjoyable.',
+                        translation(context: context, 'Faunty 2.0 is built with Flutter and Firebase, ensuring fast performance and real-time updates. Our mission is to empower users with tools that make everyday management effortless and enjoyable.'),
                         style: textTheme.bodyMedium?.copyWith(color: onSurface),
                       ),
                       const SizedBox(height: 16),
@@ -95,7 +96,7 @@ class AboutPage extends StatelessWidget {
               const SizedBox(height: 32),
               Center(
                 child: Text(
-                  'Thank you for using Faunty!\nFor feedback or support, contact us at talebelergfc@gmail.com',
+                  translation(context: context, 'Thank you for using Faunty!') + '\n' + translation(context: context, 'For feedback or support, contact us at talebelergfc@gmail.com'),
                   style: textTheme.bodyMedium?.copyWith(color: onSurface),
                   textAlign: TextAlign.center,
                 ),

@@ -9,9 +9,9 @@ import 'package:faunty/i18n/strings.g.dart';
 /// string interpolation is currently not supported. And I think it will not be supported in the future.
 ///
 /// Returns the translated string for the current locale.
-String translation(BuildContext context, String value, {Map<String, Object>? args}) {
+String translation(String value, {BuildContext? context, Map<String, Object>? args}) {
   final key = normalizeKey(value);
-  final t = Translations.of(context);
-  final result = args != null ? t[key](args) : t[key]; // args not supported yet
+  final f = context != null ? Translations.of(context) : t;
+  final result = args != null ? f[key](args) : f[key]; // args not supported yet
   return result ?? value;
 }

@@ -42,7 +42,7 @@ class Faunty extends StatelessWidget {
   @override
   Widget build(BuildContext context) { 
     return MaterialApp(
-      title: translation(context, 'Faunty'),
+      title: translation(context: context, 'Faunty'),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),

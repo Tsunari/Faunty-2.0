@@ -1,6 +1,7 @@
 import 'package:faunty/components/role_gate.dart';
-import 'package:faunty/global_styles.dart';
+import 'package:faunty/globals.dart';
 import 'package:faunty/models/user_roles.dart';
+import 'package:faunty/tools/translation_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'cleaning_assign.dart';
@@ -16,7 +17,7 @@ class CleaningPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Cleaning',
+        title: translation(context: context, 'Cleaning'),
         actions: [],
       ),
       body: cleaningDataAsync.when(
@@ -38,14 +39,14 @@ class CleaningPage extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                     margin: const EdgeInsets.only(bottom: 0),
                     child: Row(
-                      children: const [
+                      children: [
                         Expanded(
                           flex: 2,
-                          child: Text('Place', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, letterSpacing: 0.5)),
+                          child: Text(translation(context: context, 'Place'), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, letterSpacing: 0.5)),
                         ),
                         Expanded(
                           flex: 5,
-                          child: Text('Assignees', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, letterSpacing: 0.5)),
+                          child: Text(translation(context: context, 'Assignees'), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, letterSpacing: 0.5)),
                         ),
                       ],
                     ),
@@ -62,7 +63,9 @@ class CleaningPage extends ConsumerWidget {
                                 Icon(Icons.cleaning_services_rounded, size: 64, color: notFoundIconColor(context)),
                                 const SizedBox(height: 24),
                                 Text(
-                                  placesNoUser && places.isEmpty ? 'No cleaning places yet!' : 'No users assigned to any places.',
+                                  placesNoUser && places.isEmpty 
+                                  ? translation(context: context, 'No cleaning places yet!') 
+                                  : translation(context: context, 'No users assigned to any places.'),
                                   style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
@@ -77,8 +80,8 @@ class CleaningPage extends ConsumerWidget {
                                   minRole: UserRole.baskan,
                                   child: Text(
                                     placesNoUser && places.isEmpty 
-                                    ? 'Tap below to create your first place and start assigning users.' 
-                                    : 'Assign users to your existing places using the action button below.',
+                                    ? translation(context: context, 'Tap below to create your first place and start assigning users.') 
+                                    : translation(context: context, 'Assign users to your existing places using the action button below.'),
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: Theme.of(context).brightness == Brightness.dark
@@ -93,7 +96,7 @@ class CleaningPage extends ConsumerWidget {
                                   minRole: UserRole.baskan,
                                   child: ElevatedButton.icon(
                                     icon: Icon(Icons.add_box, color: notFoundIconColor(context)),
-                                    label: Text('Create Place', style: TextStyle(color: notFoundIconColor(context))),
+                                    label: Text(translation(context: context, 'Create Place'), style: TextStyle(color: notFoundIconColor(context))),
                                     style: ElevatedButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                                       textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -104,15 +107,15 @@ class CleaningPage extends ConsumerWidget {
                                       final name = await showDialog<String>(
                                         context: context,
                                         builder: (context) => AlertDialog(
-                                          title: const Text('Create Place'),
+                                          title: Text(translation(context: context, 'Create Place')),
                                           content: TextField(
                                             controller: controller,
                                             autofocus: true,
-                                            decoration: const InputDecoration(labelText: 'Place name'),
+                                            decoration: InputDecoration(labelText: translation(context: context, 'Place name')),
                                           ),
                                           actions: [
-                                            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-                                            ElevatedButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Create')),
+                                            TextButton(onPressed: () => Navigator.pop(context), child: Text(translation(context: context, 'Cancel'))),
+                                            ElevatedButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: Text(translation(context: context, 'Create'))),
                                           ],
                                         ),
                                       );
@@ -181,7 +184,7 @@ class CleaningPage extends ConsumerWidget {
                                                   .toList(),
                                             ),
                                           )
-                                        : const Text('No users assigned', style: TextStyle(color: Colors.grey)),
+                                        : Text(translation(context: context, 'No users assigned'), style: TextStyle(color: Colors.grey)),
                                   ),
                                 ],
                               ),

@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:faunty/tools/translation_helper.dart';
+import 'package:faunty/components/language_dropdown.dart';
 import '../state_management/user_provider.dart';
 
 Future<(User?, String?)> registerWithEmail(BuildContext context, String email, String password) async {
@@ -15,27 +16,28 @@ Future<(User?, String?)> registerWithEmail(BuildContext context, String email, S
     return (credential.user, null);
   } on FirebaseAuthException catch (e) {
     printError('Registration error: $e');
-    if (!context.mounted) return (null, 'Registration failed. Please try again.');
+    if (!context.mounted) return (null, translation('Registration failed. Please try again.'));
     switch (e.code) {
-      // case 'email-already-in-use':
-      //   return (null, translation(context, 'This email is already registered.'));
-      // case 'weak-password':
-      //   return (null, translation(context, 'Password is too weak. Please use at least 6 characters.'));
-      // case 'invalid-email':
-      //   return (null, translation(context, 'Please enter a valid email address.'));
-      // case 'operation-not-allowed':
-      //   return (null, translation(context, 'Registration is currently disabled.'));
-      // case 'network-request-failed':
-      //   return (null, translation(context, 'No internet connection. Please check your network and try again.'));
+      case 'email-already-in-use':
+        return (null, translation(context: context, 'This email is already registered.'));
+      case 'weak-password':
+        return (null, translation(context: context, 'Password is too weak. Please use at least 6 characters.'));
+      case 'invalid-email':
+        return (null, translation(context: context, 'Please enter a valid email address.'));
+      case 'operation-not-allowed':
+        return (null, translation(context: context, 'Registration is currently disabled.'));
+      case 'network-request-failed':
+        return (null, translation(context: context, 'No internet connection. Please check your network and try again.'));
       default:
-        return (null, "${translation(context, 'Registration failed.')}\n${e.message ?? ''}");
+        return (null, "${translation(context: context, 'Registration failed.')}\n${e.message ?? ''}");
     }
   } catch (e) {
     printError('Registration error: $e');
+    if (!context.mounted) return (null, translation('Registration failed. Please try again.'));
     if (e.toString().contains('SocketException')) {
-      return (null, 'No internet connection. Please check your network and try again.');
+      return (null, translation(context: context, 'No internet connection. Please check your network and try again.'));
     }
-    return (null, 'Registration failed. Please try again.');
+    return (null, translation(context: context, 'Registration failed. Please try again.'));
   }
 }
 
@@ -331,7 +333,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
-                            _isRegisterMode ? translation(context, 'Register') : translation(context, 'Login'),
+                            _isRegisterMode ? translation(context: context, 'Register') : translation(context: context, 'Login'),
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
@@ -401,11 +403,11 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                               ? Center(
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    children: const [
-                                      SizedBox(height: 8),
-                                      CircularProgressIndicator(),
-                                      SizedBox(height: 16),
-                                      Text('Please wait...', style: TextStyle(fontSize: 16)),
+                                    children: [
+                                      const SizedBox(height: 8),
+                                      const CircularProgressIndicator(),
+                                      const SizedBox(height: 16),
+                                      Text(translation(context: context, 'Please wait...'), style: TextStyle(fontSize: 16)),
                                     ],
                                   ),
                                 )
@@ -422,7 +424,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                                             borderRadius: BorderRadius.circular(12),
                                           ),
                                         ),
-                                        child: Text(_isRegisterMode ? 'Register' : 'Login',
+                                        child: Text(_isRegisterMode ? translation(context: context, 'Register') : translation(context: context, 'Login'),
                                           style: const TextStyle(fontSize: 18)),
                                       ),
                                     ),
@@ -435,8 +437,8 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                                           duration: const Duration(milliseconds: 250),
                                           child: Text(
                                             _isRegisterMode
-                                                ? 'Already have an account? Login'
-                                                : 'Don\'t have an account? Register',
+                                                ? translation(context: context, 'Already have an account? Login')
+                                                : translation(context: context, 'Don\'t have an account? Register'),
                                             key: ValueKey(_isRegisterMode),
                                             style: const TextStyle(fontSize: 15),
                                           ),
@@ -444,6 +446,17 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                                       ),
                                     ),
                                   ],
+                                ),
+                                // Language selector at the bottom
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 24.0),
+                                  child: Center(
+                                    child: LanguageDropdown(
+                                      borderColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                                      borderRadius: 20,
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    ),
+                                  ),
                                 ),
                         ],
                       ),
@@ -498,7 +511,7 @@ class _LoginFormFields extends StatelessWidget {
             child: TextField(
               controller: firstNameController,
               decoration: InputDecoration(
-                labelText: 'First Name',
+                labelText: translation(context: context, 'First Name'),
                 prefixIcon: Icon(Icons.person_outline),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -515,7 +528,7 @@ class _LoginFormFields extends StatelessWidget {
             child: TextField(
               controller: lastNameController,
               decoration: InputDecoration(
-                labelText: 'Last Name',
+                labelText: translation(context: context, 'Last Name'),
                 prefixIcon: Icon(Icons.person_outline),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -533,7 +546,7 @@ class _LoginFormFields extends StatelessWidget {
           child: TextField(
             controller: emailController,
             decoration: InputDecoration(
-              labelText: 'Email',
+              labelText: translation(context: context, 'Email'),
               prefixIcon: Icon(Icons.email_outlined),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -581,7 +594,7 @@ class _LoginFormFields extends StatelessWidget {
           child: TextField(
             controller: passwordController,
             decoration: InputDecoration(
-              labelText: 'Password',
+              labelText: translation(context: context, 'Password'),
               prefixIcon: Icon(Icons.lock_outline),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -594,7 +607,7 @@ class _LoginFormFields extends StatelessWidget {
                   child: IconButton(
                     icon: Icon(showPassword ? Icons.visibility_off : Icons.visibility),
                     onPressed: onTogglePassword,
-                    tooltip: showPassword ? 'Hide password' : 'Show password',
+                    tooltip: showPassword ? translation(context: context, 'Hide password') : translation(context: context, 'Show password'),
                   ),
                 ),
               ),
@@ -663,7 +676,7 @@ class _RegisterExtraFields extends StatelessWidget {
           child: TextField(
             controller: confirmPasswordController,
             decoration: InputDecoration(
-              labelText: 'Confirm Password',
+              labelText: translation(context: context, 'Confirm Password'),
               prefixIcon: Icon(Icons.lock_reset),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -676,7 +689,7 @@ class _RegisterExtraFields extends StatelessWidget {
                   child: IconButton(
                     icon: Icon(showConfirmPassword ? Icons.visibility_off : Icons.visibility),
                     onPressed: onToggleConfirmPassword,
-                    tooltip: showConfirmPassword ? 'Hide password' : 'Show password',
+                    tooltip: showConfirmPassword ? translation(context: context, 'Hide password') : translation(context: context, 'Show password'),
                   ),
                 ),
               ),
@@ -705,13 +718,13 @@ class _RegisterExtraFields extends StatelessWidget {
             )).toList(),
             onChanged: onPlaceChanged,
             decoration: InputDecoration(
-              labelText: 'Select Place',
+              labelText: translation(context: context, 'Select Place'),
               prefixIcon: Icon(Icons.domain_outlined),
               suffixIcon: selectedPlace != null
                   ? IconButton(
                       icon: const Icon(Icons.clear),
                       onPressed: onClearPlace,
-                      tooltip: 'Clear selection',
+                      tooltip: translation(context: context, 'Clear selection'),
                     )
                   : null,
               border: OutlineInputBorder(

@@ -4,12 +4,16 @@ import 'package:faunty/models/user_roles.dart';
 import 'package:faunty/pages/more/about_page.dart';
 import 'package:faunty/pages/more/account_page.dart';
 import 'package:faunty/state_management/user_provider.dart';
+import 'package:faunty/tools/translation_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/globals_provider.dart';
 import 'users_page.dart';
 import '../../components/custom_chip.dart';
+import 'package:faunty/i18n/strings.g.dart';
+import 'package:faunty/components/language_dropdown.dart';
+
 
 class MorePage extends ConsumerWidget {
   const MorePage({super.key});
@@ -70,9 +74,9 @@ class MorePage extends ConsumerWidget {
               final userAsync = ref.watch(userProvider);
               final user = userAsync.asData?.value;
               return globalsAsync.when(
-                loading: () => const SwitchListTile(
-                  secondary: Icon(Icons.app_registration_outlined),
-                  title: Text('Registration Mode'),
+                loading: () => SwitchListTile(
+                  secondary: const Icon(Icons.app_registration_outlined),
+                  title: Text(translation(context: context, 'Registration Mode')),
                   value: false,
                   onChanged: null,
                 ),
@@ -85,12 +89,12 @@ class MorePage extends ConsumerWidget {
                   secondary: Icon(Icons.app_registration_outlined, color: primaryColor),
                   title: Row(
                     children: [
-                      const Text('Registration Mode'),
+                      Text(translation(context: context, 'Registration Mode')),
                       const SizedBox(width: 4),
-                      CustomChip(label: globals.registrationMode ? 'Active' : 'Inactive'),
+                      CustomChip(label: globals.registrationMode ? translation(context: context, 'Active') : translation(context: context, 'Inactive')),
                     ],
                   ),
-                  subtitle: const Text('Enable or disable registration'),
+                  subtitle: Text(translation(context: context, 'Enable or disable registration')),
                   value: globals.registrationMode,
                   onChanged: (val) async {
                     if (user == null) return;
@@ -107,9 +111,9 @@ class MorePage extends ConsumerWidget {
           leading: Icon(Icons.account_circle_outlined, color: primaryColor),
           title: Row(
               children: [
-                const Text('Account'),
+                Text(translation(context: context, 'Account')),
                 const SizedBox(width: 4),
-                CustomChip(label: 'Active'),
+                CustomChip(label: translation(context: context, 'Active')),
               ],
             ),
           onTap: () {
@@ -124,10 +128,10 @@ class MorePage extends ConsumerWidget {
           leading: Icon(Icons.group_outlined, color: primaryColor),
           title: Row(
             children: [
-              const Text('Users'),
+              Text(translation(context: context, 'Users')),
               const SizedBox(width: 4),
               CustomChip(
-                label: 'Active',
+                label: translation(context: context, 'Active'),
               ),
             ],
           ),
@@ -140,28 +144,28 @@ class MorePage extends ConsumerWidget {
           },
         ),
         ListTile(
-          leading: Icon(Icons.bar_chart_outlined, color: primaryColor),
-          title: const Text('Statistics'),
-          onTap: () {},
+          leading: Icon(Icons.language_outlined, color: primaryColor),
+          title: Text(translation(context: context, 'Language')),
+          trailing: LanguageDropdown(borderColor: primaryColor.withOpacity(0.5)),
         ),
         ListTile(
-          leading: Icon(Icons.backup_outlined, color: primaryColor),
-          title: const Text('Backup and restore'),
+          leading: Icon(Icons.bar_chart_outlined, color: primaryColor),
+          title: Text(translation(context: context, 'Statistics')),
           onTap: () {},
         ),
         const Divider(),
         ListTile(
           leading: Icon(Icons.settings_outlined, color: primaryColor),
-          title: const Text('Settings'),
+          title: Text(translation(context: context, 'Settings')),
           onTap: () {},
         ),
         ListTile(
           leading: Icon(Icons.info_outline, color: primaryColor),
           title: Row(
               children: [
-                const Text('About'),
+                Text(translation(context: context, 'About')),
                 const SizedBox(width: 4),
-                CustomChip(label: 'Active'),
+                CustomChip(label: translation(context: context, 'Active')),
               ],
             ),
           onTap: () {
@@ -174,7 +178,7 @@ class MorePage extends ConsumerWidget {
         ),
         ListTile(
           leading: Icon(Icons.help_outline, color: primaryColor),
-          title: const Text('Help'),
+          title: Text(translation(context: context, 'Help')),
           onTap: () {},
         ),
       ],

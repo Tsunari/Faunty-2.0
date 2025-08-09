@@ -1,7 +1,8 @@
 import 'package:faunty/components/custom_app_bar.dart';
 import 'package:faunty/components/role_gate.dart';
-import 'package:faunty/global_styles.dart';
+import 'package:faunty/globals.dart';
 import 'package:faunty/models/user_roles.dart';
+import 'package:faunty/tools/translation_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'catering_organisation.dart';
@@ -9,10 +10,10 @@ import '../../state_management/catering_provider.dart';
 import '../../state_management/user_list_provider.dart';
 
 // Users will be loaded from allUsersProvider
-final List<String> meals = ['Breakfast', 'Lunch', 'Dinner'];
+final List<String> meals = [translation('Breakfast'), translation('Lunch'), translation('Dinner')];
 
 class CateringPage extends ConsumerStatefulWidget {
-  const CateringPage({Key? key}) : super(key: key);
+  const CateringPage({super.key});
 
   @override
   ConsumerState<CateringPage> createState() => _CateringPageState();
@@ -20,20 +21,18 @@ class CateringPage extends ConsumerStatefulWidget {
 
 class _CateringPageState extends ConsumerState<CateringPage> {
 
-  // No local weekPlan, use provider
-
-  String getWeekday(int weekday) {
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    return days[weekday % 7];
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
     final monday = now.subtract(Duration(days: now.weekday - 1));
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    final roles = [UserRole.baskan, UserRole.talebe].map((r) => r.name).join(','); 
+    final days = [
+      translation(context: context, 'Monday'), translation(context: context, 'Tuesday'),
+      translation(context: context, 'Wednesday'), translation(context: context, 'Thursday'),
+      translation(context: context, 'Friday'), translation(context: context, 'Saturday'),
+      translation(context: context, 'Sunday')
+    ];
+    final roles = [UserRole.baskan, UserRole.talebe].map((r) => r.name).join(',');
     final usersAsync = ref.watch(usersByRolesProvider(roles));
     return usersAsync.when(
       data: (userList) {
@@ -57,7 +56,7 @@ class _CateringPageState extends ConsumerState<CateringPage> {
             }
             return Scaffold(
               appBar: CustomAppBar(
-                title: 'Catering',
+                title: translation(context: context, 'Catering'),
               ),
               body: Center(
                 child: SizedBox(
@@ -149,7 +148,7 @@ class _CateringPageState extends ConsumerState<CateringPage> {
                               Icon(Icons.emoji_food_beverage, size: 64, color: notFoundIconColor(context)),
                               const SizedBox(height: 24),
                               Text(
-                                'No catering assignments yet!',
+                                translation(context: context, 'No catering assignments yet!'),
                                 style: TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
@@ -161,7 +160,7 @@ class _CateringPageState extends ConsumerState<CateringPage> {
                               RoleGate(
                                 minRole: UserRole.baskan,
                                 child: Text(
-                                  'Tap the edit button below to assign users to meals for the week.',
+                                  translation(context: context, 'Tap the edit button below to assign users to meals for the week.'),
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: isDark ? Colors.white54 : Colors.black54,
@@ -194,7 +193,7 @@ class _CateringPageState extends ConsumerState<CateringPage> {
                       await service.setWeekPlan(result);
                     }
                   },
-                  tooltip: 'Bearbeiten',
+                  tooltip: translation(context: context, 'Edit'),
                   child: const Icon(Icons.edit),
                 ),
               ),

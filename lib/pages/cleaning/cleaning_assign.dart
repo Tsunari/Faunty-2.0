@@ -1,5 +1,6 @@
 import 'package:faunty/components/custom_confirm_dialog.dart';
 import 'package:faunty/models/user_roles.dart';
+import 'package:faunty/tools/translation_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/user_list_provider.dart';
@@ -29,15 +30,15 @@ class _CleaningAssignPageState extends ConsumerState<CleaningAssignPage> {
     final result = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Place'),
+        title: Text(translation(context: context, 'Add Place')),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'Place name'),
+          decoration: InputDecoration(labelText: translation(context: context, 'Place name')),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Add')),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(translation(context: context, 'Cancel'))),
+          ElevatedButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: Text(translation(context: context, 'Add'))),
         ],
       ),
     );
@@ -54,15 +55,15 @@ class _CleaningAssignPageState extends ConsumerState<CleaningAssignPage> {
     final result = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit Place'),
+        title: Text(translation(context: context, 'Edit Place')),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'Place name'),
+          decoration: InputDecoration(labelText: translation(context: context, 'Place name')),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Save')),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(translation(context: context, 'Cancel'))),
+          ElevatedButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: Text(translation(context: context, 'Save'))),
         ],
       ),
     );
@@ -136,7 +137,7 @@ class _CleaningAssignPageState extends ConsumerState<CleaningAssignPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Assignments'),
+        title: Text(translation(context: context, 'Edit Assignments')),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
@@ -157,14 +158,14 @@ class _CleaningAssignPageState extends ConsumerState<CleaningAssignPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'No places yet.',
+                    Text(
+                      translation(context: context, 'No places yet.'),
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.add),
-                      label: const Text('Create Place'),
+                      label: Text(translation(context: context, 'Create Place')),
                       onPressed: _addPlaceDialog,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -197,12 +198,12 @@ class _CleaningAssignPageState extends ConsumerState<CleaningAssignPage> {
                             ),
                             IconButton(
                               icon: const Icon(Icons.edit),
-                              tooltip: 'Edit Place',
+                              tooltip: translation(context: context, 'Edit Place'),
                               onPressed: () => _editPlaceDialog(placeId, placeName),
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete),
-                              tooltip: 'Delete Place',
+                              tooltip: translation(context: context, 'Delete Place'),
                               onPressed: () => _deletePlace(placeId, placeName),
                             ),
                           ],
@@ -257,7 +258,7 @@ class _CleaningAssignPageState extends ConsumerState<CleaningAssignPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: isSaving ? null : _saveAll,
-        tooltip: 'Save',
+        tooltip: translation(context: context, 'Save'),
         backgroundColor: isDark ? Colors.teal[400] : null,
         foregroundColor: isDark ? Colors.black : null,
         child: isSaving ? const Icon(Icons.save) : const Icon(Icons.save),

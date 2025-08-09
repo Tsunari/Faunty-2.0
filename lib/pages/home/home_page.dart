@@ -1,4 +1,5 @@
 import 'package:faunty/helper/logging.dart';
+import 'package:faunty/tools/translation_helper.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../components/custom_app_bar.dart';
@@ -106,14 +107,14 @@ class _HomePageState extends ConsumerState<HomePage> {
       data: (user) {
         printInfo(user != null ? 'UserEntity: uid=${user.uid}, email=${user.email}, role=${user.role}, place=${user.placeId}' : 'UserEntity NOT LOADED');
         if (user == null) {
-          return const Scaffold(
+          return Scaffold(
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Warte auf UserEntity... (HomePage wurde ohne geladenen User gebaut)')
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(translation(context: context, 'Waiting for UserEntity... (HomePage was built without a loaded user)'))
                 ],
               ),
             ),
@@ -125,7 +126,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         final width = MediaQuery.of(context).size.width;
         return Scaffold(
           appBar: CustomAppBar(
-            title: 'Home'
+            title: translation(context: context, 'Home')
           ),
           body: Scrollbar(
             controller: _scrollController,
@@ -142,8 +143,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Program',
+                            Text(
+                              translation(context: context, 'Program'),
                               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 12),
@@ -151,7 +152,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                               data: (data) {
                                 final appointments = getNextAppointments(data);
                                 if (appointments.isEmpty) {
-                                  return const Text('No program entries found for this week.');
+                                  return Text(translation(context: context, 'No program entries found for this week.'));
                                 }
                                 final now = DateTime.now();
                                 final todayIdx = now.weekday - 1;
@@ -219,7 +220,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 );
                               },
                               loading: () => const Center(child: CircularProgressIndicator()),
-                              error: (e, s) => Text('Fehler beim Laden des Programms: $e'),
+                              error: (e, s) => Text(translation(context: context, 'Error loading Program: $e')),
                             ),
                           ],
                         ),
@@ -251,12 +252,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   }
                                   if (assignedMeals.isNotEmpty) {
                                     final isToday = offset == 0;
-                                    final weekday = isToday ? 'Today' : weekDaysFull[dayIdx];
+                                    final weekday = isToday ? translation(context: context, 'Today') : weekDaysFull[dayIdx];
                                     return Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Your next catering assignment:',
+                                          translation(context: context, 'Your next catering assignment:'),
                                           style: const TextStyle(fontWeight: FontWeight.bold),
                                         ),
                                         Row(
@@ -282,10 +283,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                                     );
                                   }
                                 }
-                                return const Text('No upcoming catering assignment found.');
+                                return Text(translation(context: context, 'No upcoming catering assignment found.'));
                               },
-                              loading: () => const Text('Catering wird geladen...'),
-                              error: (e, s) => const Text('Fehler beim Laden des Caterings.'),
+                              loading: () => Text(translation(context: context, 'Catering wird geladen...')),
+                              error: (e, s) => Text(translation(context: context, 'Error loading Catering.')),
                             ),
                           ),
                         ],
@@ -305,7 +306,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                               data: (data) {
                                 final places = data as Map<String, dynamic>? ?? {};
                                 if (places.isEmpty) {
-                                  return const Text('No cleaning assignments found.');
+                                  return Text(translation(context: context, 'No cleaning assignments found.'));
                                 }
                                 final userPlaces = <String>[];
                                 places.forEach((placeId, placeData) {
@@ -323,13 +324,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   }
                                 });
                                 if (userPlaces.isEmpty) {
-                                  return const Text('You have no cleaning assignment');
+                                  return Text(translation(context: context, 'You have no cleaning assignment'));
                                 }
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Your cleaning assignment:',
+                                      translation(context: context, 'Your cleaning assignment:'),
                                       style: const TextStyle(fontWeight: FontWeight.bold),
                                     ),
                                     ...userPlaces.map((place) => Text(
@@ -342,8 +343,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   ],
                                 );
                               },
-                              loading: () => const Text('Cleaning assignments are loading...'),
-                              error: (e, s) => const Text('Fehler beim Laden der Cleaning-Daten.'),
+                              loading: () => Text(translation(context: context, 'Cleaning assignments are loading...')),
+                              error: (e, s) => Text(translation(context: context, 'Error loading Cleaning data.')),
                             ),
                           ),
                         ],

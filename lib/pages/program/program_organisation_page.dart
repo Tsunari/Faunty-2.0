@@ -1,4 +1,5 @@
 import 'package:faunty/components/custom_confirm_dialog.dart';
+import 'package:faunty/tools/translation_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../components/custom_app_bar.dart';
@@ -17,7 +18,9 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
   String? loadedTemplateName;
   late Map<String, List<Map<String, String>>> localWeekProgram;
   final List<String> weekDays = [
-    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+    translation('Monday'), translation('Tuesday'), translation('Wednesday'),
+    translation('Thursday'), translation('Friday'), translation('Saturday'),
+    translation('Sunday')
   ];
 
   List<Map<String, String>> _sortEntries(List<Map<String, String>> entries) {
@@ -38,17 +41,16 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
     };
   }
 
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Organisation',
+        title: translation(context: context, 'Organisation'),
         actions: [
           IconButton(
             icon: const Icon(Icons.note_add), //#Icon Save as Template
-            tooltip: 'Save as template',
+            tooltip: translation(context: context, 'Save as template'),
             onPressed: () async {
               final nameController = TextEditingController();
               final service = ref.read(programFirestoreServiceProvider);
@@ -59,7 +61,7 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
                 context: context,
                 builder: (context) => StatefulBuilder(
                   builder: (context, setState) => AlertDialog(
-                    title: const Text('Save as template'),
+                    title: Text(translation(context: context, 'Save as template')),
                     content: SizedBox(
                       width: 300,
                       child: Column(
@@ -120,7 +122,7 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
                             DropdownButton<String>(
                               isExpanded: true,
                               value: selectedTemplate,
-                              hint: const Text('Select template to override'),
+                              hint: Text(translation(context: context, 'Select template to override')),
                               items: templates.keys.map((name) => DropdownMenuItem(
                                 value: name,
                                 child: Text(name),
@@ -131,7 +133,7 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
                           if (tabIndex == 1) ...[
                             TextField(
                               controller: nameController,
-                              decoration: const InputDecoration(labelText: 'Template name'),
+                              decoration: InputDecoration(labelText: translation(context: context, 'Template name')),
                             ),
                           ],
                         ],
@@ -164,10 +166,10 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
                                     setState(() {});
                                     if (context.mounted) {
                                       Navigator.pop(context, selectedTemplate);
-                                      showCustomSnackBar(context, 'Template "$selectedTemplate" overridden.');
+                                      showCustomSnackBar(context, 'Template "$selectedTemplate" overridden.'); // TODO: Localize
                                     }
                                   },
-                            child: const Text('Override'),
+                            child: Text(translation(context: context, 'Override')),
                           ),
                         ],
                       ),
@@ -182,7 +184,7 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
                   loadedTemplateName = result;
                 });
                 if (context.mounted) {
-                  showCustomSnackBar(context, 'Template "$result" saved.');
+                  showCustomSnackBar(context, 'Template "$result" saved.'); // TODO: Localize
                 }
               }
             },
@@ -212,13 +214,13 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
                         onDelete: (name) async {
                           await service.deleteTemplate(name);
                           if (context.mounted) {
-                            showCustomSnackBar(context, 'Template "$name" deleted.');
+                            showCustomSnackBar(context, 'Template "$name" deleted.'); // TODO: Localize
                           }
                         },
                         onUpdate: (name) async {
                           await service.setTemplate(name, localWeekProgram);
                           if (context.mounted) {
-                            showCustomSnackBar(context, 'Template "$name" updated.');
+                            showCustomSnackBar(context, 'Template "$name" updated.'); // TODO: Localize
                           }
                           // Fetch latest templates after update and update dialog state
                           templates = await service.getTemplates();
@@ -238,7 +240,7 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
                         loadedTemplateName = selected;
                       });
                       if (context.mounted) {
-                        showCustomSnackBar(context, 'Template "$selected" loaded.');
+                        showCustomSnackBar(context, 'Template "$selected" loaded.'); // TODO: Localize
                       }
                     }
                   },
@@ -314,7 +316,7 @@ class _TemplateSelectionDialogState extends State<_TemplateSelectionDialog> {
         children: [
           const Icon(Icons.list_alt, color: Colors.teal),
           const SizedBox(width: 8),
-          const Text('Select a template'),
+          Text(translation(context: context, 'Select a template')),
         ],
       ),
       content: SizedBox(
@@ -323,7 +325,7 @@ class _TemplateSelectionDialogState extends State<_TemplateSelectionDialog> {
             ? SizedBox(
                 height: 48,
                 child: Center(
-                  child: Text('No templates found', style: theme.textTheme.bodyLarge?.copyWith(color: theme.disabledColor)),
+                  child: Text(translation(context: context, 'No templates found'), style: theme.textTheme.bodyLarge?.copyWith(color: theme.disabledColor)),
                 ),
               )
             : ListView.separated(
@@ -370,7 +372,7 @@ class _TemplateSelectionDialogState extends State<_TemplateSelectionDialog> {
                             // ),
                             IconButton(
                               icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                              tooltip: 'Delete template',
+                              tooltip: translation(context: context, 'Delete template'),
                               onPressed: () async {
                                 final confirm = await showDeleteDialog(context: context);
                                 if (confirm == true) {
@@ -395,7 +397,7 @@ class _TemplateSelectionDialogState extends State<_TemplateSelectionDialog> {
           child: TextButton.icon(
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.close),
-            label: const Text('Close'),
+            label: Text(translation(context: context, 'Close')),
             style: TextButton.styleFrom(
               foregroundColor: theme.colorScheme.primary,
               textStyle: theme.textTheme.labelLarge,
@@ -558,7 +560,7 @@ class _ProgramDayCard extends StatelessWidget {
   }
 
   String _weekDayName(int idx) {
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    final days = [translation('Monday'), translation('Tuesday'), translation('Wednesday'), translation('Thursday'), translation('Friday'), translation('Saturday'), translation('Sunday')];
     return days[idx];
   }
 }
@@ -629,7 +631,7 @@ Future<Map<String, String>?> _showAddEditDialog(BuildContext context, {Map<Strin
       return StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: Text(entry == null ? 'Add new event' : 'Edit event'),
+            title: Text(entry == null ? translation(context: context, 'Add new event') : translation(context: context, 'Edit event')),
             content: SizedBox(
               width: 350,
               child: Column(
@@ -655,7 +657,7 @@ Future<Map<String, String>?> _showAddEditDialog(BuildContext context, {Map<Strin
                             }
                           },
                           child: Text(fromTime == null
-                              ? 'Select start time'
+                              ? translation(context: context, 'Select start time')
                               : ('${fromTime!.hour.toString().padLeft(2, '0')}:${fromTime!.minute.toString().padLeft(2, '0')}')),
                         ),
                       ),
@@ -678,7 +680,7 @@ Future<Map<String, String>?> _showAddEditDialog(BuildContext context, {Map<Strin
                             }
                           },
                           child: Text(toTime == null
-                              ? 'Select end time'
+                              ? translation(context: context, 'Select end time')
                               : ('${toTime!.hour.toString().padLeft(2, '0')}:${toTime!.minute.toString().padLeft(2, '0')}')),
                         ),
                       ),
@@ -695,7 +697,7 @@ Future<Map<String, String>?> _showAddEditDialog(BuildContext context, {Map<Strin
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
+                child: Text(translation(context: context, 'Cancel')),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -709,7 +711,7 @@ Future<Map<String, String>?> _showAddEditDialog(BuildContext context, {Map<Strin
                     });
                   }
                 },
-                child: Text(entry == null ? 'Add' : 'Save'),
+                child: Text(entry == null ? translation(context: context, 'Add') : translation(context: context, 'Save')),
               ),
             ],
           );
@@ -735,7 +737,7 @@ class _SaveFab extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       onPressed: onSave,
-      tooltip: 'Save and go back',
+      tooltip: translation(context: context, 'Save and go back'),
       backgroundColor: isDark ? Colors.teal[400] : null,
       foregroundColor: isDark ? Colors.black : null,
       child: const Icon(Icons.save),

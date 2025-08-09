@@ -1,5 +1,6 @@
 import 'package:faunty/components/custom_snackbar.dart';
 import 'package:faunty/state_management/user_provider.dart';
+import 'package:faunty/tools/translation_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,7 +20,7 @@ class AccountPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Account'),
+        title: Text(translation(context: context, 'Account')),
         backgroundColor: surfaceColor,
         foregroundColor: onSurface,
         elevation: 1,
@@ -27,7 +28,7 @@ class AccountPage extends ConsumerWidget {
       body: user == null
           ? Center(
               child: Text(
-                'No user is currently signed in.',
+                translation(context: context, 'No user is currently signed in.'),
                 style: theme.textTheme.bodyLarge,
               ),
             )
@@ -81,13 +82,13 @@ class AccountPage extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Account Details', style: theme.textTheme.titleMedium),
+                              Text(translation(context: context, 'Account Details'), style: theme.textTheme.titleMedium),
                               TextButton.icon(
                                 style: TextButton.styleFrom(
                                   foregroundColor: primaryColor,
                                 ),
                                 icon: const Icon(Icons.edit),
-                                label: const Text('Edit'),
+                                label: Text(translation(context: context, 'Edit')),
                                 onPressed: () {
                                   showModalBottomSheet(
                                     context: context,
@@ -115,12 +116,12 @@ class AccountPage extends ConsumerWidget {
                                                   mainAxisSize: MainAxisSize.min,
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Text('Change Password', style: theme.textTheme.titleLarge),
+                                                    Text(translation(context: context, 'Change Password'), style: theme.textTheme.titleLarge),
                                                     const SizedBox(height: 16),
                                                     TextField(
                                                       controller: passwordController,
-                                                      decoration: const InputDecoration(
-                                                        labelText: 'New Password',
+                                                      decoration: InputDecoration(
+                                                        labelText: translation(context: context, 'New Password'),
                                                         prefixIcon: Icon(Icons.lock),
                                                       ),
                                                       obscureText: true,
@@ -142,14 +143,14 @@ class AccountPage extends ConsumerWidget {
                                                         icon: isLoading
                                                             ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                                                             : const Icon(Icons.save),
-                                                        label: const Text('Save Password'),
+                                                        label: Text(translation(context: context, 'Save Password')),
                                                         onPressed: isLoading
                                                             ? null
                                                             : () async {
                                                                 setState(() => isLoading = true);
                                                                 try {
                                                                   if (passwordController.text.trim().isEmpty) {
-                                                                    throw Exception('Please enter a new password.');
+                                                                    throw Exception(translation(context: context, 'Please enter a new password.'));
                                                                   }
                                                                   await user.updatePassword(passwordController.text.trim());
                                                                   await user.reload();
@@ -158,7 +159,7 @@ class AccountPage extends ConsumerWidget {
                                                                     // Show success snackbar
                                                                     Future.delayed(const Duration(milliseconds: 300), () {
                                                                       if (context.mounted) {
-                                                                        showCustomSnackBar(context, 'Password changed successfully!');
+                                                                        showCustomSnackBar(context, translation(context: context, 'Password changed successfully!'));
                                                                       }
                                                                     });
                                                                   }
@@ -169,9 +170,9 @@ class AccountPage extends ConsumerWidget {
                                                                       showDialog(
                                                                         context: context,
                                                                         builder: (context) => AlertDialog(
-                                                                          title: const Text('Re-authentication Required'),
-                                                                          content: const Text(
-                                                                            'For security reasons, please log in again to change your password. You will be redirected to the login screen.',
+                                                                          title: Text(translation(context: context, 'Re-authentication Required')),
+                                                                          content: Text(
+                                                                            translation(context: context, 'For security reasons, please log in again to change your password. You will be redirected to the login screen.'),
                                                                           ),
                                                                           actions: [
                                                                             TextButton(
@@ -216,26 +217,14 @@ class AccountPage extends ConsumerWidget {
                           if (user.metadata.creationTime != null)
                             ListTile(
                               leading: Icon(Icons.event, color: primaryColor),
-                              title: Text('Created'),
+                              title: Text(translation(context: context, 'Created')),
                               subtitle: Text(formatDateTime(user.metadata.creationTime!)),
                             ),
                           if (user.metadata.lastSignInTime != null)
                             ListTile(
                               leading: Icon(Icons.login, color: primaryColor),
-                              title: Text('Last Sign-in'),
+                              title: Text(translation(context: context, 'Last Sign-in')),
                               subtitle: Text(formatDateTime(user.metadata.lastSignInTime!)),
-                            ),
-                          if (user.phoneNumber != null)
-                            ListTile(
-                              leading: Icon(Icons.phone, color: primaryColor),
-                              title: Text('Phone'),
-                              subtitle: Text(user.phoneNumber!),
-                            ),
-                          if (user.photoURL != null)
-                            ListTile(
-                              leading: Icon(Icons.image, color: primaryColor),
-                              title: Text('Profile Photo'),
-                              subtitle: Text(user.photoURL!),
                             ),
                         ],
                       ),

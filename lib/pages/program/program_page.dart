@@ -1,6 +1,7 @@
 import 'package:faunty/components/role_gate.dart';
-import 'package:faunty/global_styles.dart';
+import 'package:faunty/globals.dart';
 import 'package:faunty/models/user_roles.dart';
+import 'package:faunty/tools/translation_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../components/custom_app_bar.dart';
@@ -16,7 +17,7 @@ const List<String> weekDaysShort = [
 ];
 
 class ProgramPage extends ConsumerStatefulWidget {
-  const ProgramPage({Key? key}) : super(key: key);
+  const ProgramPage({super.key});
 
   @override
   ConsumerState<ProgramPage> createState() => _ProgramPageState();
@@ -27,9 +28,10 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
     // For Firestore key lookup (full name)
     return weekDays[(date.weekday - 1) % 7];
   }
-  String getWeekdayShort(DateTime date) {
-    // For UI display (short name)
-    return weekDaysShort[(date.weekday - 1) % 7];
+  String getWeekdayShort(DateTime date, BuildContext context) {
+    // For UI display (short name, translated)
+    final short = weekDaysShort[(date.weekday - 1) % 7];
+    return translation(context: context, short);
   }
 
   @override
@@ -44,7 +46,7 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
         for (int idx = 0; idx < 7; idx++) {
           final date = now.add(Duration(days: idx));
           final dayName = getWeekdayFromDate(date);
-          final dayShort = getWeekdayShort(date);
+          final dayShort = getWeekdayShort(date, context);
           final entries = weekProgram[dayName] ?? [];
           if (entries.isNotEmpty) {
             daysWithPrograms.add({
@@ -57,7 +59,7 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
         }
         return Scaffold(
           appBar: CustomAppBar(
-            title: 'Program',
+            title: translation(context: context, 'Program'),
           ),
           body: Center(
             child: SizedBox(
@@ -72,7 +74,7 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                           Icon(Icons.event_busy, size: 64, color: notFoundIconColor(context)),
                           const SizedBox(height: 24),
                           Text(
-                            'No program entries for this week!',
+                            translation(context: context, 'No program entries for this week!'),
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -84,7 +86,7 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                           RoleGate(
                             minRole: UserRole.baskan,
                             child: Text(
-                              'Tap the edit button below to add a program for the week.',
+                              translation(context: context, 'Tap the edit button below to add a program for the week.'),
                               style: TextStyle(
                                 fontSize: 16,
                                 color: isDark ? Colors.white54 : Colors.black54,
@@ -240,7 +242,7 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                   await service.setWeekProgram(result);
                 }
               },
-              tooltip: 'Edit program',
+              tooltip: translation(context: context, 'Edit program'),
               child: const Icon(Icons.edit),
             ),
           ),
