@@ -176,7 +176,7 @@ class TranslationsRu implements Translations {
 	@override String get no_other_users_found => 'Другие пользователи не найдены';
 	@override String get debt => 'Долг';
 	@override String get paypal => 'PayPal';
-	@override String get did_you_pay => 'Вы заплатили';
+	@override String get did_you_pay => 'Вы заплатили ';
 	@override String get via_paypal => ' € через PayPal?';
 	@override String get yes => 'Да';
 	@override String get reset_debt => 'Сбросить долг';
@@ -330,7 +330,7 @@ extension on TranslationsRu {
 			case 'no_other_users_found': return 'Другие пользователи не найдены';
 			case 'debt': return 'Долг';
 			case 'paypal': return 'PayPal';
-			case 'did_you_pay': return 'Вы заплатили';
+			case 'did_you_pay': return 'Вы заплатили ';
 			case 'via_paypal': return ' € через PayPal?';
 			case 'yes': return 'Да';
 			case 'reset_debt': return 'Сбросить долг';

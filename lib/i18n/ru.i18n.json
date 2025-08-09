@@ -139,7 +139,7 @@
   "no_other_users_found": "Другие пользователи не найдены",
   "debt": "Долг",
     "paypal": "PayPal",
-  "did_you_pay": "Вы заплатили",
+  "did_you_pay": "Вы заплатили ",
   "via_paypal": " € через PayPal?",
   "yes": "Да",
   "reset_debt": "Сбросить долг",

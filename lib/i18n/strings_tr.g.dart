@@ -176,7 +176,7 @@ class TranslationsTr implements Translations {
 	@override String get no_other_users_found => 'Başka kullanıcı bulunamadı';
 	@override String get debt => 'Borç';
 	@override String get paypal => 'PayPal';
-	@override String get did_you_pay => 'Ödedin mi';
+	@override String get did_you_pay => 'Ödedin mi ';
 	@override String get via_paypal => ' € PayPal ile?';
 	@override String get yes => 'Evet';
 	@override String get reset_debt => 'Borcu sıfırla';
@@ -330,7 +330,7 @@ extension on TranslationsTr {
 			case 'no_other_users_found': return 'Başka kullanıcı bulunamadı';
 			case 'debt': return 'Borç';
 			case 'paypal': return 'PayPal';
-			case 'did_you_pay': return 'Ödedin mi';
+			case 'did_you_pay': return 'Ödedin mi ';
 			case 'via_paypal': return ' € PayPal ile?';
 			case 'yes': return 'Evet';
 			case 'reset_debt': return 'Borcu sıfırla';

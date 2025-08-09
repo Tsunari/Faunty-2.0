@@ -1,5 +1,4 @@
 import 'package:faunty/components/custom_app_bar.dart';
-import 'package:faunty/components/custom_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:faunty/firestore/kantin_firestore_service.dart';
@@ -7,7 +6,6 @@ import 'package:faunty/components/custom_chip.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'package:faunty/components/custom_snackbar.dart';
 import 'package:faunty/state_management/kantin_provider.dart';
-import 'package:faunty/firestore/kantin_firestore_service.dart';
 import 'package:faunty/state_management/user_provider.dart';
 import 'package:faunty/state_management/user_list_provider.dart';
 import 'package:faunty/models/user_roles.dart';
@@ -34,7 +32,6 @@ class _KantinPageState extends ConsumerState<KantinPage> with WidgetsBindingObse
   bool _pendingPaypal = false;
 
   @override
-  @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
@@ -50,7 +47,6 @@ class _KantinPageState extends ConsumerState<KantinPage> with WidgetsBindingObse
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed && _pendingPaypal) {
       _pendingPaypal = false;
-      final theme = Theme.of(context);
       final user = ref.read(userProvider);
       final placeId = user.value?.placeId ?? '';
       final userUid = user.value?.uid ?? '';
@@ -204,25 +200,19 @@ class _KantinPageState extends ConsumerState<KantinPage> with WidgetsBindingObse
             onPressed: _isLoading || userUid.isEmpty || currentDebt <= 0
                 ? null
                 : () async {
-              final url = 'https://www.paypal.me/FatihKantin/${currentDebt.toStringAsFixed(2)}';
+              final url = Uri.parse('https://www.paypal.me/FatihKantin/${currentDebt.toStringAsFixed(2)}');
               debugPrint('[PayPal] Attempting to open: $url');
               _pendingPaypal = true;
-              try {
-                if (await canLaunch(url)) {
-                  debugPrint('[PayPal] Launching URL...');
-                  await launch(url);
-                  debugPrint('[PayPal] URL launched successfully.');
-                } else {
-                  debugPrint('[PayPal] canLaunch returned false for: $url');
+              final uri = Uri.parse(url.toString());
+              if (await canLaunchUrl(uri)) {
+                debugPrint('[PayPal] Launching URL...');
+                await launchUrl(uri);
+                debugPrint('[PayPal] URL launched successfully.');
+              } else {
+                  debugPrint('[PayPal] canLaunchUrl returned false for: $url');
                   showCustomSnackBar(context, 'Could not open PayPal.');
                   _pendingPaypal = false;
                 }
-              } catch (e, s) {
-                debugPrint('[PayPal] Exception: $e');
-                debugPrint('[PayPal] StackTrace: $s');
-                showCustomSnackBar(context, 'Could not open PayPal.');
-                _pendingPaypal = false;
-              }
             },
             tooltip: 'Pay with PayPal',
           ),

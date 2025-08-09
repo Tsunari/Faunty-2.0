@@ -176,7 +176,7 @@ class TranslationsDe implements Translations {
 	@override String get no_other_users_found => 'Keine anderen Nutzer gefunden';
 	@override String get debt => 'Schulden';
 	@override String get paypal => 'PayPal';
-	@override String get did_you_pay => 'Haben Sie bezahlt';
+	@override String get did_you_pay => 'Haben Sie bezahlt ';
 	@override String get via_paypal => ' € via PayPal?';
 	@override String get yes => 'Ja';
 	@override String get reset_debt => 'Schulden zurücksetzen';
@@ -330,7 +330,7 @@ extension on TranslationsDe {
 			case 'no_other_users_found': return 'Keine anderen Nutzer gefunden';
 			case 'debt': return 'Schulden';
 			case 'paypal': return 'PayPal';
-			case 'did_you_pay': return 'Haben Sie bezahlt';
+			case 'did_you_pay': return 'Haben Sie bezahlt ';
 			case 'via_paypal': return ' € via PayPal?';
 			case 'yes': return 'Ja';
 			case 'reset_debt': return 'Schulden zurücksetzen';
