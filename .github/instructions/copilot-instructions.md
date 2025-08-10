@@ -1,5 +1,5 @@
 ---
-applyTo: "**"
+applyTo: "**/.dart"
 ---
 
 # Faunty Flutter Project — Copilot Instructions

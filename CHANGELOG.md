@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## 1.0.0 (2025-08-10)
 
 ### Breaking Changes
 - APP RELEASE
