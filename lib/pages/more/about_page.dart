@@ -1,5 +1,7 @@
+import 'package:faunty/globals.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -85,8 +87,21 @@ class AboutPage extends StatelessWidget {
                         style: textTheme.bodyMedium?.copyWith(color: onSurface),
                       ),
                       const SizedBox(height: 16),
+                      FutureBuilder<PackageInfo>(
+                        future: getAppInfo(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return Text('Loading version...');
+                          }
+                          if (snapshot.hasError) {
+                            return Text('Version unavailable');
+                          }
+                          final info = snapshot.data;
+                          return Text('Version: ${info?.version ?? '-'}');
+                        },
+                      ),
                       Text(
-                        'Version: 2.0.0\nDeveloped by Omar & Contributors',
+                        'Developed by Omar & Contributors',
                         style: textTheme.bodySmall?.copyWith(color: secondary),
                       ),
                     ],
