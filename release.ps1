@@ -90,7 +90,7 @@ function Write-Section {
         #region Globals
         $ErrorActionPreference = 'Stop'
         $startTime = Get-Date
-        $totalSteps = 9
+        $totalSteps = 10
         $pubspecPath = "./pubspec.yaml"
         $changelogPath = "./CHANGELOG.md"
         #endregion Globals
@@ -228,9 +228,21 @@ function Write-Section {
             Write-Section "Commit and push" 7 $totalSteps
             git add $pubspecPath $changelogPath
             git commit -m "chore: prepare release $newVersion"
-            # git push
+            git push
             if ($LASTEXITCODE -ne 0) { Write-ErrorAndExit "Git push failed." }
             #endregion Step 9
+
+            #region Step 10: Trigger GitHub Workflows
+            Write-Section "Trigger GitHub Workflows" 8 $totalSteps
+
+            # Trigger release.yml workflow
+            Write-Host "Triggering release.yml workflow..." -ForegroundColor Magenta
+            gh workflow run release.yml
+
+            # Trigger release_hosting.yml workflow
+            Write-Host "Triggering release_hosting.yml workflow..." -ForegroundColor Magenta
+            gh workflow run release_hosting.yml
+            #endregion Step 10
 
             #region Final Output
             $endTime = Get-Date
