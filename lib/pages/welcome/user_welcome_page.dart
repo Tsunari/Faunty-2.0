@@ -1,5 +1,5 @@
+import 'package:faunty/globals.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/user_provider.dart';
 import '../../models/user_roles.dart';
@@ -27,6 +27,14 @@ class _UserWelcomePageState extends ConsumerState<UserWelcomePage> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted) {
               Navigator.of(context).pushReplacementNamed('/home');
+            }
+          });
+        }
+        // check if user is logged in if not go to login page
+        if (userAsync is AsyncData && userAsync.value == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (ModalRoute.of(context)?.settings.name != '/login') {
+              Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
             }
           });
         }
@@ -111,7 +119,7 @@ class _UserWelcomePageState extends ConsumerState<UserWelcomePage> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       elevation: 0,
                     ),
-                    onPressed: () => _logout(context),
+                    onPressed: () => logout(context: context, ref: ref),
                   ),
                 ],
               ),
@@ -120,13 +128,5 @@ class _UserWelcomePageState extends ConsumerState<UserWelcomePage> {
         ),
       ),
     );
-  }
-
-  void _logout(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
-    ref.invalidate(userProvider);
-    if (context.mounted) {
-      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-    }
   }
 }

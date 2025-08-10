@@ -1,4 +1,5 @@
 import 'package:faunty/components/custom_snackbar.dart';
+import 'package:faunty/globals.dart';
 import 'package:faunty/state_management/user_provider.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -242,11 +243,7 @@ class AccountPage extends ConsumerWidget {
                       icon: const Icon(Icons.logout),
                       label: const Text('Sign Out'),
                       onPressed: () async {
-                        await FirebaseAuth.instance.signOut();
-                        ref.invalidate(userProvider);
-                        if (context.mounted) {
-                          Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-                        }
+                        logout(context: context, ref: ref);
                       },
                     ),
                   ),

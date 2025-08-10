@@ -100,6 +100,14 @@ class _MainPageState extends State<MainPage> {
       fallback: Consumer(
         builder: (context, ref, _) {
           final userAsync = ref.watch(userProvider);
+          // check if user is logged in if not go to login page
+          if (userAsync is AsyncData && userAsync.value == null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (ModalRoute.of(context)?.settings.name != '/login') {
+                Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+              }
+            });
+          }
           if (userAsync is AsyncData && userAsync.value != null && userAsync.value!.role == UserRole.user) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (ModalRoute.of(context)?.settings.name != '/user-welcome') {

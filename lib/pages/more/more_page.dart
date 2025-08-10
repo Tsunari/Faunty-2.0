@@ -1,12 +1,12 @@
 import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/firestore/globals_firestore_service.dart';
+import 'package:faunty/globals.dart';
 import 'package:faunty/models/user_roles.dart';
 import 'package:faunty/pages/more/about_page.dart';
 import 'package:faunty/pages/more/account_page.dart';
 import 'package:faunty/pages/more/kantin_page.dart';
 import 'package:faunty/state_management/user_provider.dart';
 import 'package:faunty/tools/translation_helper.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/globals_provider.dart';
@@ -32,12 +32,7 @@ class MorePage extends ConsumerWidget {
             tag: 'logo',
             child: GestureDetector(
               onTap: () async {
-                await FirebaseAuth.instance.signOut();
-                ref.invalidate(userProvider);
-                if (context.mounted) {
-                  // Navigate to login page
-                  Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-                }
+                logout(context: context, ref: ref);
               },
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -155,7 +150,13 @@ class MorePage extends ConsumerWidget {
         ),
         ListTile(
           leading: Icon(Icons.local_cafe_outlined, color: primaryColor),
-          title: Text(translation(context: context, 'Kantin')),
+          title: Row(
+            children: [
+              Text(translation(context: context, 'Kantin')),
+              const SizedBox(width: 4),
+              CustomChip(label: translation(context: context, 'Active'))
+            ],
+          ),
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(

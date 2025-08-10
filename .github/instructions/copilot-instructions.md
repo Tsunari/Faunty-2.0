@@ -5,7 +5,9 @@ applyTo: "**"
 # Faunty Flutter Project — Copilot Instructions
 
 ## Project Overview
-Faunty is a Flutter app for team/organization management. The name comes from an earlier React project, but this codebase is Flutter-only.
+Faunty is a modern Flutter app for team and organization management, built for usability, real-time collaboration, and beautiful design.
+
+For more information, see the main [README.md](../../README.md) in the project root.
 
 ## Architecture & Key Patterns
 - **State Management:** Riverpod (`lib/state_management/`). Providers are used for real-time Firestore streams (see `user_provider.dart`, `kantin_provider.dart`).
@@ -27,6 +29,8 @@ Faunty is a Flutter app for team/organization management. The name comes from an
 - **Translation:** All user-facing strings (except intentionally hardcoded ones) must use the translation helper. If no context, just pass the string.
 - **Error Handling:** Use `showCustomSnackBar` for user-visible errors. For debug logging, use `lib/helper/logging.dart`.
 - **External Links:** Use `url_launcher` with `canLaunchUrl`/`launchUrl` (not deprecated `canLaunch`/`launch`). Wrap in try/catch for reliability.
+- **Theme & Colors:** Use `Theme.of(context)` for colors whenever possible to ensure consistent theming.
+- **Code Examples:** When creating something new (e.g., providers, StreamProviders, or a new page in the `pages` folder), look at similar examples in the codebase and follow their patterns for consistency.
 
 ## Integration Points
 - **Firebase:** All data flows through Firestore collections. Structure: `places/{placeId}/{domain}` (kantin, cleaning, catering, program, etc.), and `user_list/{userUID}` for user data fields. See Firestore service files for details.

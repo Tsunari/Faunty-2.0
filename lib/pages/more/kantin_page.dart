@@ -557,7 +557,12 @@ class CantineWidget extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: Text(
                   translation(context: context, 'Debt') + ': ' + currentDebt.toStringAsFixed(2).replaceAll('.', ','),
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: currentDebt > 0
+                        ? Colors.red
+                        : (currentDebt < 0 ? Colors.green : null),
+                  ),
                 ),
               ),
               // IconButton(

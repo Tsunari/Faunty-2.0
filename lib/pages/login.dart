@@ -257,9 +257,9 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       });
       // Invalidate userProvider to ensure fresh user state from StreamProvider
       ref.invalidate(userProvider);
-      if (context.mounted) {
-        Navigator.of(context).pushReplacementNamed('/user-welcome');
-      }
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed('/user-welcome');
+      
     } else {
       if (!mounted) return;
       setState(() {
@@ -289,6 +289,14 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
+    final userAsync = ref.watch(userProvider);
+    if (userAsync is AsyncData && userAsync.value != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (ModalRoute.of(context)?.settings.name == '/login') {
+          Navigator.of(context).pushReplacementNamed('/home');
+        }
+      });
+    }
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
