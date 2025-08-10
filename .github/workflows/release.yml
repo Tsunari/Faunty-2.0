@@ -1,0 +1,128 @@
+name: Release
+on:
+  workflow_dispatch:
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Set up Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Set up GitHub CLI
+        run: choco install gh -y
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Get last release tag
+        id: lasttag
+        run: |
+          echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+
+      - name: Get Conventional Commit Messages since last tag
+        id: commits
+        run: |
+          $tag = "${{ steps.lasttag.outputs.tag }}"
+          $commits = git log --pretty=format:"%s" --no-merges $tag..HEAD
+          echo "commits<<EOF" >> $GITHUB_ENV
+          echo "$commits" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+        shell: pwsh
+
+      - name: Determine next version bump
+        id: version
+        shell: pwsh
+        run: |
+          $commits = $env:commits -split "`n"
+          $pubspec = Get-Content "pubspec.yaml"
+          $versionLine = $pubspec | Where-Object { $_ -match "^version:" }
+          $version = $versionLine -replace "version:\s*", ""
+          $versionParts = $version.Split("+",2)[0].Split(".")
+          $majorNum = [int]$versionParts[0]
+          $minorNum = [int]$versionParts[1]
+          $patchNum = [int]$versionParts[2]
+          $major = $commits | Where-Object { $_ -like "*BREAKING CHANGE*" }
+          $minor = $commits | Where-Object { $_ -like "feat:*" }
+          $patch = $commits | Where-Object { $_ -like "fix:*" }
+          if ($major) {
+            $majorNum++
+            $minorNum = 0
+            $patchNum = 0
+          } elseif ($minor) {
+            $minorNum++
+            $patchNum = 0
+          } elseif ($patch) {
+            $patchNum++
+          }
+          $newVersion = "$majorNum.$minorNum.$patchNum"
+          $newVersionLine = "version: $newVersion+1"
+          echo "newVersion=$newVersion" >> $GITHUB_ENV
+          echo "newVersionLine=$newVersionLine" >> $GITHUB_ENV
+
+      - name: Update pubspec.yaml
+        shell: pwsh
+        run: |
+          $pubspec = Get-Content "pubspec.yaml"
+          $newVersionLine = $env:newVersionLine
+          $pubspec = $pubspec | ForEach-Object {
+            if ($_ -match "^version:") { $newVersionLine } else { $_ }
+          }
+          Set-Content "pubspec.yaml" $pubspec
+
+      - name: Update/Create CHANGELOG.md
+        shell: pwsh
+        run: |
+          $changelogPath = "CHANGELOG.md"
+          if (!(Test-Path $changelogPath)) {
+            "# Changelog`n" | Out-File $changelogPath
+          }
+          $changelog = Get-Content $changelogPath
+          $today = Get-Date -Format "yyyy-MM-dd"
+          $entry = "## $env:newVersion ($today)`n"
+          $commits = $env:commits -split "`n"
+          $major = $commits | Where-Object { $_ -like "*BREAKING CHANGE*" }
+          $minor = $commits | Where-Object { $_ -like "feat:*" }
+          $patch = $commits | Where-Object { $_ -like "fix:*" }
+          if ($major) { $entry += "### Breaking Changes`n" + ($major -join "`n") + "`n" }
+          if ($minor) { $entry += "### Features`n" + ($minor -join "`n") + "`n" }
+          if ($patch) { $entry += "### Fixes`n" + ($patch -join "`n") + "`n" }
+          $changelog = @($entry) + $changelog
+          Set-Content $changelogPath $changelog
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add pubspec.yaml CHANGELOG.md
+          git commit -m "chore(release): ${{ env.newVersion }}"
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Create GitHub Release (Android APK)
+        run: |
+          $apkPath = "build/app/outputs/flutter-apk/app-release.apk"
+          if (Test-Path $apkPath) {
+            gh release create "v${{ env.newVersion }}" $apkPath --title "Release ${{ env.newVersion }}" --notes (Get-Content CHANGELOG.md | Select-String "## ${{ env.newVersion }}" -Context 0,50 | ForEach-Object { $_.Line })
+          }
+        shell: pwsh
+
+      - name: Build Flutter web
+        run: flutter build web
+
+      - name: Deploy to Firebase Hosting
+        run: firebase deploy --only hosting --token $FIREBASE_TOKEN
+
+      - name: Done
+        run: echo "Release ${{ env.newVersion }} complete!"
