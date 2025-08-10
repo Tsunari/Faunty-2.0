@@ -47,10 +47,10 @@ For more information, see the main [README.md](../../README.md) in the project r
 - **Custom Chip:** See `lib/components/custom_chip.dart` for reusable UI chips with click handlers.
 - **Translation:** `translation(context: context, 'Key')` or just `translation('Key')` if no context.
 
-## Build & Deploy
-- Local: `flutter run`
-- Web: `flutter build web`
-- Deploy: Run `release.ps1` (PowerShell) for Firebase Hosting
+## Commits
+- Use commits flags for all changes (--change, --feat, --bug, --global).
+- Include a detailed description of the change and its impact.
+- Reference any related issues.
 
 ---
 

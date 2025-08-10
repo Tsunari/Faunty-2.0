@@ -313,7 +313,9 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                       ? Hero(
                           tag: 'logo',
                           child: Image.asset(
-                            'assets/LogoInverse.png',
+                            Theme.of(context).brightness == Brightness.light
+                              ? 'assets/Logo.png'
+                              : 'assets/LogoInverse.png',
                             height: 145,
                             fit: BoxFit.contain,
                           ),

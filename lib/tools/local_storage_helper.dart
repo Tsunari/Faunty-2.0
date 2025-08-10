@@ -1,0 +1,24 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
+class LocalStorageHelper {
+  static const String themeModeKey = 'theme_mode';
+
+  static Future<void> setThemeMode(String mode) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(themeModeKey, mode);
+    } catch (e) {
+      // Ignore errors (e.g., MissingPluginException)
+    }
+  }
+
+  static Future<String?> getThemeMode() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(themeModeKey);
+    } catch (e) {
+      // Ignore errors (e.g., MissingPluginException)
+      return null;
+    }
+  }
+}

@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/globals_provider.dart';
 import 'users_page.dart';
 import '../../components/custom_chip.dart';
+import 'settings_page.dart';
 import 'package:faunty/components/language_dropdown.dart';
 
 
@@ -40,7 +41,11 @@ class MorePage extends ConsumerWidget {
                   SizedBox(
                     height: 100,
                     child: Image(
-                      image: const AssetImage('assets/LogoInverse.png'),
+                      image: AssetImage(
+                        Theme.of(context).brightness == Brightness.light
+                          ? 'assets/Logo.png'
+                          : 'assets/LogoInverse.png'
+                        ),
                       fit: BoxFit.contain,
                     ),
                   ),
@@ -169,7 +174,13 @@ class MorePage extends ConsumerWidget {
         ListTile(
           leading: Icon(Icons.settings_outlined, color: primaryColor),
           title: Text(translation(context: context, 'Settings')),
-          onTap: () {},
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const SettingsPage(),
+              ),
+            );
+          },
         ),
         ListTile(
           leading: Icon(Icons.info_outline, color: primaryColor),

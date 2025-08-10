@@ -63,7 +63,7 @@ jobs:
             version="${{ steps.get_version.outputs.version }}"
             notes="${{ steps.get_notes.outputs.notes }}"
             tag="v$version"
-            apkName="Faunty $version.apk"
+            apkName="Faunty-$version.apk"
             # Get latest commit SHA
             sha=$(git rev-parse HEAD)
             if [ -f "$apkPath" ]; then

@@ -16,6 +16,7 @@ import 'pages/welcome/user_welcome_page.dart';
 import 'state_management/user_provider.dart';
 import 'package:faunty/i18n/strings.g.dart';
 import 'package:faunty/tools/translation_helper.dart';
+import 'state_management/theme_provider.dart';
 
 
 void main() async {
@@ -35,12 +36,11 @@ void main() async {
   );
 }
 
-class Faunty extends StatelessWidget {
+class Faunty extends ConsumerWidget {
   const Faunty({super.key});
 
-  // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) { 
+  Widget build(BuildContext context, WidgetRef ref) { 
     return MaterialApp(
       title: translation(context: context, 'Faunty'),
       debugShowCheckedModeBanner: false,
@@ -55,7 +55,11 @@ class Faunty extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      themeMode: ThemeMode.dark,
+      themeMode: ref.watch(themeProvider).value == AppThemeMode.dark
+        ? ThemeMode.dark
+        : ref.watch(themeProvider).value == AppThemeMode.light
+            ? ThemeMode.light
+            : ThemeMode.system,
 
       initialRoute: '/splash',
       routes: {
@@ -68,14 +72,14 @@ class Faunty extends StatelessWidget {
   }
 }
 
-class MainPage extends StatefulWidget {
+class MainPage extends ConsumerStatefulWidget {
   const MainPage({super.key});
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  ConsumerState<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends ConsumerState<MainPage> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
@@ -94,12 +98,12 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    final userAsync = ref.watch(userProvider);
     return RoleGate(
       minRole: UserRole.talebe,
       showChildOnPages: ['/login'],
-      fallback: Consumer(
-        builder: (context, ref, _) {
-          final userAsync = ref.watch(userProvider);
+      fallback: Builder(
+        builder: (context) {
           // check if user is logged in if not go to login page
           if (userAsync is AsyncData && userAsync.value == null) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
