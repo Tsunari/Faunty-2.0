@@ -91,7 +91,7 @@ class MorePage extends ConsumerWidget {
                     children: [
                       Text(translation(context: context, 'Registration Mode')),
                       const SizedBox(width: 4),
-                      CustomChip(label: globals.registrationMode ? translation(context: context, 'Active') : translation(context: context, 'Inactive')),
+                      CustomContainerChip(label: globals.registrationMode ? translation(context: context, 'Active') : translation(context: context, 'Inactive')),
                     ],
                   ),
                   subtitle: Text(translation(context: context, 'Enable or disable registration')),
@@ -113,7 +113,7 @@ class MorePage extends ConsumerWidget {
               children: [
                 Text(translation(context: context, 'Account')),
                 const SizedBox(width: 4),
-                CustomChip(label: translation(context: context, 'Active')),
+                CustomContainerChip(label: translation(context: context, 'Active')),
               ],
             ),
           onTap: () {
@@ -130,7 +130,7 @@ class MorePage extends ConsumerWidget {
             children: [
               Text(translation(context: context, 'Users')),
               const SizedBox(width: 4),
-              CustomChip(
+              CustomContainerChip(
                 label: translation(context: context, 'Active'),
               ),
             ],
@@ -149,7 +149,7 @@ class MorePage extends ConsumerWidget {
               children: [
                 Text(translation(context: context, 'Language')),
                 const SizedBox(width: 4),
-                CustomChip(label: translation(context: context, 'Active')),
+                CustomContainerChip(label: translation(context: context, 'Active')),
               ],
             ),
           trailing: LanguageDropdown(borderColor: primaryColor.withOpacity(0.5)),
@@ -165,7 +165,7 @@ class MorePage extends ConsumerWidget {
             children: [
               Text(translation(context: context, 'Kantin')),
               const SizedBox(width: 4),
-              CustomChip(label: translation(context: context, 'Active'))
+              CustomContainerChip(label: translation(context: context, 'Active'))
             ],
           ),
           onTap: () {
@@ -183,7 +183,7 @@ class MorePage extends ConsumerWidget {
               children: [
                 Text(translation(context: context, 'Settings')),
                 const SizedBox(width: 4),
-                CustomChip(label: translation(context: context, 'Active')),
+                CustomContainerChip(label: translation(context: context, 'Active')),
               ],
             ),
           onTap: () {
@@ -200,7 +200,7 @@ class MorePage extends ConsumerWidget {
               children: [
                 Text(translation(context: context, 'About')),
                 const SizedBox(width: 4),
-                CustomChip(label: translation(context: context, 'Active')),
+                CustomContainerChip(label: translation(context: context, 'Active')),
               ],
             ),
           onTap: () {

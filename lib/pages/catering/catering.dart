@@ -1,5 +1,6 @@
 import 'package:faunty/components/custom_app_bar.dart';
 import 'package:faunty/components/role_gate.dart';
+import 'package:faunty/components/custom_chip.dart';
 import 'package:faunty/globals.dart';
 import 'package:faunty/models/user_roles.dart';
 import 'package:faunty/tools/translation_helper.dart';
@@ -88,8 +89,7 @@ class _CateringPageState extends ConsumerState<CateringPage> {
                                         '${days[dayIdx]}, ${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: isDark ? Colors.white : null,
+                                          fontSize: 16
                                         ),
                                       ),
                                     ),
@@ -106,8 +106,7 @@ class _CateringPageState extends ConsumerState<CateringPage> {
                                                     child: Text(
                                                       meals[mealIdx],
                                                       style: TextStyle(
-                                                        fontWeight: FontWeight.w500,
-                                                        color: isDark ? Colors.white : null,
+                                                        fontWeight: FontWeight.w500
                                                       ),
                                                     ),
                                                   ),
@@ -115,16 +114,8 @@ class _CateringPageState extends ConsumerState<CateringPage> {
                                                     child: Wrap(
                                                       spacing: 8,
                                                       runSpacing: 4,
-                                                      children: weekPlan[dayIdx][mealIdx].map((user) => Container(
-                                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                                            decoration: BoxDecoration(
-                                                              color: isDark ? Colors.green.shade900 : Colors.green.shade100,
-                                                              borderRadius: BorderRadius.circular(12),
-                                                            ),
-                                                            child: Text(
-                                                              user,
-                                                              style: TextStyle(color: isDark ? Colors.white : null),
-                                                            ),
+                                                      children: weekPlan[dayIdx][mealIdx].map((user) => CustomChip(
+                                                            label: user,
                                                           )).toList(),
                                                     ),
                                                   ),
@@ -152,7 +143,6 @@ class _CateringPageState extends ConsumerState<CateringPage> {
                                 style: TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white70 : Colors.blue.shade700,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -163,7 +153,6 @@ class _CateringPageState extends ConsumerState<CateringPage> {
                                   translation(context: context, 'Tap the edit button below to assign users to meals for the week.'),
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: isDark ? Colors.white54 : Colors.black54,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),

@@ -1,6 +1,8 @@
 import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/firebase_options.dart';
 import 'package:faunty/models/user_roles.dart';
+import 'package:faunty/state_management/language_provider.dart';
+import 'package:faunty/tools/local_storage_helper.dart';
 import 'package:flutter/material.dart';
 import 'globals.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -26,6 +28,7 @@ void main() async {
   LocaleSettings.useDeviceLocale(); // Localization setup
   // String storedLocale = loadFromStorage(); // with shared preferences or any other method
   // LocaleSettings.setLocaleRaw(storedLocale);
+  await LanguageNotifier().loadLanguage();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

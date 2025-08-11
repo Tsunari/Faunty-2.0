@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'cleaning_assign.dart';
 import '../../components/custom_app_bar.dart';
+import '../../components/custom_chip.dart';
 import '../../state_management/cleaning_provider.dart';
 
 class CleaningPage extends ConsumerWidget {
@@ -69,9 +70,6 @@ class CleaningPage extends ConsumerWidget {
                                   style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).brightness == Brightness.dark
-                                        ? Colors.white70
-                                        : Theme.of(context).colorScheme.primary,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -84,9 +82,6 @@ class CleaningPage extends ConsumerWidget {
                                     : translation(context: context, 'Assign users to your existing places using the action button below.'),
                                     style: TextStyle(
                                       fontSize: 16,
-                                      color: Theme.of(context).brightness == Brightness.dark
-                                          ? Colors.white54
-                                          : Colors.black54,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -169,17 +164,7 @@ class CleaningPage extends ConsumerWidget {
                                                   .map((entry) {
                                                     final parts = entry.split('_');
                                                     final label = parts.length >= 3 ? '${parts[1]} ${parts[2]}' : entry;
-                                                    return Chip(
-                                                      label: Text(label, style: const TextStyle(fontSize: 13)),
-                                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                                                      visualDensity: VisualDensity.compact,
-                                                      backgroundColor: Theme.of(context).colorScheme.primary.withAlpha(80),
-                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                                      labelStyle: TextStyle(
-                                                        color: Theme.of(context).colorScheme.onSurface,
-                                                        fontWeight: FontWeight.w500,
-                                                      ),
-                                                    );
+                                                    return CustomChip(label: label);
                                                   })
                                                   .toList(),
                                             ),

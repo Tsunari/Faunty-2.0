@@ -78,7 +78,6 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white70 : Colors.blue.shade700,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -89,7 +88,6 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                               translation(context: context, 'Tap the edit button below to add a program for the week.'),
                               style: TextStyle(
                                 fontSize: 16,
-                                color: isDark ? Colors.white54 : Colors.black54,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -139,10 +137,8 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                                   // padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
                                   decoration: BoxDecoration(
                                     color: isToday
-                                        ? Colors.blue.shade400
-                                        : isDark
-                                            ? Colors.grey[800]
-                                            : Colors.blue.shade50,
+                                        ? Theme.of(context).colorScheme.primaryContainer
+                                        : Theme.of(context).colorScheme.surface,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Center(
@@ -155,7 +151,6 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 14,
-                                            color: isToday ? Colors.white : isDark ? Colors.white : null,
                                           ),
                                         ),
                                         const SizedBox(height: 2),
@@ -163,7 +158,6 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                                           '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}',
                                           style: TextStyle(
                                             fontSize: 11,
-                                            color: isToday ? Colors.white : isDark ? Colors.white70 : Colors.black87,
                                           ),
                                         ),
                                       ],
@@ -185,9 +179,9 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                           decoration: BoxDecoration(
-                                            color: isDark ? Colors.green.shade900 : Colors.green.shade100,
+                                            color: Theme.of(context).colorScheme.surface,
                                             borderRadius: BorderRadius.circular(12),
-                                            border: isCurrent ? Border.all(color: Colors.red, width: 2) : null,
+                                            border: isCurrent ? Border.all(color: Theme.of(context).colorScheme.primary.withAlpha(200), width: 2) : null,
                                           ),
                                           child: Row(
                                             children: [
@@ -195,7 +189,6 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                                                 '${entry['from']} - ${entry['to']}',
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.w500,
-                                                  color: isDark ? Colors.white : null,
                                                 ),
                                               ),
                                               const SizedBox(width: 12),
@@ -203,7 +196,6 @@ class _ProgramPageState extends ConsumerState<ProgramPage> {
                                                 child: Text(
                                                   entry['event'] ?? '',
                                                   style: TextStyle(
-                                                    color: isDark ? Colors.white : null,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),

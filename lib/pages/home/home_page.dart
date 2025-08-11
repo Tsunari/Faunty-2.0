@@ -196,10 +196,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                             decoration: BoxDecoration(
-                                              color: Theme.of(context).brightness == Brightness.dark ? Colors.green.shade900 : Colors.green.shade100,
+                                              color: Theme.of(context).colorScheme.surface,
                                               borderRadius: BorderRadius.circular(12),
                                               border: Border.all(
-                                                color: isCurrent ? Colors.red : Colors.green.shade700,
+                                                color: isCurrent ? Colors.red : Theme.of(context).colorScheme.primary.withAlpha(200),
                                                 width: 2,
                                               ),
                                             ),
@@ -234,7 +234,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       padding: const EdgeInsets.all(16.0),
                       child: Row(
                         children: [
-                          const Icon(Icons.dining, color: Colors.green),
+                          Icon(Icons.dining, color: Theme.of(context).colorScheme.primary),
                           const SizedBox(width: 12),
                           Expanded(
                             child: cateringAsync.when(
@@ -300,7 +300,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       padding: const EdgeInsets.all(16.0),
                       child: Row(
                         children: [
-                          Icon(Icons.cleaning_services, color: Colors.green),
+                          Icon(Icons.cleaning_services, color: Theme.of(context).colorScheme.primary),
                           const SizedBox(width: 12),
                           Expanded(
                             child: cleaningAsync.when(

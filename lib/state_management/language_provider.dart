@@ -7,10 +7,10 @@ final languageProvider = StateNotifierProvider<LanguageNotifier, String>((ref) =
 
 class LanguageNotifier extends StateNotifier<String> {
   LanguageNotifier() : super('en') {
-    _loadLanguage();
+    loadLanguage();
   }
 
-  Future<void> _loadLanguage() async {
+  Future<void> loadLanguage() async {
     final code = await LocalStorageHelper.getLanguageCode();
     if (code != null) {
       state = code;

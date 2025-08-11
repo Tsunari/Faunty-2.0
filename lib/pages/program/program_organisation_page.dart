@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:faunty/components/custom_confirm_dialog.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'package:flutter/material.dart';
@@ -18,9 +20,7 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
   String? loadedTemplateName;
   late Map<String, List<Map<String, String>>> localWeekProgram;
   final List<String> weekDays = [
-    translation('Monday'), translation('Tuesday'), translation('Wednesday'),
-    translation('Thursday'), translation('Friday'), translation('Saturday'),
-    translation('Sunday')
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
   ];
 
   List<Map<String, String>> _sortEntries(List<Map<String, String>> entries) {
@@ -57,6 +57,7 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
               final templates = await service.getTemplates();
               String? selectedTemplate;
               int tabIndex = templates.isNotEmpty ? 0 : 1;
+              if (!context.mounted) return;
               final result = await showDialog<String>(
                 context: context,
                 builder: (context) => StatefulBuilder(
@@ -77,7 +78,7 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
                                     padding: const EdgeInsets.symmetric(vertical: 10),
                                     decoration: BoxDecoration(
                                       color: tabIndex == 0 ? Theme.of(context).colorScheme.primary.withOpacity(0.08) : Colors.transparent,
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Center(
                                       child: Text(
@@ -100,7 +101,7 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
                                     padding: const EdgeInsets.symmetric(vertical: 10),
                                     decoration: BoxDecoration(
                                       color: tabIndex == 1 ? Theme.of(context).colorScheme.primary.withOpacity(0.08) : Colors.transparent,
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Center(
                                       child: Text(
@@ -197,54 +198,51 @@ class _ProgramOrganisationPageState extends ConsumerState<ProgramOrganisationPag
               }
               final templates = snapshot.data ?? {};
               if (templates.isEmpty) return const SizedBox.shrink();
-              return Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: IconButton(
-                  icon: const Icon(Icons.folder_special), //#icon load template
-                  tooltip: 'Load template',
-                  onPressed: () async {
-                    final service = ref.read(programFirestoreServiceProvider);
-                    var templates = await service.getTemplates();
-                    if (!mounted) return;
-                    final selected = await showDialog<String>(
-                      context: context, // TODO: Solution for this
-                      builder: (context) => _TemplateSelectionDialog(
-                        templates: templates,
-                        // loadedTemplateName: loadedTemplateName, // TODO: Cool? not cool?
-                        onDelete: (name) async {
-                          await service.deleteTemplate(name);
-                          if (context.mounted) {
-                            showCustomSnackBar(context, 'Template "$name" deleted.'); // TODO: Localize
-                          }
-                        },
-                        onUpdate: (name) async {
-                          await service.setTemplate(name, localWeekProgram);
-                          if (context.mounted) {
-                            showCustomSnackBar(context, 'Template "$name" updated.'); // TODO: Localize
-                          }
-                          // Fetch latest templates after update and update dialog state
-                          templates = await service.getTemplates();
-                          return templates;
-                        },
-                      ),
-                    );
-                    // Always fetch latest templates after dialog closes
-                    templates = await service.getTemplates();
-                    if (selected != null && templates.containsKey(selected)) {
-                      setState(() {
-                        // Deep copy to avoid reference issues
-                        localWeekProgram = {
-                          for (final day in weekDays)
-                            day: (templates[selected]![day] as List?)?.map((e) => Map<String, String>.from(e)).toList() ?? []
-                        };
-                        loadedTemplateName = selected;
-                      });
-                      if (context.mounted) {
-                        showCustomSnackBar(context, 'Template "$selected" loaded.'); // TODO: Localize
-                      }
+              return IconButton(
+                icon: const Icon(Icons.folder_special), //#icon load template
+                tooltip: translation(context: context, 'Load template'),
+                onPressed: () async {
+                  final service = ref.read(programFirestoreServiceProvider);
+                  var templates = await service.getTemplates();
+                  if (!mounted) return;
+                  final selected = await showDialog<String>(
+                    context: context, // TODO: Solution for this
+                    builder: (context) => _TemplateSelectionDialog(
+                      templates: templates,
+                      // loadedTemplateName: loadedTemplateName, // TODO: Cool? not cool?
+                      onDelete: (name) async {
+                        await service.deleteTemplate(name);
+                        if (context.mounted) {
+                          showCustomSnackBar(context, 'Template "$name" deleted.'); // TODO: Localize
+                        }
+                      },
+                      onUpdate: (name) async {
+                        await service.setTemplate(name, localWeekProgram);
+                        if (context.mounted) {
+                          showCustomSnackBar(context, 'Template "$name" updated.'); // TODO: Localize
+                        }
+                        // Fetch latest templates after update and update dialog state
+                        templates = await service.getTemplates();
+                        return templates;
+                      },
+                    ),
+                  );
+                  // Always fetch latest templates after dialog closes
+                  templates = await service.getTemplates();
+                  if (selected != null && templates.containsKey(selected)) {
+                    setState(() {
+                      // Deep copy to avoid reference issues
+                      localWeekProgram = {
+                        for (final day in weekDays)
+                          day: (templates[selected]![day] as List?)?.map((e) => Map<String, String>.from(e)).toList() ?? []
+                      };
+                      loadedTemplateName = selected;
+                    });
+                    if (context.mounted) {
+                      showCustomSnackBar(context, 'Template "$selected" loaded.'); // TODO: Localize
                     }
-                  },
-                ),
+                  }
+                },
               );
             },
           ),
@@ -314,7 +312,7 @@ class _TemplateSelectionDialogState extends State<_TemplateSelectionDialog> {
       actionsPadding: EdgeInsets.zero,
       title: Row(
         children: [
-          const Icon(Icons.list_alt, color: Colors.teal),
+          Icon(Icons.list_alt, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 8),
           Text(translation(context: context, 'Select a template')),
         ],
@@ -338,7 +336,7 @@ class _TemplateSelectionDialogState extends State<_TemplateSelectionDialog> {
                   return Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                       onTap: () => Navigator.pop(context, name),
                       child: Container(
                         decoration: isCurrent
@@ -351,7 +349,7 @@ class _TemplateSelectionDialogState extends State<_TemplateSelectionDialog> {
                         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                         child: Row(
                           children: [
-                            const Icon(Icons.description_outlined, color: Colors.teal, size: 22),
+                            Icon(Icons.description_outlined, color: Theme.of(context).colorScheme.primary, size: 22),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -424,8 +422,10 @@ class _ProgramList extends StatelessWidget {
       itemCount: 7,
       itemBuilder: (context, idx) {
         final dayName = weekDays[idx];
+        final dayLabel = translation(context: context, dayName);
         return _ProgramDayCard(
           dayName: dayName,
+          dayLabel: dayLabel,
           entries: localWeekProgram[dayName]!,
           weekProgram: localWeekProgram,
           isDark: isDark,
@@ -438,11 +438,12 @@ class _ProgramList extends StatelessWidget {
 
 class _ProgramDayCard extends StatelessWidget {
   final String dayName;
+  final String dayLabel;
   final List<Map<String, String>> entries;
   final Map<String, List<Map<String, String>>> weekProgram;
   final bool isDark;
   final void Function(List<Map<String, String>> entries) onChanged;
-  const _ProgramDayCard({required this.dayName, required this.entries, required this.weekProgram, required this.isDark, required this.onChanged});
+  const _ProgramDayCard({required this.dayName, required this.dayLabel, required this.entries, required this.weekProgram, required this.isDark, required this.onChanged});
 
   List<Map<String, String>> _sortEntries(List<Map<String, String>> entries) {
     entries.sort((a, b) {
@@ -457,36 +458,37 @@ class _ProgramDayCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final sortedEntries = _sortEntries(List<Map<String, String>>.from(entries));
     return Card(
-      color: isDark ? Colors.grey[850] : null,
+      color: Theme.of(context).colorScheme.onInverseSurface,
       margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[800] : Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    dayName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: isDark ? Colors.white : null,
+            SizedBox(
+              width: 110,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      dayLabel,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: 90,
-                  height: 38,
-                  child: DropdownButton<String>(
+                  const SizedBox(height: 8),
+                  DropdownButton<String>(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                     hint: const Text('Copy', style: TextStyle(fontSize: 12)),
                     value: null,
                     style: const TextStyle(fontSize: 12),
@@ -496,8 +498,8 @@ class _ProgramDayCard extends StatelessWidget {
                     iconSize: 18,
                     items: [
                       ...List.generate(7, (i) => DropdownMenuItem<String>(
-                        value: _weekDayName(i),
-                        child: Text(_weekDayName(i), style: const TextStyle(fontSize: 12)),
+                        value: _weekDayName(i, false),
+                        child: Text(_weekDayName(i, true), style: const TextStyle(fontSize: 12)),
                       ))
                     ],
                     onChanged: (copyDay) {
@@ -509,11 +511,11 @@ class _ProgramDayCard extends StatelessWidget {
                     },
                     dropdownColor: isDark ? Colors.grey[800] : Colors.white,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(width: 12),
-            Expanded(
+            Flexible(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -559,8 +561,8 @@ class _ProgramDayCard extends StatelessWidget {
     );
   }
 
-  String _weekDayName(int idx) {
-    final days = [translation('Monday'), translation('Tuesday'), translation('Wednesday'), translation('Thursday'), translation('Friday'), translation('Saturday'), translation('Sunday')];
+  String _weekDayName(int idx, bool translated) {
+    final days = translated ? [translation('Monday'), translation('Tuesday'), translation('Wednesday'), translation('Thursday'), translation('Friday'), translation('Saturday'), translation('Sunday')] : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     return days[idx];
   }
 }
@@ -575,7 +577,7 @@ class _ProgramEntryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.fromLTRB(12.0, 0, 12.0, 4.0),
       child: GestureDetector(
         onTap: () async {
           final result = await _showAddEditDialog(context, entry: entry);
@@ -586,7 +588,7 @@ class _ProgramEntryTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: isDark ? Colors.green.shade900 : Colors.green.shade100,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -595,7 +597,6 @@ class _ProgramEntryTile extends StatelessWidget {
                 '${entry['from']} - ${entry['to']}',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
-                  color: isDark ? Colors.white : null,
                 ),
               ),
               const SizedBox(width: 12),
@@ -603,13 +604,12 @@ class _ProgramEntryTile extends StatelessWidget {
                 child: Text(
                   entry['event']!,
                   style: TextStyle(
-                    color: isDark ? Colors.white : null,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.delete, color: Color.fromARGB(255, 63, 63, 63)),
+                icon: const Icon(Icons.delete),
                 tooltip: 'Delete event',
                 onPressed: onDelete,
               ),
@@ -689,7 +689,7 @@ Future<Map<String, String>?> _showAddEditDialog(BuildContext context, {Map<Strin
                   const SizedBox(height: 16),
                   TextField(
                     controller: eventController,
-                    decoration: const InputDecoration(labelText: 'Title'),
+                    decoration: InputDecoration(labelText: translation(context: context, 'Title')),
                   ),
                 ],
               ),
@@ -738,8 +738,8 @@ class _SaveFab extends StatelessWidget {
     return FloatingActionButton(
       onPressed: onSave,
       tooltip: translation(context: context, 'Save and go back'),
-      backgroundColor: isDark ? Colors.teal[400] : null,
-      foregroundColor: isDark ? Colors.black : null,
+      backgroundColor: Theme.of(context).colorScheme.primary.withValues(colorSpace: ColorSpace.sRGB),
+      foregroundColor: isDark ? Colors.black : Colors.white,
       child: const Icon(Icons.save),
     );
   }

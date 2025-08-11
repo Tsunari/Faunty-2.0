@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/catering_provider.dart';
@@ -310,8 +312,8 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                 if (mounted) Navigator.pop(context, localWeekPlan);
               },
         tooltip: 'Save and go back',
-        backgroundColor: isDark ? Colors.teal[400] : null,
-        foregroundColor: isDark ? Colors.black : null,
+        backgroundColor: Theme.of(context).colorScheme.primary.withValues(colorSpace: ColorSpace.sRGB),
+        foregroundColor: isDark ? Colors.black : Colors.white,
         child: isSaving ? const CircularProgressIndicator() : const Icon(Icons.save),
       ),
     );

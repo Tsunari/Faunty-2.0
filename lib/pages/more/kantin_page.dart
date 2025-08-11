@@ -216,7 +216,6 @@ class _KantinPageState extends ConsumerState<KantinPage> with WidgetsBindingObse
             },
             tooltip: 'Pay with PayPal',
           ),
-          SizedBox(width: 8),
         ],
       ),
       body: kantinAsync.isLoading
@@ -389,7 +388,7 @@ class _KantinPageState extends ConsumerState<KantinPage> with WidgetsBindingObse
                 InkWell(
                   borderRadius: BorderRadius.circular(16),
                   onTap: _isLoading || userUid.isEmpty ? null : () => setDebt(displayDebt + (product['price'] as double), placeId, userUid),
-                  child: CustomChip(
+                  child: CustomContainerChip(
                     label: '${product['name']} ${product['price'].toString().replaceAll('.', ',')}',
                     // backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
                     // textColor: theme.colorScheme.primary,
@@ -529,7 +528,7 @@ class CantineWidget extends ConsumerWidget {
               InkWell(
                 onTap: userUid.isEmpty ? null : () => setDebt(currentDebt - 1.0),
                 borderRadius: BorderRadius.circular(8),
-                child: CustomChip(
+                child: CustomContainerChip(
                   label: "- 1", 
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 ),
@@ -538,23 +537,47 @@ class CantineWidget extends ConsumerWidget {
               InkWell(
                 onTap: userUid.isEmpty ? null : () => setDebt(currentDebt - 0.5),
                 borderRadius: BorderRadius.circular(8),
-                child: CustomChip(
+                child: CustomContainerChip(
                   label: "- 0.5", 
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 ),
               ),
-              // IconButton(
-              //   icon: const Icon(Icons.remove),
-              //   onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt - 1.0),
-              //   tooltip: '-1',
-              // ),
-              // IconButton(
-              //   icon: const Icon(Icons.remove),
-              //   onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt - 0.5),
-              //   tooltip: '-0.5',
-              // ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              SizedBox(width: 16),
+              GestureDetector(
+                onTap: userUid.isEmpty
+                    ? null
+                    : () async {
+                        final controller = TextEditingController(text: currentDebt.toStringAsFixed(2).replaceAll('.', ','));
+                        final result = await showDialog<double>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text(translation(context: context, 'Set Debt')),
+                            content: TextField(
+                              controller: controller,
+                              keyboardType: TextInputType.numberWithOptions(decimal: true),
+                              decoration: InputDecoration(labelText: translation(context: context, 'Debt amount')),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text(translation(context: context, 'Cancel')),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  final value = double.tryParse(controller.text.replaceAll(',', '.'));
+                                  if (value != null) {
+                                    Navigator.pop(context, value);
+                                  }
+                                },
+                                child: Text(translation(context: context, 'Set')),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (result != null) {
+                          await setDebt(result);
+                        }
+                      },
                 child: Text(
                   translation(context: context, 'Debt') + ': ' + currentDebt.toStringAsFixed(2).replaceAll('.', ','),
                   style: theme.textTheme.titleMedium?.copyWith(
@@ -565,20 +588,11 @@ class CantineWidget extends ConsumerWidget {
                   ),
                 ),
               ),
-              // IconButton(
-              //   icon: const Icon(Icons.add),
-              //   onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt + 1.0),
-              //   tooltip: '+1',
-              // ),
-              // IconButton(
-              //   icon: const Icon(Icons.add),
-              //   onPressed: userUid.isEmpty ? null : () => setDebt(currentDebt + 0.5),
-              //   tooltip: '+0.5',
-              // ),
+              SizedBox(width: 16),
               InkWell(
                 onTap: userUid.isEmpty ? null : () => setDebt(currentDebt + 0.5),
                 borderRadius: BorderRadius.circular(8),
-                child: CustomChip(
+                child: CustomContainerChip(
                   label: "+ 0,5", 
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 ),
@@ -587,7 +601,7 @@ class CantineWidget extends ConsumerWidget {
               InkWell(
                 onTap: userUid.isEmpty ? null : () => setDebt(currentDebt + 1.0),
                 borderRadius: BorderRadius.circular(8),
-                child: CustomChip(
+                child: CustomContainerChip(
                   label: "+ 1", 
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 ),
@@ -602,7 +616,7 @@ class CantineWidget extends ConsumerWidget {
                 InkWell(
                   borderRadius: BorderRadius.circular(12),
                   onTap: userUid.isEmpty ? null : () => setDebt(currentDebt + (product['price'] as double)),
-                  child: CustomChip(
+                  child: CustomContainerChip(
                     label: '${product['name']} ${product['price'].toString().replaceAll('.', ',')}',
                     fontSize: 11,
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),

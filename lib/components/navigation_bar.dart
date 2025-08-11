@@ -6,35 +6,35 @@ class NavBar extends StatelessWidget {
   final ValueChanged<int> onDestinationSelected;
   const NavBar({super.key, required this.selectedIndex, required this.onDestinationSelected});
 
-  static final List<NavigationDestination> _destinations = [
-    NavigationDestination(
-      icon: Icon(Icons.home_filled),
-      label: translation('Home'),
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.cleaning_services),
-      label: translation('Cleaning'),
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.dining),
-      label: translation('Catering'),
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.today),
-      label: translation('Program'),
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.more_horiz_outlined),
-      label: translation('More'),
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
+    final destinations = [
+      NavigationDestination(
+        icon: Icon(Icons.home_filled),
+        label: translation(context: context, 'Home'),
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.cleaning_services),
+        label: translation(context: context, 'Cleaning'),
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.dining),
+        label: translation(context: context, 'Catering'),
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.today),
+        label: translation(context: context, 'Program'),
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.more_horiz_outlined),
+        label: translation(context: context, 'More'),
+      ),
+    ];
     return NavigationBar(
       labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
       selectedIndex: selectedIndex,
-      destinations: _destinations,
+      destinations: destinations,
       onDestinationSelected: onDestinationSelected,
     );
   }
