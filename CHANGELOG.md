@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.2.0] - 11-08-2025
+### Added
+- Add dialog to kantin widget
+### Changed
+- Add translations
+- Change circle avatar background
+- Custom sliver app bar component ready to use
+- Enhance UI components
+- Some more ui enhancements
+- Update color scheme usage and adjust layout dimensions in various pages
+- Update padding in CustomAppBar actions and improve color scheme in CateringOrganisationPage
+- Use design across app
+### Fixed
+- Enhance user navigation condition in UserWelcomePage
+- Fix language persistence loading not working till navigating to a page with language dropdown
+- Local storage import fix
+
+
+
 ## [1.1.0] - 11-08-2025
 ### Global
 - Release script
