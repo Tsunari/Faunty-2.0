@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.0] - 11-08-2025
+### Global
+- Release script
+- Workflows enhancement
+
+### Added
+- Add settings page
+- Add sharedPreferences and use it for themes
+- Add theme dropdown
+- Add theme selection with persistence functionality
+- Implement language selection and persistence
+### Changed
+- Enhance theme preset UI and add more
+- Update commit guidelines and fix APK naming convention
+- Use ConsumerWidgets in main
+
+
+
 ## 1.0.0 (2025-08-10)
 
 ### Breaking Changes
