@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:faunty/i18n/strings.g.dart';
+import 'package:faunty/state_management/language_provider.dart';
 
 class LanguageDropdown extends ConsumerWidget {
   final Color? borderColor;
@@ -16,7 +17,6 @@ class LanguageDropdown extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final primaryColor = Theme.of(context).colorScheme.primary;
-    final locale = TranslationProvider.of(context).locale;
     final locales = AppLocale.values;
     final localeNames = {
       AppLocale.en: 'English',
@@ -24,6 +24,11 @@ class LanguageDropdown extends ConsumerWidget {
       AppLocale.tr: 'Türkçe',
       AppLocale.ru: 'Русский',
     };
+    final selectedCode = ref.watch(languageProvider);
+    final selectedLocale = locales.firstWhere(
+      (loc) => loc.languageTag == selectedCode,
+      orElse: () => AppLocale.en,
+    );
     return Container(
       padding: padding,
       decoration: BoxDecoration(
@@ -32,7 +37,7 @@ class LanguageDropdown extends ConsumerWidget {
         color: Theme.of(context).colorScheme.surface,
       ),
       child: DropdownButton<AppLocale>(
-        value: locale,
+        value: selectedLocale,
         icon: Icon(Icons.arrow_drop_down, color: primaryColor),
         underline: SizedBox(),
         borderRadius: BorderRadius.circular(borderRadius),
@@ -53,6 +58,7 @@ class LanguageDropdown extends ConsumerWidget {
         onChanged: (newLocale) {
           if (newLocale != null) {
             LocaleSettings.setLocale(newLocale);
+            ref.read(languageProvider.notifier).setLanguage(newLocale.languageTag);
           }
         },
       ),

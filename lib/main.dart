@@ -17,6 +17,7 @@ import 'state_management/user_provider.dart';
 import 'package:faunty/i18n/strings.g.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'state_management/theme_provider.dart';
+import 'state_management/language_provider.dart';
 
 
 void main() async {
@@ -40,13 +41,20 @@ class Faunty extends ConsumerWidget {
   const Faunty({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) { 
+  Widget build(BuildContext context, WidgetRef ref) {
+    final langCode = ref.watch(languageProvider);
+    // Set locale if not already set
+    final locale = AppLocale.values.firstWhere(
+      (loc) => loc.languageTag == langCode,
+      orElse: () => AppLocale.en,
+    );
+    LocaleSettings.setLocale(locale);
     return MaterialApp(
       title: translation(context: context, 'Faunty'),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-        useMaterial3: true
+        useMaterial3: true,
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -60,7 +68,6 @@ class Faunty extends ConsumerWidget {
         : ref.watch(themeProvider).value == AppThemeMode.light
             ? ThemeMode.light
             : ThemeMode.system,
-
       initialRoute: '/splash',
       routes: {
         '/splash': (context) => const SplashPage(),

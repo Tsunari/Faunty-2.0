@@ -1,4 +1,5 @@
 import 'package:faunty/components/custom_dropdown.dart';
+import 'package:faunty/components/language_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../tools/translation_helper.dart';
@@ -49,6 +50,12 @@ class SettingsPage extends ConsumerWidget {
                 },
                 borderColor: primaryColor.withOpacity(0.5),
               ),
+            ),
+            ListTile(
+              leading: Icon(Icons.language, color: primaryColor),
+              title: Text(translation(context: context, 'Language')),
+              subtitle: Text(translation(context: context, 'Choose app language.')),
+              trailing: LanguageDropdown(borderColor: primaryColor.withOpacity(0.5)),
             ),
           ],
         ),
