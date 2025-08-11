@@ -12,6 +12,10 @@ final themePresets = [
   ThemePreset(name: 'Sunset', seedColor: Colors.deepOrangeAccent, borderColor: Colors.deepOrangeAccent),
   ThemePreset(name: 'Ocean', seedColor: Colors.lightBlueAccent, borderColor: Colors.lightBlueAccent),
   ThemePreset(name: 'Mint', seedColor: Colors.tealAccent, borderColor: Colors.tealAccent),
+  ThemePreset(name: 'Berry', seedColor: Colors.redAccent, borderColor: Colors.red),
+  ThemePreset(name: 'Sky', seedColor: Colors.cyan, borderColor: Colors.indigo),
+  ThemePreset(name: 'Sand', seedColor: Colors.amber, borderColor: Colors.brown),
+  ThemePreset(name: 'Monochrome', seedColor: Colors.black, borderColor: Colors.white),
 ];
 
 class ThemePreset {
@@ -47,102 +51,203 @@ class ThemeCardsSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-  final selectedIndex = ref.watch(themePresetProvider);
-    return SizedBox(
-      height: 175,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (_) => true,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            physics: const ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-            itemCount: themePresets.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 20),
-            itemBuilder: (context, i) {
-              final preset = themePresets[i];
-              final isSelected = i == selectedIndex;
-              return GestureDetector(
-                onTap: () {
-                  ref.read(themePresetProvider.notifier).setPreset(i);
-                },
-                child: Container(
-                  width: 90,
-                  height: 150,
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: preset.seedColor.withOpacity(0.10),
-                    borderRadius: BorderRadius.circular(22),
-                    border: Border.all(
-                      color: isSelected ? preset.borderColor : Colors.transparent,
-                      width: isSelected ? 3 : 1,
-                    ),
-                    boxShadow: isSelected
-                        ? [BoxShadow(color: preset.borderColor.withOpacity(0.25), blurRadius: 10, offset: Offset(0, 2))]
-                        : [],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final selectedIndex = ref.watch(themePresetProvider);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final cardWidth = (screenWidth - 48) / 3.5; // ~3.5 cards visible
+        final cardHeight = cardWidth * 1.5;
+        return SizedBox(
+          height: cardHeight + 30,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (_) => true,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                physics: const ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                itemCount: themePresets.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, i) {
+                  final preset = themePresets[i];
+                  final isSelected = i == selectedIndex;
+                  return Column(
                     children: [
-                      Expanded(
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                top: 12,
-                                left: 12,
-                                right: 12,
-                                child: Container(
-                                  height: 22,
-                                  decoration: BoxDecoration(
-                                    color: preset.seedColor,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
+                      GestureDetector(
+                        onTap: () {
+                          ref.read(themePresetProvider.notifier).setPreset(i);
+                        },
+                        child: Stack(
+                          children: [
+                            Container(
+                              width: cardWidth,
+                              height: cardHeight,
+                              decoration: BoxDecoration(
+                                color: preset.seedColor.withOpacity(0.10),
+                                borderRadius: BorderRadius.circular(cardWidth * 0.18),
+                                border: Border.all(
+                                  color: isSelected ? preset.borderColor : Colors.transparent,
+                                  width: isSelected ? 3 : 1,
+                                ),
+                                boxShadow: isSelected
+                                    ? [BoxShadow(color: preset.borderColor.withOpacity(0.22), blurRadius: 12, offset: Offset(0, 2))]
+                                    : [],
+                              ),
+                              child: Container(
+                                margin: EdgeInsets.all(cardWidth * 0.04),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.background,
+                                  borderRadius: BorderRadius.circular(cardWidth * 0.14),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.only(top: cardWidth * 0.13, bottom: cardWidth * 0.07),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Stack(
+                                            children: [
+                                              Container(
+                                                width: cardWidth * 0.16,
+                                                height: cardWidth * 0.16,
+                                                decoration: BoxDecoration(
+                                                  color: preset.seedColor,
+                                                  borderRadius: BorderRadius.circular(cardWidth * 0.045),
+                                                  border: Border.all(color: Colors.black12, width: 1),
+                                                ),
+                                              ),
+                                              if (isSelected)
+                                                Positioned.fill(
+                                                  child: Center(
+                                                    child: Icon(
+                                                      Icons.check,
+                                                      size: cardWidth * 0.11,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                          SizedBox(width: cardWidth * 0.045),
+                                          Container(
+                                            width: cardWidth * 0.16,
+                                            height: cardWidth * 0.16,
+                                            decoration: BoxDecoration(
+                                              color: preset.seedColor.withOpacity(0.7),
+                                              borderRadius: BorderRadius.circular(cardWidth * 0.045),
+                                              border: Border.all(color: Colors.black12, width: 1),
+                                            ),
+                                          ),
+                                          SizedBox(width: cardWidth * 0.045),
+                                          Container(
+                                            width: cardWidth * 0.16,
+                                            height: cardWidth * 0.16,
+                                            decoration: BoxDecoration(
+                                              color: preset.borderColor,
+                                              borderRadius: BorderRadius.circular(cardWidth * 0.045),
+                                              border: Border.all(color: Colors.black12, width: 1),
+                                            ),
+                                          ),
+                                          SizedBox(width: cardWidth * 0.045),
+                                          Container(
+                                            width: cardWidth * 0.16,
+                                            height: cardWidth * 0.16,
+                                            decoration: BoxDecoration(
+                                              color: preset.seedColor.withOpacity(0.3),
+                                              borderRadius: BorderRadius.circular(cardWidth * 0.045),
+                                              border: Border.all(color: Colors.black12, width: 1),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Stack(
+                                        children: [
+                                          Positioned(
+                                            top: cardWidth * 0.13,
+                                            left: cardWidth * 0.13,
+                                            right: cardWidth * 0.13,
+                                            child: Container(
+                                              height: cardHeight * 0.24,
+                                              decoration: BoxDecoration(
+                                                color: preset.seedColor,
+                                                borderRadius: BorderRadius.circular(cardWidth * 0.11),
+                                              ),
+                                            ),
+                                          ),
+                                          Positioned(
+                                            bottom: cardWidth * 0.13,
+                                            left: cardWidth * 0.13,
+                                            right: cardWidth * 0.13,
+                                            child: Container(
+                                              height: cardHeight * 0.38,
+                                              decoration: BoxDecoration(
+                                                color: preset.seedColor.withOpacity(0.5),
+                                                borderRadius: BorderRadius.circular(cardWidth * 0.11),
+                                              ),
+                                            ),
+                                          ),
+                                          Positioned(
+                                            top: cardWidth * 0.08,
+                                            left: cardWidth * 0.27,
+                                            right: cardWidth * 0.27,
+                                            child: Container(
+                                              height: cardHeight * 0.06,
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey.withOpacity(0.13),
+                                                borderRadius: BorderRadius.circular(cardWidth * 0.055),
+                                              ),
+                                            ),
+                                          ),
+                                          Positioned(
+                                            bottom: cardWidth * 0.08,
+                                            left: cardWidth * 0.27,
+                                            right: cardWidth * 0.27,
+                                            child: Container(
+                                              height: cardHeight * 0.06,
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey.withOpacity(0.13),
+                                                borderRadius: BorderRadius.circular(cardWidth * 0.055),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Positioned(
-                                bottom: 12,
-                                left: 12,
-                                right: 12,
-                                child: Container(
-                                  height: 34,
-                                  decoration: BoxDecoration(
-                                    color: preset.seedColor.withOpacity(0.5),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
+                      const SizedBox(height: 8),
                       SizedBox(
-                        height: 28,
+                        height: cardHeight * 0.09,
+                        width: cardWidth,
                         child: Center(
                           child: Text(
                             preset.name,
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: cardWidth * 0.10,
                               color: isSelected ? preset.borderColor : Theme.of(context).colorScheme.onSurface,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ),
                     ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
+                  );
+                },
+              ),
+            ),
+          )
+        );
+      },
     );
   }
 }

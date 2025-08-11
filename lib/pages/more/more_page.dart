@@ -145,7 +145,13 @@ class MorePage extends ConsumerWidget {
         ),
         ListTile(
           leading: Icon(Icons.language_outlined, color: primaryColor),
-          title: Text(translation(context: context, 'Language')),
+          title: Row(
+              children: [
+                Text(translation(context: context, 'Language')),
+                const SizedBox(width: 4),
+                CustomChip(label: translation(context: context, 'Active')),
+              ],
+            ),
           trailing: LanguageDropdown(borderColor: primaryColor.withOpacity(0.5)),
         ),
         ListTile(
@@ -173,7 +179,13 @@ class MorePage extends ConsumerWidget {
         const Divider(),
         ListTile(
           leading: Icon(Icons.settings_outlined, color: primaryColor),
-          title: Text(translation(context: context, 'Settings')),
+          title: Row(
+              children: [
+                Text(translation(context: context, 'Settings')),
+                const SizedBox(width: 4),
+                CustomChip(label: translation(context: context, 'Active')),
+              ],
+            ),
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(

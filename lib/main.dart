@@ -2,6 +2,7 @@ import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/firebase_options.dart';
 import 'package:faunty/models/user_roles.dart';
 import 'package:flutter/material.dart';
+import 'globals.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'pages/home/home_page.dart';
@@ -44,20 +45,25 @@ class Faunty extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) { 
     final presetIndex = ref.watch(themePresetProvider);
     final preset = themePresets[presetIndex];
+    final isMonochrome = preset.name == 'Monochrome';
     return MaterialApp(
       title: translation(context: context, 'Faunty'),
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: preset.seedColor),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: preset.seedColor,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
+      theme: isMonochrome
+          ? monochromeThemeData
+          : ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: preset.seedColor),
+              useMaterial3: true,
+            ),
+      darkTheme: isMonochrome
+          ? monochromeThemeData
+          : ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: preset.seedColor,
+                brightness: Brightness.dark,
+              ),
+              useMaterial3: true,
+            ),
       themeMode: ref.watch(themeProvider).value == AppThemeMode.dark
         ? ThemeMode.dark
         : ref.watch(themeProvider).value == AppThemeMode.light
