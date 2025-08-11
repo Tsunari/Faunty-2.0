@@ -81,7 +81,7 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                     itemCount: 7,
                     itemBuilder: (context, dayIdx) {
                       return Card(
-                        color: theme.colorScheme.surface,
+                        color: theme.colorScheme.onPrimary.withAlpha(85),
                         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
