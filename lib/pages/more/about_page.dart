@@ -31,7 +31,7 @@ class AboutPage extends StatelessWidget {
               Center(
                 child: CircleAvatar(
                   radius: 48,
-                  backgroundColor: onSurface,
+                  backgroundColor: onSurface.withAlpha(20),
                   child: Icon(Icons.info_outline, size: 64, color: primary),
                 ),
               ),

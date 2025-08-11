@@ -464,7 +464,7 @@ class _ProgramDayCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: 110,
+              width: 90,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

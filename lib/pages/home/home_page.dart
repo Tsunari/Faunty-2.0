@@ -265,14 +265,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                                           children: [
                                             Text(
                                               weekday,
-                                              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+                                              style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
                                             ),
                                             const Text(': '),
                                             ...assignedMeals.asMap().entries.map((entry) => Row(
                                               children: [
                                                 Text(
                                                   mealNames[entry.value],
-                                                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                                                  style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.tertiary),
                                                 ),
                                                 if (entry.key != assignedMeals.length - 1)
                                                   const Text(', '),
@@ -338,7 +338,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                           place,
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.blue,
+                                            color: Theme.of(context).colorScheme.primary,
                                           ),
                                         )),
                                   ],
