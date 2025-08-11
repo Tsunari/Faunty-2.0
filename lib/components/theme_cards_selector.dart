@@ -1,6 +1,6 @@
+import 'package:faunty/tools/local_storage_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../tools/theme_local_storage_helper.dart';
 
 // Define your color schemes
 final themePresets = [
@@ -33,7 +33,7 @@ class ThemePresetNotifier extends StateNotifier<int> {
   }
 
   Future<void> _loadPreset() async {
-    final idx = await ThemeLocalStorageHelper.getThemePresetIndex();
+    final idx = await LocalStorageHelper.getThemePresetIndex();
     if (idx != null && idx >= 0 && idx < themePresets.length) {
       state = idx;
     }
@@ -41,7 +41,7 @@ class ThemePresetNotifier extends StateNotifier<int> {
 
   Future<void> setPreset(int idx) async {
     state = idx;
-    await ThemeLocalStorageHelper.setThemePresetIndex(idx);
+    await LocalStorageHelper.setThemePresetIndex(idx);
   }
 }
 
