@@ -480,6 +480,69 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
 
 	/// en: 'Debt reset!'
 	String get debt_reset => 'Debt reset!';
+
+	/// en: 'System'
+	String get system => 'System';
+
+	/// en: 'Light'
+	String get light => 'Light';
+
+	/// en: 'Dark'
+	String get dark => 'Dark';
+
+	/// en: 'Theme'
+	String get theme => 'Theme';
+
+	/// en: 'Breakfast'
+	String get breakfast => 'Breakfast';
+
+	/// en: 'Lunch'
+	String get lunch => 'Lunch';
+
+	/// en: 'Dinner'
+	String get dinner => 'Dinner';
+
+	/// en: 'Montag'
+	String get montag => 'Montag';
+
+	/// en: 'Dienstag'
+	String get dienstag => 'Dienstag';
+
+	/// en: 'Mittwoch'
+	String get mittwoch => 'Mittwoch';
+
+	/// en: 'Donnerstag'
+	String get donnerstag => 'Donnerstag';
+
+	/// en: 'Freitag'
+	String get freitag => 'Freitag';
+
+	/// en: 'Samstag'
+	String get samstag => 'Samstag';
+
+	/// en: 'Sonntag'
+	String get sonntag => 'Sonntag';
+
+	/// en: 'Credit'
+	String get credit => 'Credit';
+
+	/// en: 'Set Debt'
+	String get set_debt => 'Set Debt';
+
+	/// en: 'Debt amount'
+	String get debt_amount => 'Debt amount';
+
+	/// en: 'Set'
+	String get set => 'Set';
+
+	/// en: 'Choose app language.'
+	String get choose_app_language => 'Choose app language.';
+
+	/// en: 'Load template'
+	String get load_template => 'Load template';
+
+	/// en: 'Title'
+	String get title => 'Title';
 }
 
 /// Flat map(s) containing all translations.
@@ -634,6 +697,27 @@ extension on Translations {
 			case 'are_you_sure_you_want_to_reset_your_debt_to_0': return 'Are you sure you want to reset your debt to 0?';
 			case 'confirm': return 'Confirm';
 			case 'debt_reset': return 'Debt reset!';
+			case 'system': return 'System';
+			case 'light': return 'Light';
+			case 'dark': return 'Dark';
+			case 'theme': return 'Theme';
+			case 'breakfast': return 'Breakfast';
+			case 'lunch': return 'Lunch';
+			case 'dinner': return 'Dinner';
+			case 'montag': return 'Montag';
+			case 'dienstag': return 'Dienstag';
+			case 'mittwoch': return 'Mittwoch';
+			case 'donnerstag': return 'Donnerstag';
+			case 'freitag': return 'Freitag';
+			case 'samstag': return 'Samstag';
+			case 'sonntag': return 'Sonntag';
+			case 'credit': return 'Credit';
+			case 'set_debt': return 'Set Debt';
+			case 'debt_amount': return 'Debt amount';
+			case 'set': return 'Set';
+			case 'choose_app_language': return 'Choose app language.';
+			case 'load_template': return 'Load template';
+			case 'title': return 'Title';
 			default: return null;
 		}
 	}

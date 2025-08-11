@@ -10,8 +10,7 @@ import 'catering_organisation.dart';
 import '../../state_management/catering_provider.dart';
 import '../../state_management/user_list_provider.dart';
 
-// Users will be loaded from allUsersProvider
-final List<String> meals = [translation('Breakfast'), translation('Lunch'), translation('Dinner')];
+final List<String> meals = ['Breakfast', 'Lunch', 'Dinner'];
 
 class CateringPage extends ConsumerStatefulWidget {
   const CateringPage({super.key});
@@ -32,6 +31,11 @@ class _CateringPageState extends ConsumerState<CateringPage> {
       translation(context: context, 'Wednesday'), translation(context: context, 'Thursday'),
       translation(context: context, 'Friday'), translation(context: context, 'Saturday'),
       translation(context: context, 'Sunday')
+    ];
+    final mealsTranslated = [
+      translation(context: context, 'Breakfast'),
+      translation(context: context, 'Lunch'),
+      translation(context: context, 'Dinner'),
     ];
     final roles = [UserRole.baskan, UserRole.talebe].map((r) => r.name).join(',');
     final usersAsync = ref.watch(usersByRolesProvider(roles));
@@ -104,7 +108,7 @@ class _CateringPageState extends ConsumerState<CateringPage> {
                                                   SizedBox(
                                                     width: 100,
                                                     child: Text(
-                                                      meals[mealIdx],
+                                                      mealsTranslated[mealIdx],
                                                       style: TextStyle(
                                                         fontWeight: FontWeight.w500
                                                       ),
@@ -173,6 +177,7 @@ class _CateringPageState extends ConsumerState<CateringPage> {
                           weekPlan: weekPlan,
                           users: userNames,
                           meals: meals,
+                          mealsTranslated: mealsTranslated,
                         ),
                       ),
                     );

@@ -143,7 +143,7 @@ class _CleaningAssignPageState extends ConsumerState<CleaningAssignPage> {
             padding: const EdgeInsets.only(right: 8.0),
             child: IconButton(
               icon: const Icon(Icons.add),
-              tooltip: 'Add Place',
+              tooltip: translation(context: context, 'Add Place'),
               onPressed: _addPlaceDialog,
             ),
           ),

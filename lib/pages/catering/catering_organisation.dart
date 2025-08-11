@@ -1,3 +1,4 @@
+import 'package:faunty/tools/translation_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/catering_provider.dart';
@@ -7,8 +8,9 @@ class CateringOrganisationPage extends ConsumerStatefulWidget {
   final List<List<List<String>>> weekPlan;
   final List<String> users;
   final List<String> meals;
+  final List<String> mealsTranslated;
 
-  const CateringOrganisationPage({super.key, required this.weekPlan, required this.users, required this.meals});
+  const CateringOrganisationPage({super.key, required this.weekPlan, required this.users, required this.meals, required this.mealsTranslated});
 
   @override
   ConsumerState<CateringOrganisationPage> createState() => _CateringOrganisationPageState();
@@ -45,9 +47,18 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
     return true;
   }
 
-  String getWeekday(int weekday) {
+  String getWeekday(int weekday, bool translated) {
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    return days[weekday % 7];
+    final daysTranslated = [
+      translation(context: context, 'Montag'),
+      translation(context: context, 'Dienstag'),
+      translation(context: context, 'Mittwoch'),
+      translation(context: context, 'Donnerstag'),
+      translation(context: context, 'Freitag'),
+      translation(context: context, 'Samstag'),
+      translation(context: context, 'Sonntag')
+    ];
+    return translated ? daysTranslated[weekday % 7] : days[weekday % 7];
   }
 
   @override
@@ -94,7 +105,7 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                                   Padding(
                                     padding: const EdgeInsets.only(left: 8.0),
                                     child: Text(
-                                      getWeekday(dayIdx),
+                                      getWeekday(dayIdx, true),
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: theme.colorScheme.onSurface,
@@ -120,7 +131,7 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                                             children: [
                                               const TextSpan(text: 'Are you sure you want to delete all entries for '),
                                               TextSpan(
-                                                text: getWeekday(dayIdx),
+                                                text: getWeekday(dayIdx, true),
                                                 style: TextStyle(
                                                   color: Colors.redAccent,
                                                   fontWeight: FontWeight.bold,
@@ -144,7 +155,7 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                               // Stacked drop zones: 3 vertically, label inside the drag box
                               Column(
                                 children: List.generate(widget.meals.length, (mealIdx) {
-                                  final mealName = widget.meals[mealIdx];
+                                  final mealName = widget.mealsTranslated[mealIdx];
                                   final usersForMeal = localWeekPlan![dayIdx][mealIdx];
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(vertical: 6.0),

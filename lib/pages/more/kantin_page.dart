@@ -262,7 +262,7 @@ class _KantinPageState extends ConsumerState<KantinPage> with WidgetsBindingObse
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    translation(context: context, 'Debt'),
+                    displayDebt >= 0 ? translation(context: context, 'Debt') : translation(context: context, 'Credit'),
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold, 
                         color: displayDebt > 0
@@ -579,12 +579,16 @@ class CantineWidget extends ConsumerWidget {
                         }
                       },
                 child: Text(
-                  translation(context: context, 'Debt') + ': ' + currentDebt.toStringAsFixed(2).replaceAll('.', ','),
+                  currentDebt >= 0 
+                  ? translation(context: context, 'Debt') + ': ' + currentDebt.toStringAsFixed(2).replaceAll('.', ',')
+                  : translation(context: context, 'Credit') + ': ' + currentDebt.toStringAsFixed(2).replaceAll('.', ','),
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: currentDebt > 0
                         ? Colors.red
                         : (currentDebt < 0 ? Colors.green : null),
+                        // ? Colors.red
+                        // : (currentDebt < 0 ? Colors.green : null),
                   ),
                 ),
               ),

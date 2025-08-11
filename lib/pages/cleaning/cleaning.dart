@@ -195,7 +195,7 @@ class CleaningPage extends ConsumerWidget {
               ),
             );
           },
-          tooltip: 'Edit',
+          tooltip: translation(context: context, 'Edit'),
           child: const Icon(Icons.edit),
         ),
       ),

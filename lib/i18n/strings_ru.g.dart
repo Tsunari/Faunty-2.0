@@ -183,6 +183,27 @@ class TranslationsRu implements Translations {
 	@override String get are_you_sure_you_want_to_reset_your_debt_to_0 => 'Вы уверены, что хотите сбросить свой долг до 0?';
 	@override String get confirm => 'Подтвердить';
 	@override String get debt_reset => 'Долг сброшен!';
+	@override String get system => 'Система';
+	@override String get light => 'Светлая';
+	@override String get dark => 'Тёмная';
+	@override String get theme => 'Тема';
+	@override String get breakfast => 'Завтрак';
+	@override String get lunch => 'Обед';
+	@override String get dinner => 'Ужин';
+	@override String get montag => 'Понедельник';
+	@override String get dienstag => 'Вторник';
+	@override String get mittwoch => 'Среда';
+	@override String get donnerstag => 'Четверг';
+	@override String get freitag => 'Пятница';
+	@override String get samstag => 'Суббота';
+	@override String get sonntag => 'Воскресенье';
+	@override String get credit => 'баланс';
+	@override String get set_debt => 'Установить долг';
+	@override String get debt_amount => 'Сумма долга';
+	@override String get set => 'Установить';
+	@override String get choose_app_language => 'Выберите язык приложения.';
+	@override String get load_template => 'Загрузить шаблон';
+	@override String get title => 'Заголовок';
 }
 
 /// Flat map(s) containing all translations.
@@ -337,6 +358,27 @@ extension on TranslationsRu {
 			case 'are_you_sure_you_want_to_reset_your_debt_to_0': return 'Вы уверены, что хотите сбросить свой долг до 0?';
 			case 'confirm': return 'Подтвердить';
 			case 'debt_reset': return 'Долг сброшен!';
+			case 'system': return 'Система';
+			case 'light': return 'Светлая';
+			case 'dark': return 'Тёмная';
+			case 'theme': return 'Тема';
+			case 'breakfast': return 'Завтрак';
+			case 'lunch': return 'Обед';
+			case 'dinner': return 'Ужин';
+			case 'montag': return 'Понедельник';
+			case 'dienstag': return 'Вторник';
+			case 'mittwoch': return 'Среда';
+			case 'donnerstag': return 'Четверг';
+			case 'freitag': return 'Пятница';
+			case 'samstag': return 'Суббота';
+			case 'sonntag': return 'Воскресенье';
+			case 'credit': return 'баланс';
+			case 'set_debt': return 'Установить долг';
+			case 'debt_amount': return 'Сумма долга';
+			case 'set': return 'Установить';
+			case 'choose_app_language': return 'Выберите язык приложения.';
+			case 'load_template': return 'Загрузить шаблон';
+			case 'title': return 'Заголовок';
 			default: return null;
 		}
 	}

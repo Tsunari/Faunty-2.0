@@ -183,6 +183,27 @@ class TranslationsDe implements Translations {
 	@override String get are_you_sure_you_want_to_reset_your_debt_to_0 => 'Sind Sie sicher, dass Sie Ihre Schulden auf 0 zurücksetzen möchten?';
 	@override String get confirm => 'Bestätigen';
 	@override String get debt_reset => 'Schulden zurückgesetzt!';
+	@override String get system => 'System';
+	@override String get light => 'Hell';
+	@override String get dark => 'Dunkel';
+	@override String get theme => 'Thema';
+	@override String get breakfast => 'Frühstück';
+	@override String get lunch => 'Mittagessen';
+	@override String get dinner => 'Abendessen';
+	@override String get montag => 'Montag';
+	@override String get dienstag => 'Dienstag';
+	@override String get mittwoch => 'Mittwoch';
+	@override String get donnerstag => 'Donnerstag';
+	@override String get freitag => 'Freitag';
+	@override String get samstag => 'Samstag';
+	@override String get sonntag => 'Sonntag';
+	@override String get credit => 'Guthaben';
+	@override String get set_debt => 'Schulden setzen';
+	@override String get debt_amount => 'Schuldenbetrag';
+	@override String get set => 'Setzen';
+	@override String get choose_app_language => 'App-Sprache wählen.';
+	@override String get load_template => 'Vorlage laden';
+	@override String get title => 'Titel';
 }
 
 /// Flat map(s) containing all translations.
@@ -337,6 +358,27 @@ extension on TranslationsDe {
 			case 'are_you_sure_you_want_to_reset_your_debt_to_0': return 'Sind Sie sicher, dass Sie Ihre Schulden auf 0 zurücksetzen möchten?';
 			case 'confirm': return 'Bestätigen';
 			case 'debt_reset': return 'Schulden zurückgesetzt!';
+			case 'system': return 'System';
+			case 'light': return 'Hell';
+			case 'dark': return 'Dunkel';
+			case 'theme': return 'Thema';
+			case 'breakfast': return 'Frühstück';
+			case 'lunch': return 'Mittagessen';
+			case 'dinner': return 'Abendessen';
+			case 'montag': return 'Montag';
+			case 'dienstag': return 'Dienstag';
+			case 'mittwoch': return 'Mittwoch';
+			case 'donnerstag': return 'Donnerstag';
+			case 'freitag': return 'Freitag';
+			case 'samstag': return 'Samstag';
+			case 'sonntag': return 'Sonntag';
+			case 'credit': return 'Guthaben';
+			case 'set_debt': return 'Schulden setzen';
+			case 'debt_amount': return 'Schuldenbetrag';
+			case 'set': return 'Setzen';
+			case 'choose_app_language': return 'App-Sprache wählen.';
+			case 'load_template': return 'Vorlage laden';
+			case 'title': return 'Titel';
 			default: return null;
 		}
 	}

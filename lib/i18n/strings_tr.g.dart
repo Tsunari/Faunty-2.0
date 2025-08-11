@@ -183,6 +183,27 @@ class TranslationsTr implements Translations {
 	@override String get are_you_sure_you_want_to_reset_your_debt_to_0 => 'Borcu sıfırlamak istediğine emin misin?';
 	@override String get confirm => 'Onayla';
 	@override String get debt_reset => 'Borç sıfırlandı!';
+	@override String get system => 'Sistem';
+	@override String get light => 'Açık';
+	@override String get dark => 'Koyu';
+	@override String get theme => 'Tema';
+	@override String get breakfast => 'Kahvaltı';
+	@override String get lunch => 'Öğle Yemeği';
+	@override String get dinner => 'Akşam Yemeği';
+	@override String get montag => 'Pazartesi';
+	@override String get dienstag => 'Salı';
+	@override String get mittwoch => 'Çarşamba';
+	@override String get donnerstag => 'Perşembe';
+	@override String get freitag => 'Cuma';
+	@override String get samstag => 'Cumartesi';
+	@override String get sonntag => 'Pazar';
+	@override String get credit => 'Bakiye';
+	@override String get set_debt => 'Borç ayarla';
+	@override String get debt_amount => 'Borç miktarı';
+	@override String get set => 'Ayarla';
+	@override String get choose_app_language => 'Uygulama dilini seçin.';
+	@override String get load_template => 'Şablon yükle';
+	@override String get title => 'Başlık';
 }
 
 /// Flat map(s) containing all translations.
@@ -337,6 +358,27 @@ extension on TranslationsTr {
 			case 'are_you_sure_you_want_to_reset_your_debt_to_0': return 'Borcu sıfırlamak istediğine emin misin?';
 			case 'confirm': return 'Onayla';
 			case 'debt_reset': return 'Borç sıfırlandı!';
+			case 'system': return 'Sistem';
+			case 'light': return 'Açık';
+			case 'dark': return 'Koyu';
+			case 'theme': return 'Tema';
+			case 'breakfast': return 'Kahvaltı';
+			case 'lunch': return 'Öğle Yemeği';
+			case 'dinner': return 'Akşam Yemeği';
+			case 'montag': return 'Pazartesi';
+			case 'dienstag': return 'Salı';
+			case 'mittwoch': return 'Çarşamba';
+			case 'donnerstag': return 'Perşembe';
+			case 'freitag': return 'Cuma';
+			case 'samstag': return 'Cumartesi';
+			case 'sonntag': return 'Pazar';
+			case 'credit': return 'Bakiye';
+			case 'set_debt': return 'Borç ayarla';
+			case 'debt_amount': return 'Borç miktarı';
+			case 'set': return 'Ayarla';
+			case 'choose_app_language': return 'Uygulama dilini seçin.';
+			case 'load_template': return 'Şablon yükle';
+			case 'title': return 'Başlık';
 			default: return null;
 		}
 	}
