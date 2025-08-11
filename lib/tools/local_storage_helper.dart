@@ -1,6 +1,26 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageHelper {
+  static const String themePresetKey = 'theme_preset_index';
+
+  static Future<void> setThemePresetIndex(int index) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(themePresetKey, index);
+    } catch (e) {
+      // Ignore errors
+    }
+  }
+
+  static Future<int?> getThemePresetIndex() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getInt(themePresetKey);
+    } catch (e) {
+      // Ignore errors
+      return null;
+    }
+  }
   static const String languageCodeKey = 'language_code';
 
   static Future<void> setLanguageCode(String code) async {

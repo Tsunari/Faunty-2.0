@@ -1,5 +1,7 @@
 import 'package:faunty/components/custom_dropdown.dart';
 import 'package:faunty/components/language_dropdown.dart';
+import 'package:faunty/components/theme_cards_selector.dart';
+import 'package:faunty/components/theme_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../tools/translation_helper.dart';
@@ -23,34 +25,11 @@ class SettingsPage extends ConsumerWidget {
         error: (e, st) => Center(child: Text('Error loading theme: $e')),
         data: (themeMode) => ListView(
           children: [
-            ListTile(
-              leading: Icon(Icons.palette_outlined, color: primaryColor),
-              title: Text(translation(context: context, 'Theme')),
-              subtitle: Text(translation(context: context, 'Choose app theme. Dark recommended.')),
-              trailing: CustomDropdown(
-                value: themeMode,
-                items: [
-                  DropdownMenuItem(
-                    value: AppThemeMode.system,
-                    child: Text(translation(context: context, 'System')),
-                  ),
-                  DropdownMenuItem(
-                    value: AppThemeMode.light,
-                    child: Text(translation(context: context, 'Light')),
-                  ),
-                  DropdownMenuItem(
-                    value: AppThemeMode.dark,
-                    child: Text(translation(context: context, 'Dark')),
-                  ),
-                ],
-                onChanged: (val) {
-                  if (val != null) {
-                    ref.read(themeProvider.notifier).setTheme(val);
-                  }
-                },
-                borderColor: primaryColor.withOpacity(0.5),
-              ),
-            ),
+            ThemeSelector(borderColor: primaryColor),
+            const SizedBox(height: 16),
+            ThemeCardsSelector(borderColor: primaryColor),
+            const SizedBox(height: 16),
+            const Divider(),
             ListTile(
               leading: Icon(Icons.language, color: primaryColor),
               title: Text(translation(context: context, 'Language')),
