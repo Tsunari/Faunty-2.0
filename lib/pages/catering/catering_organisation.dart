@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/catering_provider.dart';
@@ -54,8 +52,9 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final users = widget.users;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     if (localWeekPlan == null) {
       // Show loading until Firestore data is available
       return const Scaffold(
@@ -65,8 +64,8 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
     return Scaffold(
       appBar: AppBar(
         title: const Text('Catering Organisation'),
-        backgroundColor: isDark ? Colors.grey[900] : null,
-        foregroundColor: isDark ? Colors.white : null,
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
         actions: [],
       ),
       body: Row(
@@ -82,7 +81,7 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                     itemCount: 7,
                     itemBuilder: (context, dayIdx) {
                       return Card(
-                        color: isDark ? Colors.grey[850] : null,
+                        color: theme.colorScheme.surface,
                         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -98,7 +97,7 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                                       getWeekday(dayIdx),
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: isDark ? Colors.white : null,
+                                        color: theme.colorScheme.onSurface,
                                       ),
                                     ),
                                   ),
@@ -106,7 +105,7 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                                   IconButton(
                                     icon: Icon(
                                       Icons.delete_outline,
-                                      color: isDark ? Colors.white : Colors.black,
+                                      color: theme.colorScheme.onSurface,
                                       size: 20,
                                     ),
                                     padding: const EdgeInsets.all(0),
@@ -156,7 +155,7 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                                           width: double.infinity,
                                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                           decoration: BoxDecoration(
-                                            color: isDark ? Colors.grey[800] : Colors.grey.shade200,
+                                            color: theme.colorScheme.background,
                                             borderRadius: BorderRadius.circular(12),
                                             border: Border.all(color: isDark ? Colors.white24 : Colors.grey),
                                           ),
@@ -185,7 +184,7 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                                                         margin: const EdgeInsets.only(bottom: 2),
                                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                                         decoration: BoxDecoration(
-                                                          color: isDark ? Colors.green.shade900 : Colors.green.shade100,
+                                                          color: theme.colorScheme.primary.withOpacity(isDark ? 0.18 : 0.08),
                                                           borderRadius: BorderRadius.circular(12),
                                                         ),
                                                         child: Row(
@@ -260,10 +259,10 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.blue.shade400 : Colors.blue.shade200,
+                              color: theme.colorScheme.surface,
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Text(user, style: const TextStyle(color: Colors.white)),
+                            child: Text(user, style: TextStyle(color: theme.colorScheme.primary)),
                           ),
                         ),
                         childWhenDragging: Opacity(
@@ -271,22 +270,22 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.blue.shade900 : Colors.blue.shade100,
+                              color: theme.colorScheme.primary.withOpacity(isDark ? 0.18 : 0.08),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Text(user, style: TextStyle(color: isDark ? Colors.white : null)),
+                            child: Text(user, style: TextStyle(color: theme.colorScheme.primary)),
                           ),
                         ),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.blue.shade900 : Colors.blue.shade100,
+                            color: theme.colorScheme.surface,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             user,
                             style: TextStyle(
-                              color: isDark ? Colors.white : null,
+                              color: theme.colorScheme.primary,
                               fontSize: 17, // slightly larger
                               fontWeight: FontWeight.w500,
                             ),
@@ -309,10 +308,10 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                 final service = ref.read(cateringFirestoreServiceProvider);
                 await service.setWeekPlan(localWeekPlan!);
                 setState(() => isSaving = false);
-                if (mounted) Navigator.pop(context, localWeekPlan);
+                if (context.mounted) Navigator.pop(context, localWeekPlan);
               },
         tooltip: 'Save and go back',
-        backgroundColor: Theme.of(context).colorScheme.primary.withValues(colorSpace: ColorSpace.sRGB),
+        backgroundColor: theme.colorScheme.primary,
         foregroundColor: isDark ? Colors.black : Colors.white,
         child: isSaving ? const CircularProgressIndicator() : const Icon(Icons.save),
       ),

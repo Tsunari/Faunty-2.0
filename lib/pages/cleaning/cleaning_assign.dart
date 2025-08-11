@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:faunty/components/custom_confirm_dialog.dart';
 import 'package:faunty/models/user_roles.dart';
 import 'package:faunty/tools/translation_helper.dart';
@@ -261,7 +259,7 @@ class _CleaningAssignPageState extends ConsumerState<CleaningAssignPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: isSaving ? null : _saveAll,
         tooltip: translation(context: context, 'Save'),
-        backgroundColor: Theme.of(context).colorScheme.primary.withValues(colorSpace: ColorSpace.sRGB),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: isDark ? Colors.black : Colors.white,
         child: isSaving ? const Icon(Icons.save) : const Icon(Icons.save),
         // child: isSaving ? CircularProgressIndicator(color: Theme.of(context).colorScheme.onPrimary) : const Icon(Icons.save),

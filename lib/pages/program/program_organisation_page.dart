@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:faunty/components/custom_confirm_dialog.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'package:flutter/material.dart';
@@ -738,7 +736,7 @@ class _SaveFab extends StatelessWidget {
     return FloatingActionButton(
       onPressed: onSave,
       tooltip: translation(context: context, 'Save and go back'),
-      backgroundColor: Theme.of(context).colorScheme.primary.withValues(colorSpace: ColorSpace.sRGB),
+      backgroundColor: Theme.of(context).colorScheme.primary,
       foregroundColor: isDark ? Colors.black : Colors.white,
       child: const Icon(Icons.save),
     );
