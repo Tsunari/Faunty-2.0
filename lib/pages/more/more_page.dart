@@ -14,7 +14,7 @@ import 'users_page.dart';
 import '../../components/custom_chip.dart';
 import 'settings_page.dart';
 import 'package:faunty/components/language_dropdown.dart';
-
+import 'package:faunty/custom_lists/ui/custom_lists_page.dart';
 
 class MorePage extends ConsumerWidget {
   const MorePage({super.key});
@@ -43,9 +43,9 @@ class MorePage extends ConsumerWidget {
                     child: Image(
                       image: AssetImage(
                         Theme.of(context).brightness == Brightness.light
-                          ? 'assets/Logo.png'
+                            ? 'assets/Logo.png'
                           : 'assets/LogoInverse.png'
-                        ),
+                      ),
                       fit: BoxFit.contain,
                     ),
                   ),
@@ -76,7 +76,9 @@ class MorePage extends ConsumerWidget {
               return globalsAsync.when(
                 loading: () => SwitchListTile(
                   secondary: const Icon(Icons.app_registration_outlined),
-                  title: Text(translation(context: context, 'Registration Mode')),
+                  title: Text(
+                    translation(context: context, 'Registration Mode'),
+                  ),
                   value: false,
                   onChanged: null,
                 ),
@@ -86,15 +88,27 @@ class MorePage extends ConsumerWidget {
                   subtitle: Text(e.toString()),
                 ),
                 data: (globals) => SwitchListTile(
-                  secondary: Icon(Icons.app_registration_outlined, color: primaryColor),
+                  secondary: Icon(
+                    Icons.app_registration_outlined,
+                    color: primaryColor,
+                  ),
                   title: Row(
                     children: [
                       Text(translation(context: context, 'Registration Mode')),
                       const SizedBox(width: 4),
-                      CustomContainerChip(label: globals.registrationMode ? translation(context: context, 'Active') : translation(context: context, 'Inactive')),
+                      CustomContainerChip(
+                        label: globals.registrationMode
+                            ? translation(context: context, 'Active')
+                            : translation(context: context, 'Inactive'),
+                      ),
                     ],
                   ),
-                  subtitle: Text(translation(context: context, 'Enable or disable registration')),
+                  subtitle: Text(
+                    translation(
+                      context: context,
+                      'Enable or disable registration',
+                    ),
+                  ),
                   value: globals.registrationMode,
                   onChanged: (val) async {
                     if (user == null) return;
@@ -108,19 +122,36 @@ class MorePage extends ConsumerWidget {
         ),
         RoleGate(minRole: UserRole.hoca, child: const Divider()),
         ListTile(
-          leading: Icon(Icons.account_circle_outlined, color: primaryColor),
+          leading: Icon(Icons.view_list_outlined, color: primaryColor),
           title: Row(
-              children: [
-                Text(translation(context: context, 'Account')),
-                const SizedBox(width: 4),
-                CustomContainerChip(label: translation(context: context, 'Active')),
-              ],
-            ),
+            children: [
+              Text(translation(context: context, 'Custom Lists')),
+              const SizedBox(width: 4),
+              CustomContainerChip(
+                label: translation(context: context, 'Active'),
+              ),
+            ],
+          ),
           onTap: () {
             Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const AccountPage(),
+              MaterialPageRoute(builder: (context) => const CustomListsPage()),
+            );
+          },
+        ),
+        ListTile(
+          leading: Icon(Icons.account_circle_outlined, color: primaryColor),
+          title: Row(
+            children: [
+              Text(translation(context: context, 'Account')),
+              const SizedBox(width: 4),
+              CustomContainerChip(
+                label: translation(context: context, 'Active'),
               ),
+            ],
+          ),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const AccountPage()),
             );
           },
         ),
@@ -136,23 +167,25 @@ class MorePage extends ConsumerWidget {
             ],
           ),
           onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const UsersPage(),
-              ),
-            );
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (context) => const UsersPage()));
           },
         ),
         ListTile(
           leading: Icon(Icons.language_outlined, color: primaryColor),
           title: Row(
-              children: [
-                Text(translation(context: context, 'Language')),
-                const SizedBox(width: 4),
-                CustomContainerChip(label: translation(context: context, 'Active')),
-              ],
-            ),
-          trailing: LanguageDropdown(borderColor: primaryColor.withOpacity(0.5)),
+            children: [
+              Text(translation(context: context, 'Language')),
+              const SizedBox(width: 4),
+              CustomContainerChip(
+                label: translation(context: context, 'Active'),
+              ),
+            ],
+          ),
+          trailing: LanguageDropdown(
+            borderColor: primaryColor.withOpacity(0.5),
+          ),
         ),
         ListTile(
           leading: Icon(Icons.bar_chart_outlined, color: primaryColor),
@@ -165,50 +198,50 @@ class MorePage extends ConsumerWidget {
             children: [
               Text(translation(context: context, 'Kantin')),
               const SizedBox(width: 4),
-              CustomContainerChip(label: translation(context: context, 'Active'))
+              CustomContainerChip(
+                label: translation(context: context, 'Active'),
+              ),
             ],
           ),
           onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const KantinPage(),
-              ),
-            );
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (context) => const KantinPage()));
           },
         ),
         const Divider(),
         ListTile(
           leading: Icon(Icons.settings_outlined, color: primaryColor),
           title: Row(
-              children: [
-                Text(translation(context: context, 'Settings')),
-                const SizedBox(width: 4),
-                CustomContainerChip(label: translation(context: context, 'Active')),
-              ],
-            ),
+            children: [
+              Text(translation(context: context, 'Settings')),
+              const SizedBox(width: 4),
+              CustomContainerChip(
+                label: translation(context: context, 'Active'),
+              ),
+            ],
+          ),
           onTap: () {
             Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const SettingsPage(),
-              ),
+              MaterialPageRoute(builder: (context) => const SettingsPage()),
             );
           },
         ),
         ListTile(
           leading: Icon(Icons.info_outline, color: primaryColor),
           title: Row(
-              children: [
-                Text(translation(context: context, 'About')),
-                const SizedBox(width: 4),
-                CustomContainerChip(label: translation(context: context, 'Active')),
-              ],
-            ),
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const AboutPage(),
+            children: [
+              Text(translation(context: context, 'About')),
+              const SizedBox(width: 4),
+              CustomContainerChip(
+                label: translation(context: context, 'Active'),
               ),
-            );
+            ],
+          ),
+          onTap: () {
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (context) => const AboutPage()));
           },
         ),
         ListTile(
