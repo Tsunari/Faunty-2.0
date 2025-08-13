@@ -3,10 +3,10 @@ import 'package:flutter/foundation.dart';
 /// High-level patterns describing the data shape and UX of a custom list.
 /// Concrete list types map to one of these patterns.
 enum CustomListPattern {
-  assignment, // e.g., Temizlik, Imam Müezzin, Nöbetci, Rollen/Hizmet, Çamaşırhane, Dış Hizmet
-  schedule, // e.g., Program, Hatim, Users↔Time/Place, Time↔Event
-  attendance, // e.g., Yoklama
-  survey, // e.g., Umfragen
+  assignment, // e.g., Cleaning, Catering
+  schedule, // e.g., Program
+  attendance, // e.g., Attendance
+  survey, // e.g., Surveys
   freeform, // reserved for future use
 }
 
@@ -17,15 +17,7 @@ enum CustomListType {
   program,
   umfragen,
   kantin,
-  hatim,
   yoklama,
-  imamMuezzin,
-  camasirhane,
-  nobetci,
-  rollenHizmet,
-  disHizmet,
-  userTimePlace,
-  timeEvent,
   // Generic, user-created types
   customAssignment,
   customSchedule,
@@ -60,14 +52,14 @@ class CustomListTypeRegistry {
   static const Map<CustomListType, CustomListTypeMeta> meta = {
     CustomListType.temizlik: CustomListTypeMeta(
       key: 'temizlik',
-      displayKey: 'Temizlik',
+      displayKey: 'Cleaning',
       pattern: CustomListPattern.assignment,
       buildDefaultContent: _defaultAssignment,
       isPreset: true,
     ),
     CustomListType.yemekcilik: CustomListTypeMeta(
       key: 'yemekcilik',
-      displayKey: 'Yemekcilik',
+      displayKey: 'Catering',
       pattern: CustomListPattern.assignment,
       buildDefaultContent: _defaultAssignment,
       isPreset: true,
@@ -81,72 +73,23 @@ class CustomListTypeRegistry {
     ),
     CustomListType.umfragen: CustomListTypeMeta(
       key: 'umfragen',
-      displayKey: 'Umfragen',
+      displayKey: 'Surveys',
       pattern: CustomListPattern.survey,
       buildDefaultContent: _defaultSurvey,
       supportsTemplates: true,
     ),
     CustomListType.kantin: CustomListTypeMeta(
       key: 'kantin',
-      displayKey: 'Kantin',
+      displayKey: 'Canteen',
       pattern: CustomListPattern.assignment,
       buildDefaultContent: _defaultAssignment,
       isPreset: true,
     ),
-    CustomListType.hatim: CustomListTypeMeta(
-      key: 'hatim',
-      displayKey: 'Hatim',
-      pattern: CustomListPattern.schedule,
-      buildDefaultContent: _defaultSchedule,
-      supportsTemplates: true,
-    ),
     CustomListType.yoklama: CustomListTypeMeta(
       key: 'yoklama',
-      displayKey: 'Yoklama',
+      displayKey: 'Attendance',
       pattern: CustomListPattern.attendance,
       buildDefaultContent: _defaultAttendance,
-    ),
-    CustomListType.imamMuezzin: CustomListTypeMeta(
-      key: 'imam_muezzin',
-      displayKey: 'Imam Müezzin',
-      pattern: CustomListPattern.assignment,
-      buildDefaultContent: _defaultAssignment,
-    ),
-    CustomListType.camasirhane: CustomListTypeMeta(
-      key: 'camasirhane',
-      displayKey: 'Çamaşırhane',
-      pattern: CustomListPattern.assignment,
-      buildDefaultContent: _defaultAssignment,
-    ),
-    CustomListType.nobetci: CustomListTypeMeta(
-      key: 'nobetci',
-      displayKey: 'Nöbetci',
-      pattern: CustomListPattern.assignment,
-      buildDefaultContent: _defaultAssignment,
-    ),
-    CustomListType.rollenHizmet: CustomListTypeMeta(
-      key: 'rollen_hizmet',
-      displayKey: 'Rollen/Hizmet',
-      pattern: CustomListPattern.assignment,
-      buildDefaultContent: _defaultAssignment,
-    ),
-    CustomListType.disHizmet: CustomListTypeMeta(
-      key: 'dis_hizmet',
-      displayKey: 'Dış Hizmet',
-      pattern: CustomListPattern.assignment,
-      buildDefaultContent: _defaultAssignment,
-    ),
-    CustomListType.userTimePlace: CustomListTypeMeta(
-      key: 'user_time_place',
-      displayKey: 'Users mapped to Time/Place',
-      pattern: CustomListPattern.schedule,
-      buildDefaultContent: _defaultSchedule,
-    ),
-    CustomListType.timeEvent: CustomListTypeMeta(
-      key: 'time_event',
-      displayKey: 'Time mapped Event',
-      pattern: CustomListPattern.schedule,
-      buildDefaultContent: _defaultSchedule,
     ),
     // Generic user-created types
     CustomListType.customAssignment: CustomListTypeMeta(

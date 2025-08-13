@@ -122,23 +122,6 @@ class MorePage extends ConsumerWidget {
         ),
         RoleGate(minRole: UserRole.hoca, child: const Divider()),
         ListTile(
-          leading: Icon(Icons.view_list_outlined, color: primaryColor),
-          title: Row(
-            children: [
-              Text(translation(context: context, 'Custom Lists')),
-              const SizedBox(width: 4),
-              CustomContainerChip(
-                label: translation(context: context, 'Active'),
-              ),
-            ],
-          ),
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const CustomListsPage()),
-            );
-          },
-        ),
-        ListTile(
           leading: Icon(Icons.account_circle_outlined, color: primaryColor),
           title: Row(
             children: [
@@ -207,6 +190,23 @@ class MorePage extends ConsumerWidget {
             Navigator.of(
               context,
             ).push(MaterialPageRoute(builder: (context) => const KantinPage()));
+          },
+        ),
+        ListTile(
+          leading: Icon(Icons.view_list_outlined, color: primaryColor),
+          title: Row(
+            children: [
+              Text(translation(context: context, 'Custom Lists')),
+              const SizedBox(width: 4),
+              CustomContainerChip(
+                label: translation(context: context, 'Active'),
+              ),
+            ],
+          ),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const CustomListsPage()),
+            );
           },
         ),
         const Divider(),

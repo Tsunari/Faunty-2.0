@@ -56,10 +56,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              actions: actions?.map((w) => Padding(
-                        padding: const EdgeInsets.only(right: 4),
-                        child: w,
-                      )).toList(),
+              actions: actions?.map((w) => w).toList(),
               centerTitle: true,
               automaticallyImplyLeading: true,
             ),
