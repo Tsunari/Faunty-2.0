@@ -4,6 +4,7 @@ import 'package:faunty/globals.dart';
 import 'package:faunty/models/user_roles.dart';
 import 'package:faunty/pages/more/about_page.dart';
 import 'package:faunty/pages/more/account_page.dart';
+import 'package:faunty/pages/more/survey_page.dart';
 import 'package:faunty/state_management/user_provider.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'package:flutter/material.dart';
@@ -172,6 +173,15 @@ class MorePage extends ConsumerWidget {
           leading: Icon(Icons.bar_chart_outlined, color: primaryColor),
           title: Text(translation(context: context, 'Statistics')),
           onTap: () {},
+        ),
+        ListTile(
+          leading: Icon(Icons.thumbs_up_down_outlined, color: primaryColor),
+          title: Text(translation(context: context, 'Survey')),
+          onTap: () {
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (context) => const SurveyPage()));
+          },
         ),
         const Divider(),
         ListTile(
