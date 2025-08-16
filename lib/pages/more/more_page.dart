@@ -2,6 +2,7 @@ import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/firestore/globals_firestore_service.dart';
 import 'package:faunty/globals.dart';
 import 'package:faunty/models/user_roles.dart';
+import 'package:faunty/pages/attendance/attendance_viewer.dart';
 import 'package:faunty/pages/more/about_page.dart';
 import 'package:faunty/pages/more/account_page.dart';
 import 'package:faunty/pages/more/kantin_page.dart';
@@ -190,6 +191,25 @@ class MorePage extends ConsumerWidget {
             Navigator.of(
               context,
             ).push(MaterialPageRoute(builder: (context) => const KantinPage()));
+          },
+        ),
+        Consumer(
+          builder: (context, ref, _) {
+            final userAsync = ref.watch(userProvider);
+            final user = userAsync.asData?.value;
+            return ListTile(
+              leading: Icon(Icons.checklist_outlined, color: primaryColor),
+              title: Text(translation(context: context, 'Attendance')),
+              onTap: user == null
+                  ? null
+                  : () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => AttendanceViewer(placeId: user.placeId),
+                        ),
+                      );
+                    },
+            );
           },
         ),
         ListTile(
