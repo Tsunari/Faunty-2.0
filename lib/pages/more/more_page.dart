@@ -169,8 +169,8 @@ class MorePage extends ConsumerWidget {
           ),
         ),
         ListTile(
-          leading: Icon(Icons.bar_chart_outlined, color: primaryColor),
-          title: Text(translation(context: context, 'Statistics')),
+          leading: Icon(Icons.extension_outlined, color: primaryColor),
+          title: Text(translation(context: context, 'Tools')),
           onTap: () {},
         ),
         const Divider(),
@@ -207,6 +207,11 @@ class MorePage extends ConsumerWidget {
               context,
             ).push(MaterialPageRoute(builder: (context) => const AboutPage()));
           },
+        ),
+        ListTile(
+          leading: Icon(Icons.feedback_outlined, color: primaryColor),
+          title: Text(translation(context: context, 'Feedback')),
+          onTap: () {},
         ),
         ListTile(
           leading: Icon(Icons.help_outline, color: primaryColor),

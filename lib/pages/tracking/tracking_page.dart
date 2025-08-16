@@ -15,8 +15,8 @@ class TrackingPage extends StatelessWidget {
       tabs: const [
         TabMeta('Statistics', DummyPage('Statistics'), Icons.bar_chart_outlined),
         TabMeta('Attendance', AttendanceViewer(), Icons.checklist_outlined),
-        TabMeta('Kantin', KantinPage(), Icons.local_cafe_outlined),
-        TabMeta('Custom List Tracking', DummyPage('Custom List Tracking'), Icons.list_alt_outlined)
+        TabMeta('Custom List Tracking', DummyPage('Custom List Tracking'), Icons.list_alt_outlined),
+        TabMeta('Kantin', KantinPage(), Icons.local_cafe_outlined)
       ],
       tabIndexProvider: trackingTabIndexProvider,
       prefsKey: 'tracking_last_tab_index',
