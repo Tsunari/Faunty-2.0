@@ -1,7 +1,9 @@
 import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/firebase_options.dart';
 import 'package:faunty/models/user_roles.dart';
+import 'package:faunty/pages/communication/communication_page.dart';
 import 'package:faunty/pages/lists/lists_page.dart';
+import 'package:faunty/pages/tracking/tracking_page.dart';
 import 'package:faunty/state_management/language_provider.dart';
 import 'package:flutter/material.dart';
 import 'globals.dart';
@@ -93,8 +95,8 @@ class _MainPageState extends ConsumerState<MainPage> {
 
   final List<Widget> _pages = [
     HomePage(),
-    CleaningPage(),
-    CateringPage(),
+    CommunicationPage(),
+    TrackingPage(),
     ListsPage(),
     MorePage(),
   ];
