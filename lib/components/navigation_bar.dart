@@ -22,9 +22,13 @@ class NavBar extends StatelessWidget {
         icon: Icon(Icons.dining),
         label: translation(context: context, 'Catering'),
       ),
+      // NavigationDestination(
+      //   icon: Icon(Icons.today),
+      //   label: translation(context: context, 'Program'),
+      // ),
       NavigationDestination(
-        icon: Icon(Icons.today),
-        label: translation(context: context, 'Program'),
+        icon: Icon(Icons.list_alt_outlined),
+        label: translation(context: context, 'Lists'),
       ),
       NavigationDestination(
         icon: Icon(Icons.more_horiz_outlined),

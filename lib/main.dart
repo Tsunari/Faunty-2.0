@@ -1,8 +1,8 @@
 import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/firebase_options.dart';
 import 'package:faunty/models/user_roles.dart';
+import 'package:faunty/pages/lists/lists_page.dart';
 import 'package:faunty/state_management/language_provider.dart';
-import 'package:faunty/tools/local_storage_helper.dart';
 import 'package:flutter/material.dart';
 import 'globals.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,7 +13,6 @@ import 'pages/cleaning/cleaning.dart';
 import 'pages/catering/catering.dart';
 import 'pages/more/more_page.dart';
 import 'components/navigation_bar.dart';
-import 'pages/program/program_page.dart';
 import 'pages/splash_page.dart';
 import 'pages/welcome/user_welcome_page.dart';
 import 'state_management/user_provider.dart';
@@ -21,7 +20,6 @@ import 'package:faunty/i18n/strings.g.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'state_management/theme_provider.dart';
 import 'components/theme_cards_selector.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +43,7 @@ class Faunty extends ConsumerWidget {
   const Faunty({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) { 
+  Widget build(BuildContext context, WidgetRef ref) {
     final presetIndex = ref.watch(themePresetProvider);
     final preset = themePresets[presetIndex];
     final isMonochrome = preset.name == 'Monochrome';
@@ -68,10 +66,10 @@ class Faunty extends ConsumerWidget {
               useMaterial3: true,
             ),
       themeMode: ref.watch(themeProvider).value == AppThemeMode.dark
-        ? ThemeMode.dark
-        : ref.watch(themeProvider).value == AppThemeMode.light
-            ? ThemeMode.light
-            : ThemeMode.system,
+          ? ThemeMode.dark
+          : ref.watch(themeProvider).value == AppThemeMode.light
+          ? ThemeMode.light
+          : ThemeMode.system,
       initialRoute: '/splash',
       routes: {
         '/splash': (context) => const SplashPage(),
@@ -97,7 +95,7 @@ class _MainPageState extends ConsumerState<MainPage> {
     HomePage(),
     CleaningPage(),
     CateringPage(),
-    ProgramPage(),
+    ListsPage(),
     MorePage(),
   ];
 
@@ -123,7 +121,9 @@ class _MainPageState extends ConsumerState<MainPage> {
               }
             });
           }
-          if (userAsync is AsyncData && userAsync.value != null && userAsync.value!.role == UserRole.user) {
+          if (userAsync is AsyncData &&
+              userAsync.value != null &&
+              userAsync.value!.role == UserRole.user) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (ModalRoute.of(context)?.settings.name != '/user-welcome') {
                 Navigator.of(context).pushReplacement(

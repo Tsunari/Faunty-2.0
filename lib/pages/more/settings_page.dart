@@ -1,4 +1,3 @@
-import 'package:faunty/components/custom_dropdown.dart';
 import 'package:faunty/components/language_dropdown.dart';
 import 'package:faunty/components/theme_cards_selector.dart';
 import 'package:faunty/components/theme_selector.dart';
