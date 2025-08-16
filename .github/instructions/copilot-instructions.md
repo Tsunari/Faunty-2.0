@@ -35,6 +35,18 @@ For more information, see the main [README.md](../../README.md) in the project r
 - **External Links:** Use `url_launcher` with `canLaunchUrl`/`launchUrl` (not deprecated `canLaunch`/`launch`). Wrap in try/catch for reliability.
 - **Theme & Colors:** Use `Theme.of(context)` for colors whenever possible to ensure consistent theming.
 - **Code Examples:** When creating something new (e.g., providers, StreamProviders, or a new page in the `pages` folder), look at similar examples in the codebase and follow their patterns for consistency.
+- **Dummy Data Usage:** If a page or widget needs user data (e.g. names, products, debts, etc.), always use a dummy list or dummy data structure first (e.g. `List<Map<String, dynamic>>` or `List<Model>`), and build the UI to consume this dummy data. Structure the code so that the dummy data can be easily replaced with a Firestore stream/provider later (see Riverpod and Firestore service examples). This makes it easy to connect to Firebase/Firestore afterwards by swapping the dummy data for a provider or stream from Firestore, without changing the UI code structure.
+
+  Example:
+  ```dart
+  final List<Map<String, dynamic>> _dummyProducts = [ ... ];
+  // ...
+  for (final product in _dummyProducts) ...
+  ```
+
+  When connecting to Firestore, replace `_dummyProducts` with a provider/stream and update usages.
+
+  See also: `lib/firestore/kantin_firestore_service.dart`, `lib/state_management/kantin_provider.dart`.
 
 ## Integration Points
 - **Firebase:** All data flows through Firestore collections. Structure: `places/{placeId}/{domain}` (kantin, cleaning, catering, program, etc.), and `user_list/{userUID}` for user data fields. See Firestore service files for details.
