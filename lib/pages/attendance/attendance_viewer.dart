@@ -539,8 +539,8 @@ class _InlineCellState extends State<_InlineCell> {
         rec['present'] = present;
         rec['absent'] = absent;
         next[widget.dateKey] = rec;
-      // Persist using AttendanceFirestoreService directly
-  await AttendanceFirestoreService(widget.placeId).setAttendance(widget.dateKey, next);
+        // Persist using AttendanceFirestoreService directly
+        await AttendanceFirestoreService(widget.placeId).setAttendance(widget.dateKey, rec);
       },
     );
   }

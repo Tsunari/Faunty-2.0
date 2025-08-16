@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AttendanceFirestoreService {
+  final String placeId;
+  AttendanceFirestoreService(this.placeId);
+
   Future<List<String>> getRoster() async {
     final usersSnapshot = await FirebaseFirestore.instance
         .collection('user_list')
@@ -12,8 +15,6 @@ class AttendanceFirestoreService {
         .where((e) => e.isNotEmpty)
         .toList();
   }
-  final String placeId;
-  AttendanceFirestoreService(this.placeId);
 
   CollectionReference<Map<String, dynamic>> get _attendanceCollection =>
       FirebaseFirestore.instance.collection('places').doc(placeId).collection('attendance');
