@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../globals.dart';
 
 class SurveyFirestoreService {
   final String placeId;
@@ -10,37 +9,88 @@ class SurveyFirestoreService {
       .doc(placeId)
       .collection('surveys');
 
-  // Save or update a user's response for a survey
-  Future<void> saveResponse({
-    required String surveyId,
-    required String userId,
-    required dynamic optionValue,
-  }) async {
-    final doc = _surveyCollection.doc(surveyId).collection('responses').doc(userId);
-    await doc.set({'optionValue': optionValue}, SetOptions(merge: true));
-  }
-
-  // Stream of all responses for a survey, returns a map of value to count
-  Stream<Map<dynamic, int>> responsesMapStream(String surveyId) {
-    return _surveyCollection.doc(surveyId).collection('responses').snapshots().map((snapshot) {
-      final Map<dynamic, int> counts = {};
-      for (final doc in snapshot.docs) {
-        final value = doc['optionValue'];
-        if (value != null) {
-          counts[value] = (counts[value] ?? 0) + 1;
-        }
-      }
-      return counts;
+  /// Stream of all surveys for a place (real-time updates)
+  Stream<List<Map<String, dynamic>>> surveyStream() {
+    return _surveyCollection.snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return {
+          'id': doc.id,
+          ...data,
+        };
+      }).toList();
     });
   }
 
-  // Get the current user's selected option value for a survey
-  Stream<dynamic> userSelectionValueStream(String surveyId, String userId) {
-    return _surveyCollection.doc(surveyId).collection('responses').doc(userId).snapshots().map((doc) {
-      if (doc.exists) {
-        return doc['optionValue'];
+  /// Add a new survey
+  Future<void> addSurvey(Map<String, dynamic> survey) async {
+    await _surveyCollection.add(survey);
+  }
+
+  /// Update an existing survey
+  Future<void> updateSurvey(String surveyId, Map<String, dynamic> data) async {
+    await _surveyCollection.doc(surveyId).update(data);
+  }
+
+  /// Increment vote for an option
+  Future<void> incrementVote(String surveyId, String optionValue, {required String userId}) async {
+    final docRef = _surveyCollection.doc(surveyId);
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final snapshot = await transaction.get(docRef);
+      final data = snapshot.data() as Map<String, dynamic>?;
+      if (data == null) return;
+      final options = List<Map<String, dynamic>>.from(data['options'] ?? []);
+      for (var option in options) {
+        if (option['value'] == optionValue) {
+          option['voteCount'] = (option['voteCount'] ?? 0) + 1;
+          final users = List<String>.from(option['users'] ?? []);
+          if (!users.contains(userId)) users.add(userId);
+          option['users'] = users;
+        }
       }
-      return null;
+      transaction.update(docRef, {'options': options});
+    });
+  }
+
+  /// Decrement vote for an option
+  Future<void> decrementVote(String surveyId, String optionValue, {required String userId}) async {
+    final docRef = _surveyCollection.doc(surveyId);
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final snapshot = await transaction.get(docRef);
+      final data = snapshot.data() as Map<String, dynamic>?;
+      if (data == null) return;
+      final options = List<Map<String, dynamic>>.from(data['options'] ?? []);
+      for (var option in options) {
+        if (option['value'] == optionValue) {
+          option['voteCount'] = ((option['voteCount'] ?? 0) - 1).clamp(0, double.infinity);
+          final users = List<String>.from(option['users'] ?? []);
+          users.remove(userId);
+          option['users'] = users;
+        }
+      }
+      transaction.update(docRef, {'options': options});
+    });
+  }
+
+  /// Select an option (single choice)
+  Future<void> selectOption(String surveyId, String optionValue, {required String userId}) async {
+    final docRef = _surveyCollection.doc(surveyId);
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final snapshot = await transaction.get(docRef);
+      final data = snapshot.data() as Map<String, dynamic>?;
+      if (data == null) return;
+      final options = List<Map<String, dynamic>>.from(data['options'] ?? []);
+      // Remove user from all options first
+      for (var option in options) {
+        final users = List<String>.from(option['users'] ?? []);
+        users.remove(userId);
+        option['users'] = users;
+        if (option['value'] == optionValue) {
+          option['voteCount'] = (option['voteCount'] ?? 0) + 1;
+          if (!users.contains(userId)) users.add(userId);
+        }
+      }
+      transaction.update(docRef, {'options': options});
     });
   }
 }
