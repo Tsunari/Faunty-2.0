@@ -174,15 +174,6 @@ class MorePage extends ConsumerWidget {
           title: Text(translation(context: context, 'Tools')),
           onTap: () {},
         ),
-        ListTile(
-          leading: Icon(Icons.thumbs_up_down_outlined, color: primaryColor),
-          title: Text(translation(context: context, 'Survey')),
-          onTap: () {
-            Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (context) => const SurveyPage()));
-          },
-        ),
         const Divider(),
         ListTile(
           leading: Icon(Icons.settings_outlined, color: primaryColor),
