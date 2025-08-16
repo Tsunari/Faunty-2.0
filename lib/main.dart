@@ -1,6 +1,7 @@
 import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/firebase_options.dart';
 import 'package:faunty/models/user_roles.dart';
+import 'package:faunty/pages/lists/lists_page.dart';
 import 'package:faunty/state_management/language_provider.dart';
 import 'package:flutter/material.dart';
 import 'globals.dart';
@@ -12,7 +13,6 @@ import 'pages/cleaning/cleaning.dart';
 import 'pages/catering/catering.dart';
 import 'pages/more/more_page.dart';
 import 'components/navigation_bar.dart';
-import 'pages/program/program_page.dart';
 import 'pages/splash_page.dart';
 import 'pages/welcome/user_welcome_page.dart';
 import 'state_management/user_provider.dart';
@@ -95,7 +95,7 @@ class _MainPageState extends ConsumerState<MainPage> {
     HomePage(),
     CleaningPage(),
     CateringPage(),
-    ProgramPage(),
+    ListsPage(),
     MorePage(),
   ];
 

@@ -176,59 +176,6 @@ class MorePage extends ConsumerWidget {
           title: Text(translation(context: context, 'Statistics')),
           onTap: () {},
         ),
-        ListTile(
-          leading: Icon(Icons.local_cafe_outlined, color: primaryColor),
-          title: Row(
-            children: [
-              Text(translation(context: context, 'Kantin')),
-              const SizedBox(width: 4),
-              CustomContainerChip(
-                label: translation(context: context, 'Active'),
-              ),
-            ],
-          ),
-          onTap: () {
-            Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (context) => const KantinPage()));
-          },
-        ),
-        Consumer(
-          builder: (context, ref, _) {
-            final userAsync = ref.watch(userProvider);
-            final user = userAsync.asData?.value;
-            return ListTile(
-              leading: Icon(Icons.checklist_outlined, color: primaryColor),
-              title: Text(translation(context: context, 'Attendance')),
-              onTap: user == null
-                  ? null
-                  : () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => AttendanceViewer(placeId: user.placeId),
-                        ),
-                      );
-                    },
-            );
-          },
-        ),
-        ListTile(
-          leading: Icon(Icons.view_list_outlined, color: primaryColor),
-          title: Row(
-            children: [
-              Text(translation(context: context, 'Custom Lists')),
-              const SizedBox(width: 4),
-              CustomContainerChip(
-                label: translation(context: context, 'Active'),
-              ),
-            ],
-          ),
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const CustomListsPage()),
-            );
-          },
-        ),
         const Divider(),
         ListTile(
           leading: Icon(Icons.settings_outlined, color: primaryColor),

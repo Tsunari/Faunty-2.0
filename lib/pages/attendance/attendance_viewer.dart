@@ -1,3 +1,5 @@
+import 'package:faunty/components/custom_app_bar.dart';
+import 'package:faunty/state_management/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/attendance_provider.dart';
@@ -7,10 +9,8 @@ import 'package:faunty/models/user_entity.dart';
 import '../../firestore/attendance_firestore_service.dart';
 
 class AttendanceViewer extends ConsumerStatefulWidget {
-  final String placeId;
   const AttendanceViewer({
     super.key,
-    required this.placeId,
   });
 
   @override
@@ -158,13 +158,15 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final attendanceAsync = ref.watch(attendanceProvider(widget.placeId));
+    final usersAsync = ref.watch(usersByCurrentPlaceProvider);
+    final currentUser = ref.watch(userProvider);
+    final user = currentUser.asData?.value;
+    final List<UserEntity> users = usersAsync.asData?.value ?? const <UserEntity>[];
+    final attendanceAsync = ref.watch(attendanceProvider(user!.placeId));
     if (!attendanceAsync.hasValue) {
       return const Center(child: CircularProgressIndicator());
     }
     final Map<String, dynamic> attendance = Map<String, dynamic>.from(attendanceAsync.value ?? {});
-    final usersAsync = ref.watch(usersByCurrentPlaceProvider);
-    final List<UserEntity> users = usersAsync.asData?.value ?? const <UserEntity>[];
     final List<String> fallbackRoster = users.map((u) => u.uid).toList();
     final List<String> roster = attendance['roster'] is List
         ? (attendance['roster'] as List).cast<String>()
@@ -197,6 +199,9 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
 
     // Flat full-width layout (no card)
     return Scaffold(
+      appBar: CustomAppBar(
+        title: translation(context: context, 'Attendance'),
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
         child: Row(
@@ -384,7 +389,7 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
                                             child: Transform.scale(
                                               scale: 0.9,
                                               child: _InlineCell(
-                                                placeId: widget.placeId,
+                                                placeId: user.placeId,
                                                 dateKey: d,
                                                 userId: userId,
                                                 attendance: attendance,
