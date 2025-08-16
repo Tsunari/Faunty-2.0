@@ -2,10 +2,8 @@ import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/firestore/globals_firestore_service.dart';
 import 'package:faunty/globals.dart';
 import 'package:faunty/models/user_roles.dart';
-import 'package:faunty/pages/attendance/attendance_viewer.dart';
 import 'package:faunty/pages/more/about_page.dart';
 import 'package:faunty/pages/more/account_page.dart';
-import 'package:faunty/pages/more/kantin_page.dart';
 import 'package:faunty/state_management/user_provider.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +13,6 @@ import 'users_page.dart';
 import '../../components/custom_chip.dart';
 import 'settings_page.dart';
 import 'package:faunty/components/language_dropdown.dart';
-import 'package:faunty/custom_lists/ui/custom_lists_page.dart';
 
 class MorePage extends ConsumerWidget {
   const MorePage({super.key});

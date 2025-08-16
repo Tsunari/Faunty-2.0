@@ -2,9 +2,12 @@ import 'package:faunty/pages/catering/catering.dart';
 import 'package:faunty/pages/cleaning/cleaning.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../program/program_page.dart';
 import '../more/kantin_page.dart';
 import '../attendance/attendance_viewer.dart';
+
+final lastTabIndexProvider = StateProvider<int?>((ref) => null);
 
 class ListsPage extends ConsumerStatefulWidget {
   const ListsPage({super.key});
@@ -14,7 +17,7 @@ class ListsPage extends ConsumerStatefulWidget {
 }
 
 class _ListsPageState extends ConsumerState<ListsPage> with TickerProviderStateMixin {
-  late TabController _tabController;
+  TabController? _tabController;
   final List<_ListTabMeta> _tabs = [
     _ListTabMeta('Cleaning', CleaningPage(), Icons.cleaning_services_outlined),
     _ListTabMeta('Catering', CateringPage(), Icons.restaurant_outlined),
@@ -23,25 +26,55 @@ class _ListsPageState extends ConsumerState<ListsPage> with TickerProviderStateM
     _ListTabMeta('Attendance', AttendanceViewer(), Icons.checklist_outlined),
   ];
 
+  // Key for SharedPreferences
+  static const String _prefsKey = 'lists_last_tab_index';
+  bool _isTabControllerInitialized = false;
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabs.length, vsync: this);
-    _tabController.addListener(() {
-      if (mounted) setState(() {});
-    });
+    // Get initial tab index from provider or SharedPreferences
+    _initTabController();
+  }
+
+  Future<void> _initTabController() async {
+    int initialIndex = ref.read(lastTabIndexProvider) ?? 0;
+    if (ref.read(lastTabIndexProvider) == null) {
+      final prefs = await SharedPreferences.getInstance();
+      initialIndex = prefs.getInt(_prefsKey) ?? 0;
+      ref.read(lastTabIndexProvider.notifier).state = initialIndex;
+    }
+    _tabController = TabController(length: _tabs.length, vsync: this, initialIndex: initialIndex);
+    _tabController!.addListener(_handleTabChange);
+    _isTabControllerInitialized = true;
+    if (mounted) setState(() {});
+  }
+
+  void _handleTabChange() async {
+    if (_tabController == null || _tabController!.indexIsChanging) return;
+    final index = _tabController!.index;
+    ref.read(lastTabIndexProvider.notifier).state = index;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_prefsKey, index);
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    if (_tabController != null) {
+      _tabController!.removeListener(_handleTabChange);
+      _tabController!.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // If tabController is not initialized yet, show a loader
+    if (!_isTabControllerInitialized || _tabController == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return Scaffold(
-      // Optionally, you can add a minimal AppBar for ListsPage itself, or none at all
       body: Column(
         children: [
           TabBar(
@@ -65,7 +98,6 @@ class _ListsPageState extends ConsumerState<ListsPage> with TickerProviderStateM
             isScrollable: true,
             labelPadding: const EdgeInsets.symmetric(horizontal: 16.0),
             indicatorSize: TabBarIndicatorSize.label,
-            // Center the tabs
             tabAlignment: TabAlignment.center,
           ),
           Expanded(
