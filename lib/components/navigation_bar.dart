@@ -15,12 +15,12 @@ class NavBar extends StatelessWidget {
         label: translation(context: context, 'Home'),
       ),
       NavigationDestination(
-        icon: Icon(Icons.cleaning_services),
-        label: translation(context: context, 'Cleaning'),
+        icon: Icon(Icons.group_outlined),
+        label: translation(context: context, 'Communication'),
       ),
       NavigationDestination(
-        icon: Icon(Icons.dining),
-        label: translation(context: context, 'Catering'),
+        icon: Icon(Icons.track_changes),
+        label: translation(context: context, 'Tracking'),
       ),
       // NavigationDestination(
       //   icon: Icon(Icons.today),
