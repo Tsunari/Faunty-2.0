@@ -1,5 +1,6 @@
 import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/firebase_options.dart';
+import 'package:faunty/notifications/notification_service.dart';
 import 'package:faunty/models/user_roles.dart';
 import 'package:faunty/pages/communication/communication_page.dart';
 import 'package:faunty/pages/lists/lists_page.dart';
@@ -11,8 +12,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'pages/home/home_page.dart';
 import 'pages/login.dart';
-import 'pages/cleaning/cleaning.dart';
-import 'pages/catering/catering.dart';
 import 'pages/more/more_page.dart';
 import 'components/navigation_bar.dart';
 import 'pages/splash_page.dart';
@@ -22,6 +21,7 @@ import 'package:faunty/i18n/strings.g.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'state_management/theme_provider.dart';
 import 'components/theme_cards_selector.dart';
+import 'package:flutter/foundation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +32,20 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  // Fire-and-forget init after first frame so app startup is not blocked.
+  // Also avoid asking permission immediately — we'll ask later from UI.
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    NotificationService.init(requestPermissions: true).catchError((e) {
+      // safe logging, don't crash the app
+      if (kDebugMode) print('NotificationService init error: $e');
+
+      //  Example: call from a button or first meaningful screen NOT HERE
+      // await NotificationService.init(requestPermissions: true);
+      //  or just request permission and get token:
+      // final settings = await FirebaseMessaging.instance.requestPermission();
+      // final token = await NotificationService.getToken();
+    });
+  });
   runApp(
     TranslationProvider(
       child: ProviderScope(
