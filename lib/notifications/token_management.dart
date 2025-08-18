@@ -60,4 +60,18 @@ class TokenManager {
     if (q.docs.isEmpty) return null;
     return q.docs.first.id;
   }
+
+  /// Clear the uid field for a specific token document (does not delete the doc).
+  static Future<void> clearUidForToken(String token) async {
+    final docRef = _tokens.doc(token);
+    return _fs.runTransaction((tx) async {
+      final snap = await tx.get(docRef);
+      if (!snap.exists) return;
+      final data = snap.data() as Map<String, dynamic>?;
+      if (data == null) return;
+      if (data['uid'] != null) {
+        tx.update(docRef, {'uid': FieldValue.delete()});
+      }
+    });
+  }
 }

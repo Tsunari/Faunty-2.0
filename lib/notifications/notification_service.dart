@@ -28,6 +28,19 @@ class NotificationService {
 			await _storeTokenIfAvailable(newToken);
 		});
 
+		// When a user signs in, attempt to fetch/store the token so the token
+		// document can be associated with the user's uid. This uses
+		// fetchTokenIfAllowed() so it won't trigger a browser permission prompt.
+		FirebaseAuth.instance.authStateChanges().listen((user) async {
+			if (user != null) {
+				try {
+					await fetchTokenIfAllowed();
+				} catch (e) {
+					if (kDebugMode) print('fetchTokenOnSignIn error: $e');
+				}
+			}
+		});
+
 		// Only actively fetch a token (which may trigger permission UX on web)
 		// when the caller explicitly asked for permissions. Otherwise we only
 		// set up the onTokenRefresh listener so when tokens become available
@@ -99,11 +112,17 @@ class NotificationService {
 	static Future<NotificationSettings> checkAndRequestPermission({bool requestIfNot = true}) async {
 		final settings = await _messaging.getNotificationSettings();
 		if (settings.authorizationStatus == AuthorizationStatus.notDetermined && requestIfNot) {
-			return await _messaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true
-      );
+			final granted = await _messaging.requestPermission(alert: true, badge: true, sound: true);
+			// If user granted permission, attempt to fetch & store token immediately
+			if (granted.authorizationStatus == AuthorizationStatus.authorized ||
+				granted.authorizationStatus == AuthorizationStatus.provisional) {
+				try {
+					await fetchTokenIfAllowed();
+				} catch (e) {
+					if (kDebugMode) print('fetch-token-after-permission failed: $e');
+				}
+			}
+			return granted;
 		}
 		return settings;
 	}
