@@ -4,6 +4,7 @@ import 'package:faunty/models/user_roles.dart';
 import 'package:faunty/pages/more/kantin_page.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'package:flutter/foundation.dart';
+import '../../tools/message_prefs.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../components/custom_app_bar.dart';
@@ -118,7 +119,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           await NotificationService.checkAndRequestPermission(requestIfNot: true);
         } catch (e) {
           if (mounted) {
-            print('Notification permission check/request error: $e');
+            if (kDebugMode) print('Notification permission check/request error: $e');
           }
         }
       }
@@ -178,6 +179,47 @@ class _HomePageState extends ConsumerState<HomePage> {
         Future<void> showTokensDialog(BuildContext context) async {
           final firestore = FirebaseFirestore.instance;
 
+          Future<void> showEditMessageDialog(BuildContext parentCtx) async {
+            final currentTitle = await getTestNotificationTitle();
+            final currentBody = await getTestNotificationBody();
+            final titleCtl = TextEditingController(text: currentTitle ?? 'Test notification');
+            final bodyCtl = TextEditingController(text: currentBody ?? 'This is a test message.');
+            await showDialog<void>(
+              context: parentCtx,
+              builder: (c) => AlertDialog(
+                title: Text(translation(context: context, 'Edit test notification message')),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: titleCtl,
+                      decoration: InputDecoration(labelText: translation(context: context, 'Title')),
+                    ),
+                    TextField(
+                      controller: bodyCtl,
+                      decoration: InputDecoration(labelText: translation(context: context, 'Body')),
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(onPressed: () => Navigator.of(c).pop(), child: Text(translation(context: context, 'Cancel'))),
+                  TextButton(onPressed: () async {
+                    try {
+                      await setTestNotificationTitle(titleCtl.text);
+                      await setTestNotificationBody(bodyCtl.text);
+                      if (parentCtx.mounted) showCustomSnackBar(parentCtx, translation(context: context, 'Saved'));
+                    } catch (e) {
+                      if (parentCtx.mounted) showCustomSnackBar(parentCtx, 'Save failed: $e');
+                    }
+                    Navigator.of(c).pop();
+                  }, child: Text(translation(context: context, 'Save'))),
+                ],
+              ),
+            );
+            titleCtl.dispose();
+            bodyCtl.dispose();
+          }
+
           // Query top-level fcm_tokens and group tokens by uid for display
           showDialog(
             context: context,
@@ -186,6 +228,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(child: Text(translation(context: context, 'Saved FCM tokens'))),
+                  IconButton(
+                    icon: const Icon(Icons.edit),
+                    tooltip: translation(context: context, 'Edit test notification message'),
+                    onPressed: () async {
+                      await showEditMessageDialog(ctx);
+                    },
+                  ),
                   IconButton(
                     icon: const Icon(Icons.refresh),
                     tooltip: translation(context: context, 'Refresh tokens'),
@@ -304,11 +353,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                                             if (t.id.trim().isEmpty) throw Exception('Token is empty');
                                             final functions = FirebaseFunctions.instanceFor(region: 'europe-west1');
                                             final callable = functions.httpsCallable('testNotification');
-                                            // Build safe title/body
+                                            // Use stored title/body if available
+                                            final storedTitle = await getTestNotificationTitle();
+                                            final storedBody = await getTestNotificationBody();
                                             final platform = (t.data() as Map<String, dynamic>)['platform'] ?? 'device';
                                             final safeTokenPreview = t.id.length > 20 ? '${t.id.substring(0, 20)}...' : t.id;
-                                            final title = 'Test notification — $platform';
-                                            final body = 'Token: $safeTokenPreview';
+                                            final title = (storedTitle?.isNotEmpty ?? false) ? storedTitle! : 'Test notification — $platform';
+                                            final body = (storedBody?.isNotEmpty ?? false) ? storedBody! : 'Token: $safeTokenPreview';
                                             final result = await callable.call(<String, dynamic>{'token': t.id, 'title': title, 'body': body});
                                             if (context.mounted) showCustomSnackBar(context, '${translation(context: context, 'Test notification sent')}: ${result.data}');
                                           } catch (e) {
