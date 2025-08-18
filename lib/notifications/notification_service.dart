@@ -28,6 +28,11 @@ class NotificationService {
 			await _storeTokenIfAvailable(newToken);
 		});
 
+		// Only actively fetch a token (which may trigger permission UX on web)
+		// when the caller explicitly asked for permissions. Otherwise we only
+		// set up the onTokenRefresh listener so when tokens become available
+		// (e.g., after the user grants permission) they'll be handled.
+		if (requestPermissions) {
 			String? currentToken;
 			if (kIsWeb) {
 				const vapidKey = 'BFAfGKzxnVVxMbYsIJ3NXS4L4iHjRdFh4MGJvP7qq6jyT78WOjhVthqzBKjejvIN6Um_QVKUA5gm6r2oVjs_63M';
@@ -43,17 +48,6 @@ class NotificationService {
 			if (currentToken != null) {
 				await _storeTokenIfAvailable(currentToken);
 			}
-
-		// Request permissions where relevant
-		if (requestPermissions) {
-			NotificationSettings settings = await _messaging.requestPermission(
-				alert: true,
-				badge: true,
-				sound: true,
-			);
-			if (kDebugMode) {
-				print('FCM permission status: ${settings.authorizationStatus}');
-			}
 		}
 
 		// Optional: foreground message handler
@@ -61,13 +55,55 @@ class NotificationService {
 			if (kDebugMode) print('Foreground message received: ${msg.messageId}');
 			// app-specific handling can be added by listening to this stream where needed
 		});
+
 	}
+
+	/// Attempt to fetch the current FCM token and store it, but only when it's
+	/// safe to do so (won't trigger a browser permission prompt).
+	///
+	/// On web this checks the current notification settings and only calls
+	/// getToken() when the status is authorized or provisional. On mobile we
+	/// fetch the token directly.
+	static Future<String?> fetchTokenIfAllowed() async {
+		try {
+			if (kIsWeb) {
+				final settings = await _messaging.getNotificationSettings();
+				if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+					settings.authorizationStatus == AuthorizationStatus.provisional) {
+					// safe to fetch token
+					const vapidKey = 'BFAfGKzxnVVxMbYsIJ3NXS4L4iHjRdFh4MGJvP7qq6jyT78WOjhVthqzBKjejvIN6Um_QVKUA5gm6r2oVjs_63M';
+					String? token;
+					try {
+						token = await _messaging.getToken(vapidKey: vapidKey);
+					} catch (e) {
+						if (kDebugMode) print('getToken with vapidKey failed: $e');
+						token = await _messaging.getToken();
+					}
+					if (token != null) await _storeTokenIfAvailable(token);
+					return token;
+				}
+				// not authorized — do not call getToken to avoid prompting
+				return null;
+			} else {
+				final token = await _messaging.getToken();
+				if (token != null) await _storeTokenIfAvailable(token);
+				return token;
+			}
+		} catch (e) {
+			if (kDebugMode) print('fetchTokenIfAllowed error: $e');
+			return null;
+		}
+		}
 
 	/// Check permission & optionally request it.
 	static Future<NotificationSettings> checkAndRequestPermission({bool requestIfNot = true}) async {
 		final settings = await _messaging.getNotificationSettings();
 		if (settings.authorizationStatus == AuthorizationStatus.notDetermined && requestIfNot) {
-			return await _messaging.requestPermission(alert: true, badge: true, sound: true);
+			return await _messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true
+      );
 		}
 		return settings;
 	}
