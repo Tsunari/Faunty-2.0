@@ -51,3 +51,5 @@ linux/flutter/*
 macos/Flutter/*
 windows/flutter/*
 node_modules/
+.firebase
+.tmp

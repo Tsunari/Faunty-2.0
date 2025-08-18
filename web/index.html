@@ -32,8 +32,8 @@
   <title>Faunty</title>
   <link rel="manifest" href="manifest.json">
 
-  <!-- Firebase Cloud Messaging Service Worker Registration -->
-  <script>
+  
+  <!-- <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('/firebase-messaging-sw.js').then(function(registration) {
@@ -43,9 +43,22 @@
         });
       });
     }
-  </script>
+  </script> -->
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+  <script src="flutter_bootstrap.js" async>
+    // Firebase Cloud Messaging Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+      navigator.serviceWorker.register('firebase-messaging-sw.js', {
+        scope: '/firebase-cloud-messaging-push-scope',
+      }).then(function(registration) {
+        console.log('ServiceWorker setup successful with scope:', registration.scope);
+      }).catch(function(error) {
+        console.log('ServiceWorker setup failed:', error);
+      });
+      });
+    }
+  </script>
 </body>
 </html>

@@ -35,15 +35,8 @@ void main() async {
   // Fire-and-forget init after first frame so app startup is not blocked.
   // Also avoid asking permission immediately — we'll ask later from UI.
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    NotificationService.init(requestPermissions: true).catchError((e) {
-      // safe logging, don't crash the app
+    NotificationService.init(requestPermissions: false).catchError((e) {
       if (kDebugMode) print('NotificationService init error: $e');
-
-      //  Example: call from a button or first meaningful screen NOT HERE
-      // await NotificationService.init(requestPermissions: true);
-      //  or just request permission and get token:
-      // final settings = await FirebaseMessaging.instance.requestPermission();
-      // final token = await NotificationService.getToken();
     });
   });
   runApp(
