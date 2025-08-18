@@ -54,11 +54,27 @@ class ThemeCardsSelector extends ConsumerWidget {
     final selectedIndex = ref.watch(themePresetProvider);
     return LayoutBuilder(
       builder: (context, constraints) {
-        final screenWidth = constraints.maxWidth;
-        final cardWidth = (screenWidth - 48) / 3.5; // ~3.5 cards visible
+        // Use the LayoutBuilder constraints so sizing responds to the parent
+        // while keeping a sensible min/max so cards remain usable on
+        // very small or very large screens.
+        final availableWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : MediaQuery.of(context).size.width;
+        // Show more cards across large widths and cap sizes lower so cards
+        // stay compact on desktop/fullscreen. Increase divisor => more
+        // cards visible; lower max keeps them small.
+        final baseCardWidth = (availableWidth - 48) / 5.0; // ~5 cards visible
+        const double minCardWidth = 110.0; // smaller minimum for narrow screens
+        const double maxCardWidth = 180.0; // much smaller cap for fullscreen
+        final cardWidth = baseCardWidth.clamp(minCardWidth, maxCardWidth);
         final cardHeight = cardWidth * 1.5;
+        // Calculate exact total height used by each item (card + gap + label)
+        // to avoid fractional pixel bottom overflow on large screens.
+        const double labelGap = 8.0;
+        final double labelHeight = cardHeight * 0.09;
+        final double totalHeight = cardHeight + labelGap + labelHeight + 4.0; // small buffer
         return SizedBox(
-          height: cardHeight + 30,
+          height: totalHeight,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: NotificationListener<ScrollNotification>(

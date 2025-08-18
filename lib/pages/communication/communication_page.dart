@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:faunty/pages/more/survey_page.dart';
+import 'package:faunty/pages/communication/survey_page.dart';
 import '../../components/tab_page.dart';
 
 final communicationTabIndexProvider = StateProvider<int?>((ref) => null);

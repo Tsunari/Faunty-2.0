@@ -1,4 +1,7 @@
-param()
+param(
+    [Alias('hosting')][switch]$HostingOnly,
+    [switch]$force
+)
 
 # Helper: Prompt for version bump
 function Prompt-VersionBump {
@@ -88,19 +91,51 @@ function Write-Section {
         #endregion Helper Functions
 
         #region Globals
-        $ErrorActionPreference = 'Stop'
-        $startTime = Get-Date
-        $totalSteps = 10
-        $pubspecPath = "./pubspec.yaml"
-        $changelogPath = "./CHANGELOG.md"
-        #endregion Globals
+                $ErrorActionPreference = 'Stop'
+                $startTime = Get-Date
+                $totalSteps = 10
+                $pubspecPath = "./pubspec.yaml"
+                $changelogPath = "./CHANGELOG.md"
+        # If hosting flag is passed, run a local hosting-only flow and exit.
+                if ($HostingOnly) {
+                    Write-Host "[HOSTING ONLY] Cleaning build folder..." -ForegroundColor Cyan
+                    try {
+                        if (Test-Path "./build") {
+                            Remove-Item -Path "./build" -Recurse -Force -ErrorAction Stop
+                            Write-Host "Removed ./build" -ForegroundColor Green
+                        } else {
+                            Write-Host "No ./build folder found, skipping removal." -ForegroundColor Yellow
+                        }
+
+                        Write-Host "Running 'flutter pub get'..." -ForegroundColor Cyan
+                        & flutter pub get
+                        if ($LASTEXITCODE -ne 0) { Write-Host "flutter pub get failed (exit $LASTEXITCODE)" -ForegroundColor Red; exit 1 }
+
+                        Write-Host "Running 'flutter build web'..." -ForegroundColor Cyan
+                        & flutter build web
+                        if ($LASTEXITCODE -ne 0) { Write-Host "flutter build web failed (exit $LASTEXITCODE)" -ForegroundColor Red; exit 1 }
+
+                        Write-Host "Running 'firebase deploy --only hosting'..." -ForegroundColor Cyan
+                        & firebase deploy --only hosting
+                        if ($LASTEXITCODE -ne 0) { Write-Host "firebase deploy failed (exit $LASTEXITCODE)" -ForegroundColor Red; exit 1 }
+
+                        Write-Host "Hosting deploy completed successfully." -ForegroundColor Green
+                        exit 0
+                    }
+                    catch {
+                        Write-Host "[ERROR] $_" -ForegroundColor Red
+                        exit 1
+                    }
+                }
+                #endregion Globals
 
         #region Pre-checks
         if (-not (Test-Path $pubspecPath)) { Write-ErrorAndExit "pubspec.yaml not found at $pubspecPath" }
         if (-not (Test-Path $changelogPath)) { Write-ErrorAndExit "CHANGELOG.md not found at $changelogPath" }
 
         # Check for uncommitted changes before starting (unless --force is set)
-        if (-not $force) {
+        # If running hosting-only, skip this check so local deploys work with dirty tree.
+        if (-not $force -and -not $HostingOnly) {
             $gitStatus = git status --porcelain
             if ($gitStatus) {
                 Write-ErrorAndExit "There are uncommitted changes in the repository. Please commit or stash them before running the release script." { Write-Host $gitStatus }
