@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -49,7 +50,7 @@ Future<void> showTokensDialog(BuildContext context, WidgetRef ref) async {
     final titleCtl = TextEditingController(text: currentTitle ?? 'Test notification');
     final bodyCtl = TextEditingController(text: currentBody ?? 'This is a test message.');
     await showDialog<void>(
-      context: parentCtx,
+      context: parentCtx.mounted ? parentCtx : context,
       builder: (c) => AlertDialog(
         title: Text(translation(context: parentCtx, 'Edit test notification message')),
         content: Column(
@@ -75,7 +76,7 @@ Future<void> showTokensDialog(BuildContext context, WidgetRef ref) async {
             } catch (e) {
               if (parentCtx.mounted) showCustomSnackBar(parentCtx, 'Save failed: $e');
             }
-            Navigator.of(c).pop();
+            if (context.mounted) Navigator.of(c).pop();
           }, child: Text(translation(context: parentCtx, 'Save'))),
         ],
       ),
@@ -229,7 +230,7 @@ Future<void> showTokensDialog(BuildContext context, WidgetRef ref) async {
                                     final title = (storedTitle?.isNotEmpty ?? false) ? storedTitle! : 'Test notification — $platform';
                                     final body = (storedBody?.isNotEmpty ?? false) ? storedBody! : 'Token: $safeTokenPreview';
                                     final result = await callable.call(<String, dynamic>{'token': t.id, 'title': title, 'body': body});
-                                    if (context.mounted) showCustomSnackBar(context, '${translation(context: context, 'Test notification sent')}: ${result.data}');
+                                    if (context.mounted && kDebugMode) showCustomSnackBar(context, '${translation(context: context, 'Test notification sent')}: ${result.data}');
                                   } catch (e) {
                                     if (context.mounted) showCustomSnackBar(context, 'Send failed: $e');
                                   }

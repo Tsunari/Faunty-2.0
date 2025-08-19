@@ -1,6 +1,7 @@
 import 'package:faunty/components/role_gate.dart';
 import 'package:faunty/firebase_options.dart';
 import 'package:faunty/notifications/notification_service.dart';
+import 'package:faunty/notifications/foreground_notification_wrapper.dart';
 import 'package:faunty/models/user_roles.dart';
 import 'package:faunty/pages/communication/communication_page.dart';
 import 'package:faunty/pages/lists/lists_page.dart';
@@ -57,6 +58,7 @@ class Faunty extends ConsumerWidget {
     final preset = themePresets[presetIndex];
     final isMonochrome = preset.name == 'Monochrome';
     return MaterialApp(
+      builder: (context, child) => ForegroundNotificationWrapper(child: child ?? const SizedBox.shrink()),
       title: translation(context: context, 'Faunty'),
       debugShowCheckedModeBanner: false,
       theme: isMonochrome

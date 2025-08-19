@@ -41,7 +41,7 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = (payload && payload.data && payload.data.title) || 'Background Message Title';
   const notificationOptions = {
     body: (payload && payload.data && payload.data.body) || 'Background Message Body',
-    icon: 'icons/favicon.png', // Or create a dedicated icon for notifications
+    icon: 'icons/icon-512-maskable.png',
     data: payload && payload.data
   };
 

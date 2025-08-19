@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -11,17 +12,27 @@ class NotificationService {
 
 	static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
+	// VAPID key used for web token requests. Keep a single source to avoid
+	// generating different tokens by calling getToken with/without different keys.
+	static const String _vapidKey = 'BFAfGKzxnVVxMbYsIJ3NXS4L4iHjRdFh4MGJvP7qq6jyT78WOjhVthqzBKjejvIN6Um_QVKUA5gm6r2oVjs_63M';
+
+	// Broadcast stream controller to allow UI wrappers to listen for messages
+	static final StreamController<RemoteMessage> _messageController = StreamController<RemoteMessage>.broadcast();
+
+	/// Stream of incoming messages (foreground and opened messages).
+	static Stream<RemoteMessage> get messages => _messageController.stream;
+
 	/// Initialize FCM. If [requestPermissions] is true, will request permissions on iOS/web.
 	static Future<void> init({bool requestPermissions = true}) async {
-				// On web, enable auto init and we'll pass the VAPID key to getToken below
-				if (kIsWeb) {
-					try {
-						await _messaging.getInitialMessage();
-						await _messaging.setAutoInitEnabled(true);
-					} catch (e) {
-						if (kDebugMode) print('Web FCM init warning: $e');
-					}
-				}
+		// On web, enable auto init and we'll pass the VAPID key to getToken below
+		if (kIsWeb) {
+			try {
+				await _messaging.getInitialMessage();
+				await _messaging.setAutoInitEnabled(true);
+			} catch (e) {
+				if (kDebugMode) print('Web FCM init warning: $e');
+			}
+		}
 
 		// Get and handle token
 		_messaging.onTokenRefresh.listen((newToken) async {
@@ -41,32 +52,16 @@ class NotificationService {
 			}
 		});
 
-		// Only actively fetch a token (which may trigger permission UX on web)
-		// when the caller explicitly asked for permissions. Otherwise we only
-		// set up the onTokenRefresh listener so when tokens become available
-		// (e.g., after the user grants permission) they'll be handled.
-		if (requestPermissions) {
-			String? currentToken;
-			if (kIsWeb) {
-				const vapidKey = 'BFAfGKzxnVVxMbYsIJ3NXS4L4iHjRdFh4MGJvP7qq6jyT78WOjhVthqzBKjejvIN6Um_QVKUA5gm6r2oVjs_63M';
-				try {
-					currentToken = await _messaging.getToken(vapidKey: vapidKey);
-				} catch (e) {
-					if (kDebugMode) print('getToken with vapidKey failed: $e');
-					currentToken = await _messaging.getToken();
-				}
-			} else {
-				currentToken = await _messaging.getToken();
-			}
-			if (currentToken != null) {
-				await _storeTokenIfAvailable(currentToken);
-			}
-		}
-
-		// Optional: foreground message handler
+		// Foreground message handler
 		FirebaseMessaging.onMessage.listen((RemoteMessage msg) {
 			if (kDebugMode) print('Foreground message received: ${msg.messageId}');
-			// app-specific handling can be added by listening to this stream where needed
+			_messageController.add(msg);
+		});
+
+		// When the user opens a notification (background -> foreground or tap)
+		FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage msg) {
+			if (kDebugMode) print('Message opened from background: ${msg.messageId}');
+			_messageController.add(msg);
 		});
 
 	}
@@ -84,10 +79,9 @@ class NotificationService {
 				if (settings.authorizationStatus == AuthorizationStatus.authorized ||
 					settings.authorizationStatus == AuthorizationStatus.provisional) {
 					// safe to fetch token
-					const vapidKey = 'BFAfGKzxnVVxMbYsIJ3NXS4L4iHjRdFh4MGJvP7qq6jyT78WOjhVthqzBKjejvIN6Um_QVKUA5gm6r2oVjs_63M';
 					String? token;
 					try {
-						token = await _messaging.getToken(vapidKey: vapidKey);
+						token = await _messaging.getToken(vapidKey: _vapidKey);
 					} catch (e) {
 						if (kDebugMode) print('getToken with vapidKey failed: $e');
 						token = await _messaging.getToken();
