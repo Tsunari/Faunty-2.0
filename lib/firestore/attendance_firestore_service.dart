@@ -59,17 +59,49 @@ class AttendanceFirestoreService {
     await _metaDoc.set(content);
   }
 
+  /// Add a new item to the attendance meta and return its generated id.
+  Future<String> addAttendanceMetaItem(String name) async {
+    final id = FirebaseFirestore.instance.collection('places').doc(placeId).collection('attendance').doc().id;
+    final meta = await getAttendanceMeta();
+    final items = (meta['items'] as List?)?.cast<Map<String, dynamic>>() ?? <Map<String, dynamic>>[];
+    items.add({'id': id, 'name': name});
+    meta['items'] = items;
+    await setAttendanceMeta(meta);
+    return id;
+  }
+
+  Future<void> renameAttendanceMetaItem(String id, String newName) async {
+    final meta = await getAttendanceMeta();
+    final items = (meta['items'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)).toList() ?? <Map<String, dynamic>>[];
+    for (final it in items) {
+      if (it['id'] == id) {
+        it['name'] = newName;
+        break;
+      }
+    }
+    meta['items'] = items;
+    await setAttendanceMeta(meta);
+  }
+
+  Future<void> removeAttendanceMetaItem(String id) async {
+    final meta = await getAttendanceMeta();
+    final items = (meta['items'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)).toList() ?? <Map<String, dynamic>>[];
+    items.removeWhere((it) => it['id'] == id);
+    meta['items'] = items;
+    await setAttendanceMeta(meta);
+  }
+
   /// Atomically toggle presence for a single item field using arrayUnion/arrayRemove.
   /// This keeps writes small and avoids reading/modifying the whole document client-side.
   Future<void> toggleAttendanceItem({
     required String dateId,
-    required String itemName,
+    required String itemId,
     required String userId,
     required bool checked,
   }) async {
     final docRef = _attendanceCollection.doc(dateId);
-    final presentPath = '$itemName.present';
-    final absentPath = '$itemName.absent';
+    final presentPath = '$itemId.present';
+    final absentPath = '$itemId.absent';
     final writeBatch = FirebaseFirestore.instance.batch();
     if (checked) {
       // add to present, remove from absent
@@ -84,7 +116,7 @@ class AttendanceFirestoreService {
     } catch (e) {
       // If document doesn't exist yet, create it with the minimal structure
       final initial = <String, dynamic>{
-        itemName: {
+        itemId: {
           'present': checked ? [userId] : <String>[],
           'absent': checked ? <String>[] : [userId],
         }

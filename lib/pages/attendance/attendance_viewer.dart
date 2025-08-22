@@ -5,6 +5,8 @@ import 'dart:math' as math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/attendance_provider.dart';
 import 'package:faunty/tools/translation_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'attendance_items_page.dart';
 import 'package:faunty/state_management/user_list_provider.dart';
 import 'package:faunty/models/user_entity.dart';
 import '../../firestore/attendance_firestore_service.dart';
@@ -77,6 +79,7 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
       }
       _isSyncingV = false;
     });
+  // load saved default later in build when user is known
   }
 
   @override
@@ -190,9 +193,34 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
   // listen to attendance meta (items + default)
   final metaAsync = ref.watch(attendanceMetaProvider(user.placeId));
   final meta = metaAsync.asData?.value ?? <String, dynamic>{};
-  final List<String> items = (meta['items'] as List?)?.cast<String>() ?? ['Presence'];
-  final defaultItem = (meta['default'] as String?) ?? items.first;
-  if (_selectedItem.isEmpty) _selectedItem = defaultItem;
+  final List<Map<String, dynamic>> itemsMeta = (meta['items'] as List?)?.map((e) => Map<String, dynamic>.from(e as Map)).toList() ?? <Map<String, dynamic>>[];
+  final List<String> itemIds = itemsMeta.map((e) => e['id'] as String? ?? '').where((s) => s.isNotEmpty).toList();
+    // load local default from SharedPreferences if not loaded (store itemId)
+    if (_selectedItem.isEmpty) {
+      SharedPreferences.getInstance().then((sp) {
+        final key = 'attendance_default_${user.placeId}';
+        final saved = sp.getString(key);
+        String resolved = '';
+        if (saved != null && saved.isNotEmpty) {
+          // if saved is an id that exists, use it; otherwise try match by name
+          if (itemIds.contains(saved)) {
+            resolved = saved;
+          } else {
+            final match = itemsMeta.cast<Map<String, dynamic>?>().firstWhere(
+              (e) => e != null && (e['name'] as String? ?? '') == saved,
+              orElse: () => null,
+            );
+            if (match != null) resolved = match['id'] as String? ?? '';
+          }
+        }
+        if (resolved.isEmpty && itemIds.isNotEmpty) resolved = itemIds.first;
+        if (!mounted) return; // avoid calling setState after dispose
+        setState(() {
+          _selectedItem = resolved; // may be empty if no items
+        });
+        if (resolved.isNotEmpty) sp.setString(key, resolved);
+      });
+    }
 
     String displayNameFor(String userId) {
       final u = idToUser[userId];
@@ -219,59 +247,114 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
       appBar: CustomAppBar(
         title: translation(context: context, 'Attendance'),
         actions: [
-          RoleGate(
+          itemsMeta.isNotEmpty ? RoleGate(
             minRole: UserRole.baskan,
             child: Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: Row(
                 children: [
-                  DropdownButton<String>(
-                    value: _selectedItem,
-                    underline: const SizedBox.shrink(),
-                    onChanged: (val) async {
-                      if (val == null) return;
-                      setState(() => _selectedItem = val);
-                      // persist default
-                      final metaMap = await AttendanceFirestoreService(user.placeId).getAttendanceMeta();
-                      metaMap['items'] = items;
-                      metaMap['default'] = val;
-                      await AttendanceFirestoreService(user.placeId).setAttendanceMeta(metaMap);
-                    },
-                    items: items.map((it) => DropdownMenuItem(value: it, child: Text(it))).toList(),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () async {
-                      final TextEditingController ctrl = TextEditingController();
-                      final res = await showDialog<String?>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: Text(translation(context: context, 'Add tracking item')),
-                          content: TextField(controller: ctrl, autofocus: true),
-                          actions: [
-                            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(translation(context: context, 'Cancel'))),
-                            ElevatedButton(onPressed: () => Navigator.pop(ctx, ctrl.text.trim()), child: Text(translation(context: context, 'Add'))),
-                          ],
+                    DropdownButton<String>(
+                      value: itemIds.contains(_selectedItem) ? _selectedItem : null,
+                      alignment: Alignment.center,
+                      underline: const SizedBox.shrink(),
+                      onChanged: (val) async {
+                        if (val == null) return;
+                        const manageKey = '__manage__';
+                        if (val == manageKey) {
+                          // open management page and then restore selection
+                          await Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => AttendanceItemsPage(placeId: user.placeId)));
+                            if (!mounted) return;
+                            setState(() {});
+                          return;
+                        }
+                        setState(() => _selectedItem = val);
+                        final sp = await SharedPreferences.getInstance();
+                        await sp.setString('attendance_default_${user.placeId}', val);
+                        // remove default in firestore meta if present
+                        final metaMap = await AttendanceFirestoreService(user.placeId).getAttendanceMeta();
+                        if (metaMap.containsKey('default')) {
+                          metaMap.remove('default');
+                          await AttendanceFirestoreService(user.placeId).setAttendanceMeta(metaMap);
+                        }
+                      },
+                      items: [
+                        ...itemsMeta.map((it) => DropdownMenuItem(value: it['id'] as String? ?? it['name'], child: Text(it['name'] as String? ?? ''))),
+                        const DropdownMenuItem(
+                          value: '__manage__', 
+                          alignment: Alignment.center,
+                          child: Text('Manage'),
                         ),
-                      );
-                      if (res == null || res.isEmpty) return;
-                      final newItems = List<String>.from(items);
-                      if (!newItems.contains(res)) newItems.add(res);
-                      final metaMap = await AttendanceFirestoreService(user.placeId).getAttendanceMeta();
-                      metaMap['items'] = newItems;
-                      metaMap['default'] = metaMap['default'] ?? newItems.first;
-                      await AttendanceFirestoreService(user.placeId).setAttendanceMeta(metaMap);
-                      setState(() => _selectedItem = metaMap['default']);
-                    },
-                  ),
+                      ],
+                    ),
                 ],
               ),
             ),
-          ),
+          ) : const SizedBox.shrink(),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      body: itemsMeta.isEmpty
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.event_busy,
+                      size: 64,
+                      color: theme.colorScheme.onSurface.withOpacity(0.4),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      translation(
+                        context: context,
+                        'No tracking items have been configured yet.',
+                      ),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      translation(
+                        context: context,
+                        'Ask a manager to add tracking items or add them yourself.',
+                      ),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    RoleGate(
+                      minRole: UserRole.baskan,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (ctx) =>
+                                  AttendanceItemsPage(placeId: user.placeId),
+                            ),
+                          );
+                              if (!mounted) return;
+                              setState(() {});
+                        },
+                        child: Text(
+                          translation(
+                            context: context,
+                            'Manage tracking items',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12.0,
+                vertical: 8.0,
+              ),
         child: Row(
           children: [
             // ...existing code for left and right columns...
@@ -329,7 +412,7 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
                         }
                         final userId = roster[idx];
                         final expanded = _expanded[userId] ?? false;
-                        final itemCount = items.isEmpty ? 1 : items.length;
+                        final itemCount = itemsMeta.isEmpty ? 1 : itemsMeta.length;
                         // If collapsed show only the name row; when expanded reserve space for all item rows so grid and names align.
                         final blockHeight = expanded ? rowHeight * (1 + itemCount) : rowHeight;
                         return InkWell(
@@ -361,26 +444,25 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
                                     ),
                                   ),
                                 ),
-                                // When expanded, render the item rows below the name; when collapsed render name only.
-                                if (expanded)
-                                  for (var i = 0; i < itemCount; i++)
-                                    Flexible(
-                                      fit: FlexFit.loose,
-                                      child: SizedBox(
-                                        height: rowHeight,
-                                        child: Container(
-                                          alignment: Alignment.centerLeft,
-                                          padding: const EdgeInsets.only(left: 8.0),
-                                          child: Text(
-                                            i < items.length ? items[i] : '',
-                                            style: theme.textTheme.bodySmall,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            softWrap: false,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                        if (expanded)
+                                          for (var i = 0; i < itemCount; i++)
+                                            Flexible(
+                                              fit: FlexFit.loose,
+                                              child: SizedBox(
+                                                height: rowHeight,
+                                                child: Container(
+                                                  alignment: Alignment.centerLeft,
+                                                  padding: const EdgeInsets.only(left: 8.0),
+                                                  child: Text(
+                                                    i < itemsMeta.length ? (itemsMeta[i]['name'] as String? ?? '') : '',
+                                                    style: theme.textTheme.bodySmall,
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    softWrap: false,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
                               ],
                             ),
                           ),
@@ -472,14 +554,16 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
                                   final userId = roster[rIdx];
                                   final expanded = _expanded[userId] ?? false;
                                   // Build rows: first row is the selected/default item; if expanded, show all items extra.
-                                  final renderedItems = <String>[];
-                                  // default first
-                                  renderedItems.add(_selectedItem.isNotEmpty ? _selectedItem : (items.isNotEmpty ? items.first : 'Presence'));
-                                  // then all items as extras when expanded
-                                  if (expanded) renderedItems.addAll(items);
+                  final renderedItems = <Map<String, dynamic>>[];
+                  // default first (find by id)
+                  final defaultIdOrName = _selectedItem.isNotEmpty ? _selectedItem : (itemsMeta.isNotEmpty ? (itemsMeta.first['id'] as String) : 'presence');
+                  final defaultItem = itemsMeta.firstWhere((e) => (e['id'] == defaultIdOrName) || (e['name'] == defaultIdOrName), orElse: () => itemsMeta.isNotEmpty ? itemsMeta.first : {'id': 'presence', 'name': 'Presence'});
+                  renderedItems.add(defaultItem);
+                  // then all items as extras when expanded
+                  if (expanded) renderedItems.addAll(itemsMeta);
                                   return Column(
                                     children: [
-                                      for (final it in renderedItems)
+                    for (final it in renderedItems)
                                         Container(
                                           height: rowHeight,
                                           decoration: BoxDecoration(
@@ -491,7 +575,7 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
                                           ),
                                           child: Row(
                                             children: [
-                                              for (final d in columns)
+                                                      for (final d in columns)
                                                 Container(
                                                   width: dayColWidth,
                                                   decoration: BoxDecoration(
@@ -505,20 +589,20 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
                                                     ),
                                                   ),
                                                   child: Center(
-                                                    child: Transform.scale(
+                                                        child: Transform.scale(
                                                       scale: 0.9,
                                                         child: _InlineCell(
                                                         placeId: user.placeId,
                                                         dateKey: d,
                                                         userId: userId,
                                                         attendance: attendance,
-                                                        itemName: it,
-                                                        onToggleLocal: (dateK, itemN, uid, isChecked) {
+                                                        itemName: it['id'] as String,
+                                                        onToggleLocal: (dateK, itemId, uid, isChecked) {
                                                           // mutate local cache and rebuild so other cells update immediately
                                                           setState(() {
                                                             final next = Map<String, dynamic>.from(_attendanceCache);
                                                             final dateRec = Map<String, dynamic>.from(next[dateK] as Map? ?? {});
-                                                            final rec = Map<String, dynamic>.from(dateRec[itemN] as Map? ?? {});
+                                                            final rec = Map<String, dynamic>.from(dateRec[itemId] as Map? ?? {});
                                                             final present = List<String>.from((rec['present'] as List?)?.cast<String>() ?? <String>[]);
                                                             final absent = List<String>.from((rec['absent'] as List?)?.cast<String>() ?? <String>[]);
                                                             if (isChecked) {
@@ -530,7 +614,7 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
                                                             }
                                                             rec['present'] = present;
                                                             rec['absent'] = absent;
-                                                            dateRec[itemN] = rec;
+                                                            dateRec[itemId] = rec;
                                                             next[dateK] = dateRec;
                                                             _attendanceCache = next;
                                                           });
@@ -632,15 +716,15 @@ class _InlineCell extends StatefulWidget {
   final String dateKey;
   final String userId;
   final Map<String, dynamic> attendance;
-  final String itemName;
-  final void Function(String dateKey, String itemName, String userId, bool checked)? onToggleLocal;
+  final String itemName; // here we store itemId
+  final void Function(String dateKey, String itemId, String userId, bool checked)? onToggleLocal;
   const _InlineCell({
     required this.placeId,
     required this.dateKey,
     required this.userId,
     required this.attendance,
-    required this.itemName,
-    this.onToggleLocal,
+  required this.itemName,
+  this.onToggleLocal,
   });
 
   @override
@@ -686,10 +770,10 @@ class _InlineCellState extends State<_InlineCell> {
         setState(() => checked = val ?? false);
         // Update local UI synchronously via callback
         widget.onToggleLocal?.call(widget.dateKey, widget.itemName, widget.userId, checked);
-        // Persist using atomic helper
+        // Persist using atomic helper (now using itemId)
         await AttendanceFirestoreService(widget.placeId).toggleAttendanceItem(
           dateId: widget.dateKey,
-          itemName: widget.itemName,
+          itemId: widget.itemName,
           userId: widget.userId,
           checked: checked,
         );
