@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../firestore/attendance_firestore_service.dart';
+import '../../../firestore/attendance_firestore_service.dart';
 import 'package:faunty/models/user_entity.dart';
 import 'package:faunty/models/user_roles.dart';
 

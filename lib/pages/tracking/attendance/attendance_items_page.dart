@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../firestore/attendance_firestore_service.dart';
+import '../../../firestore/attendance_firestore_service.dart';
 import 'package:faunty/tools/translation_helper.dart';
 
 class AttendanceItemsPage extends ConsumerStatefulWidget {

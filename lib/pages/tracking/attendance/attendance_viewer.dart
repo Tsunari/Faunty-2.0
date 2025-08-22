@@ -4,14 +4,14 @@ import 'package:faunty/state_management/user_provider.dart';
 import 'package:faunty/models/user_roles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../state_management/attendance_provider.dart';
+import '../../../state_management/attendance_provider.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'attendance_items_page.dart';
 import 'attendance_table.dart';
 import 'package:faunty/state_management/user_list_provider.dart';
 import 'package:faunty/models/user_entity.dart';
-import '../../firestore/attendance_firestore_service.dart';
+import '../../../firestore/attendance_firestore_service.dart';
 
 class AttendanceViewer extends ConsumerStatefulWidget {
   const AttendanceViewer({super.key});
