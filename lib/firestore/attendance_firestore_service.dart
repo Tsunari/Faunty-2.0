@@ -39,4 +39,57 @@ class AttendanceFirestoreService {
   Future<void> deleteAttendance(String id) async {
     await _attendanceCollection.doc(id).delete();
   }
+
+  // Metadata doc to store items and default selection
+  DocumentReference<Map<String, dynamic>> get _metaDoc =>
+      FirebaseFirestore.instance.collection('places').doc(placeId).collection('attendance').doc('_meta');
+
+  Stream<Map<String, dynamic>> getAttendanceMetaStream() async* {
+    await for (final snapshot in _metaDoc.snapshots()) {
+      yield snapshot.data() ?? <String, dynamic>{};
+    }
+  }
+
+  Future<Map<String, dynamic>> getAttendanceMeta() async {
+    final snap = await _metaDoc.get();
+    return snap.data() ?? <String, dynamic>{};
+  }
+
+  Future<void> setAttendanceMeta(Map<String, dynamic> content) async {
+    await _metaDoc.set(content);
+  }
+
+  /// Atomically toggle presence for a single item field using arrayUnion/arrayRemove.
+  /// This keeps writes small and avoids reading/modifying the whole document client-side.
+  Future<void> toggleAttendanceItem({
+    required String dateId,
+    required String itemName,
+    required String userId,
+    required bool checked,
+  }) async {
+    final docRef = _attendanceCollection.doc(dateId);
+    final presentPath = '$itemName.present';
+    final absentPath = '$itemName.absent';
+    final writeBatch = FirebaseFirestore.instance.batch();
+    if (checked) {
+      // add to present, remove from absent
+      writeBatch.update(docRef, {presentPath: FieldValue.arrayUnion([userId])});
+      writeBatch.update(docRef, {absentPath: FieldValue.arrayRemove([userId])});
+    } else {
+      writeBatch.update(docRef, {presentPath: FieldValue.arrayRemove([userId])});
+      writeBatch.update(docRef, {absentPath: FieldValue.arrayUnion([userId])});
+    }
+    try {
+      await writeBatch.commit();
+    } catch (e) {
+      // If document doesn't exist yet, create it with the minimal structure
+      final initial = <String, dynamic>{
+        itemName: {
+          'present': checked ? [userId] : <String>[],
+          'absent': checked ? <String>[] : [userId],
+        }
+      };
+      await docRef.set(initial, SetOptions(merge: true));
+    }
+  }
 }
