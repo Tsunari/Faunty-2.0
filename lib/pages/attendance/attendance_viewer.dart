@@ -185,7 +185,7 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
       return full.isEmpty ? userId : full;
     }
 
-    final double nameColWidth = 200;
+    final double nameColWidth = 170;
     final double rowHeight = 28;
     final double baseDayColWidth = _colWidthConst;
     final double headingHeight = 72;
@@ -227,10 +227,11 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
                             ),
                           ),
                         ),
-                        TextButton.icon(
+                        IconButton(
                           onPressed: _scrollToToday,
                           icon: const Icon(Icons.today),
-                          label: Text(translation(context: context, 'Today')),
+                          color: theme.colorScheme.primary,
+                          tooltip: translation(context: context, 'Today'),
                         ),
                       ],
                     ),
