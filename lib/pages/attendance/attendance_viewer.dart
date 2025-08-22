@@ -278,11 +278,20 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
                         }
                       },
                       items: [
-                        ...itemsMeta.map((it) => DropdownMenuItem(value: it['id'] as String? ?? it['name'], child: Text(it['name'] as String? ?? ''))),
+                        ...itemsMeta.map((it) => DropdownMenuItem(
+                              value: it['id'] as String? ?? it['name'],
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                                child: Text(it['name'] as String? ?? ''),
+                              ),
+                            )),
                         const DropdownMenuItem(
-                          value: '__manage__', 
+                          value: '__manage__',
                           alignment: Alignment.center,
-                          child: Text('Manage'),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                            child: Text('Manage'),
+                          ),
                         ),
                       ],
                     ),
