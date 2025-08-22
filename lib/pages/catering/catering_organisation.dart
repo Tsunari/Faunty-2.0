@@ -177,11 +177,14 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                                                 children: [
                                                   Icon(Icons.restaurant_menu, size: 18, color: isDark ? Colors.white54 : Colors.black45),
                                                   const SizedBox(width: 6),
-                                                  Text(
-                                                    mealName,
-                                                    style: TextStyle(
-                                                      fontWeight: FontWeight.w500,
-                                                      color: isDark ? Colors.white70 : Colors.black87,
+                                                  Expanded(
+                                                    child: Text(
+                                                      mealName,
+                                                      style: TextStyle(
+                                                        fontWeight: FontWeight.w500,
+                                                        color: isDark ? Colors.white70 : Colors.black87,
+                                                      ),
+                                                      overflow: TextOverflow.ellipsis,
                                                     ),
                                                   ),
                                                 ],
@@ -198,11 +201,9 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                                                           color: theme.colorScheme.primary.withOpacity(isDark ? 0.18 : 0.08),
                                                           borderRadius: BorderRadius.circular(12),
                                                         ),
-                                                        child: Wrap(
+                                                        child: Row(
                                                           spacing: 4,
-                                                          crossAxisAlignment: WrapCrossAlignment.center,
                                                           children: [
-                                                            Text(user, style: TextStyle(color: isDark ? Colors.white : null)),
                                                             GestureDetector(
                                                               onTap: () {
                                                                 setState(() {
@@ -210,6 +211,13 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                                                                 });
                                                               },
                                                               child: Icon(Icons.remove_circle_outline, size: 18, color: isDark ? Colors.red[200] : Colors.red[700]),
+                                                            ),
+                                                            Expanded(
+                                                              child: Text(
+                                                                user, 
+                                                                style: TextStyle(color: isDark ? Colors.white : null),
+                                                                overflow: TextOverflow.ellipsis,
+                                                              ),
                                                             ),
                                                           ],
                                                         ),
