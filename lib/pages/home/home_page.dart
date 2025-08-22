@@ -105,18 +105,18 @@ class _HomePageState extends ConsumerState<HomePage> {
         return;
       }
 
-      // Only check and request notification permission from Home.
-      // The full NotificationService.init() should run early (e.g., in main()).
-      if (!_notificationInitialized && user != null) {
-        _notificationInitialized = true;
-        try {
-          await NotificationService.checkAndRequestPermission(requestIfNot: true);
-        } catch (e) {
-          if (mounted) {
-            if (kDebugMode) print('Notification permission check/request error: $e');
-          }
-        }
-      }
+      // // Only check and request notification permission from Home.
+      // // The full NotificationService.init() should run early (e.g., in main()).
+      // if (!_notificationInitialized && user != null) {
+      //   _notificationInitialized = true;
+      //   try {
+      //     await NotificationService.checkAndRequestPermission(requestIfNot: true);
+      //   } catch (e) {
+      //     if (mounted) {
+      //       if (kDebugMode) print('Notification permission check/request error: $e');
+      //     }
+      //   }
+      // }
     });
   }
 

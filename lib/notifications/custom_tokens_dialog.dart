@@ -101,6 +101,22 @@ Future<void> showTokensDialog(BuildContext context, WidgetRef ref) async {
             },
           ),
           IconButton(
+            icon: const Icon(Icons.notifications_active),
+            tooltip: translation(context: context, 'Check notification permission'),
+            onPressed: () async {
+              try {
+                await NotificationService.checkAndRequestPermission(requestIfNot: true);
+                if (context.mounted) {
+                  showCustomSnackBar(context, translation(context: context, 'Notification permission checked'));
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  showCustomSnackBar(context, 'Permission check failed: $e');
+                }
+              }
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: translation(context: context, 'Refresh tokens'),
             onPressed: () async {
