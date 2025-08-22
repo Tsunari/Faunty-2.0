@@ -19,3 +19,4 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FAUNTY_2_0 }}
           projectId: faunty-2-0
+          target: 2faunty

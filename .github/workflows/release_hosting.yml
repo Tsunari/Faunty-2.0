@@ -30,6 +30,7 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FAUNTY_2_0 }}
           channelId: live
           projectId: faunty-2-0
+          target: 2faunty
 
       - name: Done
         run: echo "Web hosting release complete!"
