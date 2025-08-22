@@ -15,6 +15,7 @@ class IconPicker extends StatefulWidget {
 class _IconPickerState extends State<IconPicker> {
   // A curated list of Material icons with human-readable names used for searching.
   static final List<MapEntry<String, IconData>> _icons = [
+    MapEntry('post_add_outlined', Icons.post_add_outlined),
     MapEntry('list_alt', Icons.list_alt),
     MapEntry('event', Icons.event),
     MapEntry('check_circle_outline', Icons.check_circle_outline),
@@ -179,7 +180,7 @@ class _IconPickerState extends State<IconPicker> {
   Widget build(BuildContext context) {
   final display = widget.selected != null && widget.selected!.kind == 'material'
     ? Icon(IconData(widget.selected!.codePoint ?? 0, fontFamily: widget.selected!.fontFamily))
-    : const Icon(Icons.add);
+    : const Icon(Icons.post_add_outlined);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

@@ -1,3 +1,4 @@
+import 'package:faunty/models/user_roles.dart';
 import 'package:faunty/pages/catering/catering.dart';
 import 'package:faunty/pages/cleaning/cleaning.dart';
 import 'package:flutter/material.dart';
@@ -46,10 +47,19 @@ class ListsPage extends ConsumerWidget {
           final page = CustomListShell(placeId: placeId, list: l, child: pageChild);
           tabs.add(TabMeta(l.title, page, l.icon != null && l.icon!.kind == 'material' ? IconData(l.icon!.codePoint ?? 0, fontFamily: l.icon!.fontFamily) : Icons.list));
         }
-        // Add action tab
-        tabs.add(TabMeta('Add', const AddPage(), Icons.add));
 
-        return TabPage(tabs: tabs, tabIndexProvider: lastTabIndexProvider, prefsKey: 'lists_last_tab_index');
+        // Only show the Add tab for privileged roles.
+        final roleName = user?.role;
+        final allowAdd = roleName == UserRole.superuser || roleName == UserRole.hoca || roleName == UserRole.baskan;
+        if (allowAdd) {
+          tabs.add(TabMeta('Add', const AddPage(), Icons.add));
+        }
+
+        return TabPage(
+          tabs: tabs,
+          tabIndexProvider: lastTabIndexProvider,
+          prefsKey: 'lists_last_tab_index',
+        );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, st) => Center(child: Text('Error loading lists: $e')),

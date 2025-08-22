@@ -17,7 +17,7 @@ class _AddPageState extends ConsumerState<AddPage> {
   final _formKey = GlobalKey<FormState>();
   final _titleCtrl = TextEditingController();
   CustomListType _type = CustomListType.assignment;
-  IconSpec _icon = IconSpec.material(Icons.add.codePoint, fontFamily: Icons.add.fontFamily); // default list icon (plus)
+  IconSpec _icon = IconSpec.material(Icons.post_add_outlined.codePoint, fontFamily: Icons.post_add_outlined.fontFamily); // default list icon (plus)
   String? _editingListId;
 
   @override
@@ -60,7 +60,7 @@ class _AddPageState extends ConsumerState<AddPage> {
                                 _editingListId = l.id;
                                 _titleCtrl.text = l.title;
                                 _type = l.type;
-                                _icon = l.icon ?? IconSpec.material(Icons.add.codePoint, fontFamily: Icons.add.fontFamily);
+                                _icon = l.icon ?? IconSpec.material(Icons.post_add_outlined.codePoint, fontFamily: Icons.post_add_outlined.fontFamily);
                               });
                             },
                           ),
@@ -158,7 +158,7 @@ class _AddPageState extends ConsumerState<AddPage> {
                                   if (!mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Created ${list.title}')));
                               _titleCtrl.clear();
-                              setState(() => _icon = IconSpec.material(Icons.add.codePoint, fontFamily: Icons.add.fontFamily));
+                              setState(() => _icon = IconSpec.material(Icons.post_add_outlined.codePoint, fontFamily: Icons.post_add_outlined.fontFamily));
                             } else {
                               // update
                               await svc.updateList(placeId, _editingListId!, {
@@ -173,7 +173,7 @@ class _AddPageState extends ConsumerState<AddPage> {
                                 _editingListId = null;
                                 _titleCtrl.clear();
                                 _type = CustomListType.assignment;
-                                _icon = IconSpec.material(Icons.add.codePoint, fontFamily: Icons.add.fontFamily);
+                                _icon = IconSpec.material(Icons.post_add_outlined.codePoint, fontFamily: Icons.post_add_outlined.fontFamily);
                               });
                             }
                           },
@@ -187,7 +187,7 @@ class _AddPageState extends ConsumerState<AddPage> {
                             _editingListId = null;
                             _titleCtrl.clear();
                             _type = CustomListType.assignment;
-                            _icon = IconSpec.material(Icons.add.codePoint, fontFamily: Icons.add.fontFamily);
+                            _icon = IconSpec.material(Icons.post_add_outlined.codePoint, fontFamily: Icons.post_add_outlined.fontFamily);
                           });
                         }, child: const Text('Cancel'))
                     ],
