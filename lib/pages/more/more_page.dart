@@ -30,7 +30,7 @@ class MorePage extends ConsumerWidget {
           child: Hero(
             tag: 'logo',
             child: GestureDetector(
-              onTap: () async {
+              onDoubleTap: () async {
                 logout(context: context, ref: ref);
               },
               child: Column(

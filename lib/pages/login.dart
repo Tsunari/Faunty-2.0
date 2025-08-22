@@ -1,6 +1,7 @@
 import 'package:faunty/helper/logging.dart';
 import 'package:faunty/models/place_model.dart';
 import 'package:faunty/firestore/place_firestore_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -310,14 +311,23 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                   switchInCurve: Curves.easeInOut,
                   switchOutCurve: Curves.easeInOut,
                   child: !_isRegisterMode
-                      ? Hero(
+                        ? GestureDetector(
+                          onDoubleTap: () {
+                          if (kDebugMode) {
+                            _emailController.text = 'admin@faunty.com';
+                            _passwordController.text = 'fatih1453';
+                            _login();
+                          }
+                          },
+                          child: Hero(
                           tag: 'logo',
                           child: Image.asset(
                             Theme.of(context).brightness == Brightness.light
-                              ? 'assets/Logo.png'
-                              : 'assets/LogoInverse.png',
+                            ? 'assets/Logo.png'
+                            : 'assets/LogoInverse.png',
                             height: 145,
                             fit: BoxFit.contain,
+                          ),
                           ),
                         )
                       : const SizedBox.shrink(),
