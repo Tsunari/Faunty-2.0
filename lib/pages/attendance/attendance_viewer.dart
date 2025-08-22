@@ -35,6 +35,7 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
   int _numDays = 30; // initial window size
   Map<String, dynamic> _attendanceCache = {};
   bool _isExtending = false;
+  bool _useTabs = true;
   static const int _pageDays = 30;
   static const double _colWidthConst = 36.0;
   final Map<String, bool> _expanded = {};
@@ -79,7 +80,13 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
       }
       _isSyncingV = false;
     });
-  // load saved default later in build when user is known
+    // load saved tabs preference
+    SharedPreferences.getInstance().then((sp) {
+      final saved = sp.getBool('attendance_use_tabs') ?? false;
+      if (!mounted) return;
+      setState(() => _useTabs = saved);
+    });
+    // load saved default later in build when user is known
   }
 
   @override
@@ -253,47 +260,75 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
               padding: const EdgeInsets.only(right: 8.0),
               child: Row(
                 children: [
-                    DropdownButton<String>(
-                      value: itemIds.contains(_selectedItem) ? _selectedItem : null,
-                      alignment: Alignment.center,
-                      underline: const SizedBox.shrink(),
-                      onChanged: (val) async {
-                        if (val == null) return;
-                        const manageKey = '__manage__';
-                        if (val == manageKey) {
-                          // open management page and then restore selection
-                          await Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => AttendanceItemsPage(placeId: user.placeId)));
-                            if (!mounted) return;
-                            setState(() {});
-                          return;
-                        }
-                        setState(() => _selectedItem = val);
-                        final sp = await SharedPreferences.getInstance();
-                        await sp.setString('attendance_default_${user.placeId}', val);
-                        // remove default in firestore meta if present
-                        final metaMap = await AttendanceFirestoreService(user.placeId).getAttendanceMeta();
-                        if (metaMap.containsKey('default')) {
-                          metaMap.remove('default');
-                          await AttendanceFirestoreService(user.placeId).setAttendanceMeta(metaMap);
-                        }
-                      },
-                      items: [
-                        ...itemsMeta.map((it) => DropdownMenuItem(
-                              value: it['id'] as String? ?? it['name'],
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-                                child: Text(it['name'] as String? ?? ''),
-                              ),
-                            )),
-                        const DropdownMenuItem(
-                          value: '__manage__',
-                          alignment: Alignment.center,
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-                            child: Text('Manage'),
+                  // Dropdown shown when tabs are disabled
+                  if (!_useTabs)
+                  DropdownButton<String>(
+                        value: itemIds.contains(_selectedItem) ? _selectedItem : null,
+                        alignment: Alignment.center,
+                        underline: const SizedBox.shrink(),
+                        onChanged: (val) async {
+                          if (val == null) return;
+                          const manageKey = '__manage__';
+                          if (val == manageKey) {
+                            // open management page and then restore selection
+                            await Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => AttendanceItemsPage(placeId: user.placeId)));
+                              if (!mounted) return;
+                              setState(() {});
+                            return;
+                          }
+                          setState(() => _selectedItem = val);
+                          final sp = await SharedPreferences.getInstance();
+                          await sp.setString('attendance_default_${user.placeId}', val);
+                          // remove default in firestore meta if present
+                          final metaMap = await AttendanceFirestoreService(user.placeId).getAttendanceMeta();
+                          if (metaMap.containsKey('default')) {
+                            metaMap.remove('default');
+                            await AttendanceFirestoreService(user.placeId).setAttendanceMeta(metaMap);
+                          }
+                        },
+                        items: [
+                          ...itemsMeta.map((it) => DropdownMenuItem(
+                                value: it['id'] as String? ?? it['name'],
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                                  child: Text(it['name'] as String? ?? ''),
+                                ),
+                              )),
+                          const DropdownMenuItem(
+                            value: '__manage__',
+                            alignment: Alignment.center,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                              child: Text('Manage'),
+                            ),
                           ),
+                        ],
+                      ),              // Toggle between dropdown and tabs
+                  if(_useTabs)
+                    IconButton(
+                      icon: const Icon(Icons.settings),
+                      tooltip: translation(context: context, 'Manage'),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (ctx) => AttendanceItemsPage(placeId: user.placeId),
                         ),
-                      ],
+                      ).then((_) {
+                        if (!mounted) return;
+                        setState(() {});
+                      });
+                      },
+                    ),
+                  IconButton(
+                      icon: Icon(_useTabs ? Icons.view_list : Icons.tab),
+                      tooltip: _useTabs ? translation(context: context, 'Use dropdown') : translation(context: context, 'Use tabs'),
+                      onPressed: () async {
+                        final next = !_useTabs;
+                        final sp = await SharedPreferences.getInstance();
+                        await sp.setBool('attendance_use_tabs', next);
+                        if (!mounted) return;
+                        setState(() => _useTabs = next);
+                      },
                     ),
                 ],
               ),
@@ -364,8 +399,50 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
                 horizontal: 12.0,
                 vertical: 8.0,
               ),
-        child: Row(
+        child: Column(
           children: [
+            // TabBar area (only when tabs are enabled)
+            if (_useTabs)
+              DefaultTabController(
+                length: itemIds.length + 1, // plus Manage
+                initialIndex: math.max(0, itemIds.indexOf(_selectedItem)),
+                child: Column(
+                  children: [
+                    TabBar(
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.center,
+                      tabs: [
+                        ...itemsMeta.map((it) => Tab(text: it['name'] as String? ?? '')),
+                        // const Tab(icon: Icon(Icons.settings)),
+                      ],
+                      onTap: (idx) async {
+                        // if (idx == itemIds.length) {
+                        //   // Manage tapped
+                        //   await Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => AttendanceItemsPage(placeId: user.placeId)));
+                        //   if (!mounted) return;
+                        //   setState(() {});
+                        //   return;
+                        // }
+                        final sel = itemIds[idx];
+                        setState(() => _selectedItem = sel);
+                        final sp = await SharedPreferences.getInstance();
+                        await sp.setString('attendance_default_${user.placeId}', sel);
+                        // remove default in firestore meta if present
+                        final metaMap = await AttendanceFirestoreService(user.placeId).getAttendanceMeta();
+                        if (metaMap.containsKey('default')) {
+                          metaMap.remove('default');
+                          await AttendanceFirestoreService(user.placeId).setAttendanceMeta(metaMap);
+                        }
+                      },
+                    ),
+                    const Divider(height: 1),
+                  ],
+                ),
+              ),
+            // Main grid area
+            Expanded(
+              child: Row(
+                children: [
             // ...existing code for left and right columns...
             SizedBox(
               width: nameColWidth,
@@ -650,7 +727,7 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
           ],
         ),
       ),
-    );
+    ])));
   }
 
   String _fmt(DateTime d) {

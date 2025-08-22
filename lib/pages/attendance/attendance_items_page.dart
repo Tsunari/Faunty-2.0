@@ -53,7 +53,7 @@ class _AttendanceItemsPageState extends ConsumerState<AttendanceItemsPage> {
     // create via service to get stable id
     final id = await AttendanceFirestoreService(widget.placeId).addAttendanceMetaItem(val);
     setState(() {
-      _items.insert(0, {'id': id, 'name': val});
+  _items.add({'id': id, 'name': val});
       _newCtrl.clear();
     });
     await _save();
@@ -124,64 +124,89 @@ class _AttendanceItemsPageState extends ConsumerState<AttendanceItemsPage> {
                     child: Card(
                       elevation: 2,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      child: ListView.separated(
-                        padding: const EdgeInsets.all(8),
-                        itemCount: _items.length + 1,
-                        separatorBuilder: (_, __) => const Divider(height: 8),
-                        itemBuilder: (context, idx) {
-                          // Last item is the inline add row
-                          if (idx == _items.length) {
-                            return Padding(
-                              padding: const EdgeInsets.fromLTRB(6.0, 6.0, 0, 6.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: TextField(
-                                      controller: _newCtrl,
-                                      decoration: InputDecoration(
-                                        hintText: translation(context: context, 'Add new item'),
-                                        isDense: true,
-                                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: ReorderableListView.builder(
+                              padding: const EdgeInsets.all(8),
+                              itemCount: _items.length,
+                              onReorder: (oldIndex, newIndex) async {
+                                // Cancel any in-progress edit to avoid controller/key mismatch
+                                if (_editingIndex != null) {
+                                  _cancelEdit(_editingIndex!);
+                                }
+                                setState(() {
+                                  if (newIndex > oldIndex) newIndex -= 1;
+                                  final item = _items.removeAt(oldIndex);
+                                  _items.insert(newIndex, item);
+                                });
+                                await _save();
+                              },
+                              buildDefaultDragHandles: false,
+                              itemBuilder: (context, idx) {
+                                final inEdit = _editingIndex == idx;
+                                final keyVal = ValueKey(_items[idx]['id'] as String? ?? '${_items[idx]['name']}_$idx');
+                                return Column(
+                                  key: keyVal,
+                                  children: [
+                                    ListTile(
+                                      leading: ReorderableDragStartListener(
+                                        index: idx,
+                                        child: const Icon(Icons.drag_indicator, color: Colors.grey),
                                       ),
-                                      onSubmitted: (_) => _addInline(),
+                                      title: inEdit
+                                          ? TextField(
+                                              controller: _editCtrls[idx],
+                                              autofocus: true,
+                                              onSubmitted: (_) => _commitEdit(idx),
+                                              decoration: InputDecoration(
+                                                isDense: true,
+                                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                              ),
+                                            )
+                                          : Text(_items[idx]['name'] as String? ?? '', style: theme.textTheme.bodyLarge),
+                                      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                                        if (!inEdit)
+                                          IconButton(icon: const Icon(Icons.edit), onPressed: () => _startEdit(idx)),
+                                        if (inEdit) ...[
+                                          IconButton(icon: const Icon(Icons.check), onPressed: () => _commitEdit(idx)),
+                                          IconButton(icon: const Icon(Icons.close), onPressed: () => _cancelEdit(idx)),
+                                        ],
+                                        IconButton(icon: const Icon(Icons.delete), onPressed: () => _removeItem(idx)),
+                                      ]),
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  ElevatedButton(
-                                    onPressed: _addInline,
-                                    child: Row(children: [const Icon(Icons.add), const SizedBox(width: 6), Text(translation(context: context, 'Add'))]),
-                                  )
-                                ],
-                              ),
-                            );
-                          }
-                          final inEdit = _editingIndex == idx;
-                          return ListTile(
-                            leading: const Icon(Icons.drag_indicator, color: Colors.grey),
-                            title: inEdit
-                                ? TextField(
-                                    controller: _editCtrls[idx],
-                                    autofocus: true,
-                                    onSubmitted: (_) => _commitEdit(idx),
+                                    const Divider(height: 8),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(6.0, 6.0, 0, 6.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: _newCtrl,
                                     decoration: InputDecoration(
+                                      hintText: translation(context: context, 'Add new item'),
                                       isDense: true,
                                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                     ),
-                                  )
-                                : Text(_items[idx]['name'] as String? ?? '', style: theme.textTheme.bodyLarge),
-                            trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                              if (!inEdit)
-                                IconButton(icon: const Icon(Icons.edit), onPressed: () => _startEdit(idx)),
-                              if (inEdit) ...[
-                                IconButton(icon: const Icon(Icons.check), onPressed: () => _commitEdit(idx)),
-                                IconButton(icon: const Icon(Icons.close), onPressed: () => _cancelEdit(idx)),
+                                    onSubmitted: (_) => _addInline(),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                ElevatedButton(
+                                  onPressed: _addInline,
+                                  child: Row(children: [const Icon(Icons.add), const SizedBox(width: 6), Text(translation(context: context, 'Add'))]),
+                                )
                               ],
-                              IconButton(icon: const Icon(Icons.delete), onPressed: () => _removeItem(idx)),
-                            ]),
-                          );
-                        },
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
