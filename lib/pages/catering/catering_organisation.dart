@@ -198,15 +198,15 @@ class _CateringOrganisationPageState extends ConsumerState<CateringOrganisationP
                                                           color: theme.colorScheme.primary.withOpacity(isDark ? 0.18 : 0.08),
                                                           borderRadius: BorderRadius.circular(12),
                                                         ),
-                                                        child: Row(
-                                                          mainAxisSize: MainAxisSize.min,
+                                                        child: Wrap(
+                                                          spacing: 4,
+                                                          crossAxisAlignment: WrapCrossAlignment.center,
                                                           children: [
                                                             Text(user, style: TextStyle(color: isDark ? Colors.white : null)),
-                                                            const SizedBox(width: 4),
                                                             GestureDetector(
                                                               onTap: () {
                                                                 setState(() {
-                                                                  usersForMeal.remove(user);
+                                                                    usersForMeal.remove(user);
                                                                 });
                                                               },
                                                               child: Icon(Icons.remove_circle_outline, size: 18, color: isDark ? Colors.red[200] : Colors.red[700]),

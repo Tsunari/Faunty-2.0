@@ -240,7 +240,10 @@ class _KantinPageState extends ConsumerState<KantinPage> with WidgetsBindingObse
       ),
       body: kantinAsync.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
+          : SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
         children: [
           const SizedBox(height: 24),
           Row(
@@ -503,6 +506,8 @@ class _KantinPageState extends ConsumerState<KantinPage> with WidgetsBindingObse
             },
           ),
         ],
+      ),
+        ),
       ),
     );
   }

@@ -453,6 +453,7 @@ class _SurveyPageState extends ConsumerState<SurveyPage> {
                                     ),
                                     const SizedBox(height: 16),
                                     TextField(
+                                      autofocus: true,
                                       decoration: InputDecoration(
                                         labelText: translation('Survey Title', context: context),
                                         border: const OutlineInputBorder(),
@@ -472,7 +473,6 @@ class _SurveyPageState extends ConsumerState<SurveyPage> {
                                             padding: const EdgeInsets.all(8.0),
                                             child: TextField(
                                               focusNode: optionFocusNodes[i],
-                                              autofocus: i == newOptions.length - 1 && optionFocusNodes.length == newOptions.length,
                                               decoration: InputDecoration(
                                                 labelText: translation('Option', context: context) + ' ${i + 1}',
                                                 border: const OutlineInputBorder(),

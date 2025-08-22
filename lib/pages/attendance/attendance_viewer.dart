@@ -1,6 +1,7 @@
 import 'package:faunty/components/custom_app_bar.dart';
 import 'package:faunty/state_management/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/attendance_provider.dart';
 import 'package:faunty/tools/translation_helper.dart';
@@ -286,7 +287,9 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final gridHeight = constraints.maxHeight - 1; // after header divider inside scrollable
+                  // Ensure heights are non-negative to avoid creating SizedBox with
+                  // negative height when the available area is very small.
+                  final gridHeight = math.max(0.0, constraints.maxHeight - 1); // after header divider inside scrollable
                   return SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     controller: _timeScrollCtrl,
@@ -327,7 +330,7 @@ class _AttendanceViewerState extends ConsumerState<AttendanceViewer> {
                           ),
                           const Divider(height: 1),
                           SizedBox(
-                            height: gridHeight - headingHeight,
+                            height: math.max(0.0, gridHeight - headingHeight),
                             child: ListView.builder(
                               controller: _gridScrollCtrl,
                               itemExtent: rowHeight,
