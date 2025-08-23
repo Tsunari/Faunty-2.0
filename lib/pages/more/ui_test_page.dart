@@ -100,11 +100,11 @@ List<Subsection> _generateDummySchedule() {
 // Schedule mixed generator: allows both Assignment and Subsection in same list
 List<dynamic> _generateScheduleMixed() {
   return [
-    // Assignment(left: '08:00', right: 'Breakfast'),
-    // Assignment(left: '09:00', right: 'Morning Meeting'),
-    // Subsection(title: 'Midday', rows: [Assignment(left: '13:00', right: 'Workshops'),Assignment(left: '15:00', right: 'Cleaning Slot'),]),
-    // Subsection(title: 'Test', rows: [Assignment(left: '19:00', right: 'Dinner'),] ),
-    // Assignment(left: '21:00', right: 'Free Time'),
+    Assignment(left: '08:00', right: 'Breakfast'),
+    Assignment(left: '09:00', right: 'Morning Meeting'),
+    Subsection(title: 'Midday', rows: [Assignment(left: '13:00', right: 'Workshops'),Assignment(left: '15:00', right: 'Cleaning Slot'),]),
+    Subsection(title: 'Test', rows: [Assignment(left: '19:00', right: 'Dinner'),] ),
+    Assignment(left: '21:00', right: 'Free Time'),
   ];
 }
 

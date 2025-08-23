@@ -39,12 +39,15 @@ class TableWidget extends ConsumerStatefulWidget {
 
 class _TableWidgetState extends ConsumerState<TableWidget> {
   int? editingRowIndex;
+  int? editingSubsectionItemIndex;
   bool editingLeft = true;
   final TextEditingController _controller = TextEditingController();
+  final TextEditingController _subsectionController = TextEditingController();
 
   @override
   void dispose() {
     _controller.dispose();
+  _subsectionController.dispose();
     super.dispose();
   }
 
@@ -77,19 +80,44 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
       pending.clear();
     }
 
-    for (var item in widget.items) {
+    for (int itemIndex = 0; itemIndex < widget.items.length; itemIndex++) {
+      final item = widget.items[itemIndex];
       if (item is Assignment) {
         pending.add(item);
       } else if (item is Subsection) {
         // flush assignments before subsection
         flushPending();
-        // subsection header full-width
-        blocks.add(Container(
-          height: headerHeight,
-          color: primary.withOpacity(0.12),
-          alignment: Alignment.center,
-          child: Text(item.title, style: headerStyle?.copyWith(color: primary)),
-        ));
+        // subsection header: support inline editing when requested
+        if (editingSubsectionItemIndex == itemIndex) {
+          blocks.add(Container(
+            height: headerHeight,
+            color: primary.withOpacity(0.12),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: SizedBox(
+              height: headerHeight,
+              child: Center(
+                child: TextField(
+                  controller: _subsectionController,
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)), isDense: true, contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12)),
+                  onSubmitted: (val) => _saveSubsectionTitle(itemIndex, val),
+                ),
+              ),
+            ),
+          ));
+        } else {
+          blocks.add(GestureDetector(
+            onTap: () => _startEditingSubsection(itemIndex, item.title),
+            child: Container(
+              height: headerHeight,
+              color: primary.withOpacity(0.12),
+              alignment: Alignment.center,
+              child: Text(item.title, style: headerStyle?.copyWith(color: primary)),
+            ),
+          ));
+        }
+
         // add subsection rows as a separate table
         final subTable = Table(
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
@@ -425,6 +453,27 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
           }
           counter++;
         }
+      }
+    }
+  }
+
+  void _startEditingSubsection(int itemIndex, String currentTitle) {
+    setState(() {
+      editingSubsectionItemIndex = itemIndex;
+      _subsectionController.text = currentTitle;
+    });
+  }
+
+  void _saveSubsectionTitle(int itemIndex, String newTitle) {
+    for (int i = 0; i < widget.items.length; i++) {
+      final item = widget.items[i];
+      if (item is Subsection && i == itemIndex) {
+        final updated = Subsection(title: newTitle, rows: item.rows);
+        setState(() {
+          widget.items[i] = updated;
+          editingSubsectionItemIndex = null;
+        });
+        return;
       }
     }
   }
