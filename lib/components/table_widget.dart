@@ -1,5 +1,8 @@
+import 'package:faunty/models/user_roles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../state_management/user_list_provider.dart';
+import '../models/user_entity.dart';
 
 // Generic models exported for consumers
 class Assignment {
@@ -146,6 +149,11 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
 
   TableRow _buildRow(BuildContext context, Assignment r, int index) {
     final textStyle = Theme.of(context).textTheme.bodySmall;
+  // watch users with roles hoca,baskan,talebe for the current place
+  final rolesKey = [UserRole.talebe, UserRole.baskan, UserRole.hoca].map((r) => r.name).join(',');
+  final usersAsync = ref.watch(usersByRolesAndPlaceProvider(rolesKey));
+  final usersList = usersAsync.asData?.value ?? <UserEntity>[];
+  final Map<String, UserEntity> usersById = {for (var u in usersList) u.uid: u};
     final isEditing = editingRowIndex == index;
     Widget leftCell;
     Widget rightCell;
@@ -157,7 +165,13 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
     // Helper to build the trailing icon buttons (do nothing for now)
     List<Widget> buildTrailingButtons() {
       return [
-        IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(Icons.person, size: iconSize), onPressed: () {}),
+        // IconButton opens a custom overlay dropdown for multi-select
+        IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          icon: Icon(Icons.person, size: iconSize),
+          onPressed: () => _showUserDropdown(index, editingLeft, context, usersList, editingLeft ? r.left : r.right),
+        ),
         const SizedBox(width: 6),
         IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(Icons.calendar_today, size: iconSize), onPressed: () {}),
         const SizedBox(width: 6),
@@ -195,7 +209,36 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
       leftCell = ConstrainedBox(
         constraints: const BoxConstraints(minHeight: minRowHeight),
         child: Row(children: [
-          Expanded(child: GestureDetector(onTap: () => _onCellTap(index, true, r.left), child: Padding(padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12), child: Text(r.left, style: textStyle, softWrap: true)))),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => _onCellTap(index, true, r.left),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                child: () {
+                  final parts = r.left.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+                  final found = parts.where((p) => usersById.containsKey(p)).toList();
+                  if (found.isNotEmpty) {
+                    return Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: found.map((uid) {
+                        final u = usersById[uid]!;
+                        return Chip(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+                          labelPadding: EdgeInsets.zero,
+                          backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          label: Text('${u.firstName} ${u.lastName}', style: Theme.of(context).textTheme.bodySmall),
+                        );
+                      }).toList(),
+                    );
+                  }
+                  return Text(r.left, style: textStyle, softWrap: true);
+                }(),
+              ),
+            ),
+          ),
         ]),
       );
     }
@@ -227,12 +270,79 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
       rightCell = ConstrainedBox(
         constraints: const BoxConstraints(minHeight: minRowHeight),
         child: Row(children: [
-          Expanded(child: GestureDetector(onTap: () => _onCellTap(index, false, r.right), child: Padding(padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12), child: Text(r.right, style: textStyle, softWrap: true)))),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => _onCellTap(index, false, r.right),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                child: () {
+                  final parts = r.right.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+                  final found = parts.where((p) => usersById.containsKey(p)).toList();
+                  if (found.isNotEmpty) {
+                    return Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: found.map((uid) {
+                        final u = usersById[uid]!;
+                        return Chip(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+                          labelPadding: EdgeInsets.zero,
+                          backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          label: Text('${u.firstName} ${u.lastName}', style: Theme.of(context).textTheme.bodySmall),
+                        );
+                      }).toList(),
+                    );
+                  }
+                  return Text(r.right, style: textStyle, softWrap: true);
+                }(),
+              ),
+            ),
+          ),
         ]),
       );
     }
 
     return TableRow(children: [leftCell, rightCell]);
+  }
+
+  Future<void> _showUserDropdown(int index, bool editingLeft, BuildContext context, List<UserEntity> usersList, String currentValue) async {
+    final currentUids = currentValue.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toSet();
+    final selected = <String>{}..addAll(currentUids);
+
+    final items = <PopupMenuEntry<int>>[];
+    // use StatefulBuilder inside a custom menu to manage selection
+    items.add(PopupMenuItem<int>(enabled: false, child: SizedBox(height: 300, width: 300, child: StatefulBuilder(builder: (ctx, setState) {
+      return ListView.separated(
+        shrinkWrap: true,
+        itemCount: usersList.length,
+        separatorBuilder: (_, __) => const Divider(height: 1),
+        itemBuilder: (_, i) {
+          final u = usersList[i];
+          final isSel = selected.contains(u.uid);
+          return CheckboxListTile(
+            value: isSel,
+            onChanged: (v) {
+              setState(() {
+                if (v == true) selected.add(u.uid); else selected.remove(u.uid);
+              });
+              // persist selection immediately
+              _saveEdit(index, editingLeft, selected.join(','));
+            },
+            title: Text('${u.firstName} ${u.lastName}'),
+            controlAffinity: ListTileControlAffinity.leading,
+          );
+        },
+      );
+    }))));
+
+    // showMenu requires a position; use a simple center position
+    await showMenu<int>(
+      context: context,
+      position: RelativeRect.fromLTRB(100, 100, 100, 100),
+      items: items,
+    );
   }
 
   void _onCellTap(int index, bool left, String currentValue) {
