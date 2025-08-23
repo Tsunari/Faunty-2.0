@@ -6,6 +6,7 @@ import 'package:faunty/pages/more/about_page.dart';
 import 'package:faunty/pages/more/account_page.dart';
 import 'package:faunty/state_management/user_provider.dart';
 import 'package:faunty/tools/translation_helper.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state_management/globals_provider.dart';
@@ -13,6 +14,7 @@ import 'users_page.dart';
 import '../../components/custom_chip.dart';
 import 'settings_page.dart';
 import 'package:faunty/components/language_dropdown.dart';
+import 'package:faunty/pages/more/ui_test_page.dart';
 
 class MorePage extends ConsumerWidget {
   const MorePage({super.key});
@@ -218,6 +220,17 @@ class MorePage extends ConsumerWidget {
           title: Text(translation(context: context, 'Help')),
           onTap: () {},
         ),
+        if (kDebugMode)
+          ListTile(
+            leading: Icon(Icons.bug_report_outlined, color: primaryColor),
+            title: Text(translation(context: context, 'UI Test Page')),
+            subtitle: Text(translation(context: context, 'Debug only')),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const UiTestPage()),
+              );
+            },
+          ),
       ],
     );
   }
