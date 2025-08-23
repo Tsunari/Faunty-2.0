@@ -147,45 +147,100 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
   TableRow _buildRow(BuildContext context, Assignment r, int index) {
     final textStyle = Theme.of(context).textTheme.bodySmall;
     final isEditing = editingRowIndex == index;
-
     Widget leftCell;
     Widget rightCell;
 
-  if (isEditing && editingLeft) {
-      _controller.text = r.left;
-      leftCell = TextField(
-        controller: _controller,
-        autofocus: true,
-        onSubmitted: (val) => _saveEdit(index, true, val),
+    // Keep rows visually stable: fixed minimum height for both display and edit states
+    const minRowHeight = 44.0;
+    const iconSize = 20.0;
+
+    // Helper to build the trailing icon buttons (do nothing for now)
+    List<Widget> buildTrailingButtons() {
+      return [
+        IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(Icons.person, size: iconSize), onPressed: () {}),
+        const SizedBox(width: 6),
+        IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(Icons.calendar_today, size: iconSize), onPressed: () {}),
+        const SizedBox(width: 6),
+        editingLeft ? Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(Icons.access_time, size: iconSize), onPressed: () {}),
+        ) : IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(Icons.access_time, size: iconSize), onPressed: () {}),
+      ];
+    }
+
+    if (isEditing && editingLeft) {
+      leftCell = ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: minRowHeight),
+        child: Row(children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 2),
+              child: TextField(
+                controller: _controller,
+                autofocus: true,
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                ),
+                onSubmitted: (val) => _saveEdit(index, true, val),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          ...buildTrailingButtons(),
+        ]),
       );
     } else {
-      leftCell = GestureDetector(
-        onTap: () => _onCellTap(index, true, r.left),
-        child: Padding(padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12), child: Text(r.left, style: textStyle)),
+      leftCell = ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: minRowHeight),
+        child: Row(children: [
+          Expanded(child: GestureDetector(onTap: () => _onCellTap(index, true, r.left), child: Padding(padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12), child: Text(r.left, style: textStyle, softWrap: true)))),
+        ]),
       );
     }
 
-  if (isEditing && !editingLeft) {
-      _controller.text = r.right;
-      rightCell = TextField(
-        controller: _controller,
-        autofocus: true,
-        onSubmitted: (val) => _saveEdit(index, false, val),
+    if (isEditing && !editingLeft) {
+      rightCell = ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: minRowHeight),
+        child: Row(children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: TextField(
+                controller: _controller,
+                autofocus: true,
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+                ),
+                onSubmitted: (val) => _saveEdit(index, false, val),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          ...buildTrailingButtons(),
+        ]),
       );
     } else {
-      rightCell = GestureDetector(
-        onTap: () => _onCellTap(index, false, r.right),
-        child: Padding(padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12), child: Text(r.right, style: textStyle)),
+      rightCell = ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: minRowHeight),
+        child: Row(children: [
+          Expanded(child: GestureDetector(onTap: () => _onCellTap(index, false, r.right), child: Padding(padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12), child: Text(r.right, style: textStyle, softWrap: true)))),
+        ]),
       );
     }
 
-  return TableRow(children: [leftCell, rightCell]);
+    return TableRow(children: [leftCell, rightCell]);
   }
 
   void _onCellTap(int index, bool left, String currentValue) {
     setState(() {
-      editingRowIndex = index;
-      editingLeft = left;
+  editingRowIndex = index;
+  editingLeft = left;
+  // populate controller once when beginning to edit so caret/selection is stable
+  _controller.text = currentValue;
     });
   }
 
