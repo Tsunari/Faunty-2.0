@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:faunty/models/user_roles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -153,7 +154,7 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
   final rolesKey = [UserRole.talebe, UserRole.baskan, UserRole.hoca].map((r) => r.name).join(',');
   final usersAsync = ref.watch(usersByRolesAndPlaceProvider(rolesKey));
   final usersList = usersAsync.asData?.value ?? <UserEntity>[];
-  final Map<String, UserEntity> usersById = {for (var u in usersList) u.uid: u};
+  final Map<String, UserEntity> usersByName = {for (var u in usersList) '${u.firstName} ${u.lastName}': u};
     final isEditing = editingRowIndex == index;
     Widget leftCell;
     Widget rightCell;
@@ -165,13 +166,24 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
     // Helper to build the trailing icon buttons (do nothing for now)
     List<Widget> buildTrailingButtons() {
       return [
-        // IconButton opens a custom overlay dropdown for multi-select
-        IconButton(
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          icon: Icon(Icons.person, size: iconSize),
-          onPressed: () => _showUserDropdown(index, editingLeft, context, usersList, editingLeft ? r.left : r.right),
-        ),
+        // IconButton opens a dropdown anchored to the button; use Builder to get button context
+        Builder(builder: (btnCtx) {
+    return IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            icon: Icon(
+              Icons.person,
+              size: iconSize,
+          color: (editingLeft ? r.left : r.right)
+            .split(',')
+            .map((s) => s.trim())
+            .any((p) => usersByName.containsKey(p))
+        ? Theme.of(context).colorScheme.primary
+        : null,
+            ),
+            onPressed: () => _showUserDropdown(index, editingLeft, btnCtx, usersList, editingLeft ? r.left : r.right),
+          );
+        }),
         const SizedBox(width: 6),
         IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(), icon: const Icon(Icons.calendar_today, size: iconSize), onPressed: () {}),
         const SizedBox(width: 6),
@@ -216,22 +228,12 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
                 padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                 child: () {
                   final parts = r.left.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
-                  final found = parts.where((p) => usersById.containsKey(p)).toList();
-                  if (found.isNotEmpty) {
+                  if (parts.isNotEmpty) {
                     return Wrap(
                       spacing: 6,
                       runSpacing: 4,
-                      children: found.map((uid) {
-                        final u = usersById[uid]!;
-                        return Chip(
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
-                          labelPadding: EdgeInsets.zero,
-                          backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          label: Text('${u.firstName} ${u.lastName}', style: Theme.of(context).textTheme.bodySmall),
-                        );
-                      }).toList(),
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: parts.map((t) => Padding(padding: const EdgeInsets.only(right: 6), child: Text(t, style: textStyle))).toList(),
                     );
                   }
                   return Text(r.left, style: textStyle, softWrap: true);
@@ -277,22 +279,12 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
                 padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                 child: () {
                   final parts = r.right.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
-                  final found = parts.where((p) => usersById.containsKey(p)).toList();
-                  if (found.isNotEmpty) {
+                  if (parts.isNotEmpty) {
                     return Wrap(
                       spacing: 6,
                       runSpacing: 4,
-                      children: found.map((uid) {
-                        final u = usersById[uid]!;
-                        return Chip(
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
-                          labelPadding: EdgeInsets.zero,
-                          backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          label: Text('${u.firstName} ${u.lastName}', style: Theme.of(context).textTheme.bodySmall),
-                        );
-                      }).toList(),
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: parts.map((t) => Padding(padding: const EdgeInsets.only(right: 6), child: Text(t, style: textStyle))).toList(),
                     );
                   }
                   return Text(r.right, style: textStyle, softWrap: true);
@@ -307,9 +299,10 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
     return TableRow(children: [leftCell, rightCell]);
   }
 
-  Future<void> _showUserDropdown(int index, bool editingLeft, BuildContext context, List<UserEntity> usersList, String currentValue) async {
-    final currentUids = currentValue.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toSet();
-    final selected = <String>{}..addAll(currentUids);
+  Future<void> _showUserDropdown(int index, bool editingLeft, BuildContext buttonContext, List<UserEntity> usersList, String currentValue) async {
+    // currentValue now stores display names (comma separated)
+    final currentNames = currentValue.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toSet();
+    final selected = <String>{}..addAll(currentNames);
 
     final items = <PopupMenuEntry<int>>[];
     // use StatefulBuilder inside a custom menu to manage selection
@@ -320,27 +313,66 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
         separatorBuilder: (_, __) => const Divider(height: 1),
         itemBuilder: (_, i) {
           final u = usersList[i];
-          final isSel = selected.contains(u.uid);
+          final displayName = '${u.firstName} ${u.lastName}';
+          final isSel = selected.contains(displayName);
           return CheckboxListTile(
             value: isSel,
             onChanged: (v) {
               setState(() {
-                if (v == true) selected.add(u.uid); else selected.remove(u.uid);
+                if (v == true) selected.add(displayName); else selected.remove(displayName);
               });
-              // persist selection immediately
-              _saveEdit(index, editingLeft, selected.join(','));
+              // persist selection immediately and keep editing
+              _saveEdit(index, editingLeft, selected.join(','), keepEditing: true);
             },
-            title: Text('${u.firstName} ${u.lastName}'),
+            title: Text(displayName),
             controlAffinity: ListTileControlAffinity.leading,
           );
         },
       );
     }))));
 
-    // showMenu requires a position; use a simple center position
+    // compute button position to anchor menu fully above or fully below the button
+    final RenderBox btnBox = buttonContext.findRenderObject() as RenderBox;
+    final btnPos = btnBox.localToGlobal(Offset.zero);
+    final btnSize = btnBox.size;
+    final screenSize = MediaQuery.of(buttonContext).size;
+    const double menuWidth = 300.0;
+    final double menuHeight = min(screenSize.height * 0.5, usersList.length * 56.0 + 16.0);
+    const double margin = 6.0;
+
+    // decide whether to show below or above based on available space
+    final double spaceBelow = screenSize.height - (btnPos.dy + btnSize.height) - margin;
+    final double spaceAbove = btnPos.dy - margin;
+    final bool showBelow = spaceBelow >= menuHeight || spaceBelow >= spaceAbove;
+
+    // compute horizontal left, clamp to screen
+    double left = btnPos.dx;
+    if (left + menuWidth + margin > screenSize.width) {
+      left = max(margin, screenSize.width - menuWidth - margin);
+    }
+
+    double top, bottom;
+    if (showBelow) {
+      top = btnPos.dy + btnSize.height + margin;
+      bottom = top + menuHeight;
+      // ensure bottom doesn't exceed screen; if it does, nudge top up
+      if (bottom + margin > screenSize.height) {
+        bottom = screenSize.height - margin;
+        top = bottom - menuHeight;
+      }
+    } else {
+      bottom = btnPos.dy - margin;
+      top = bottom - menuHeight;
+      // if top goes off-screen, clamp
+      if (top < margin) {
+        top = margin;
+        bottom = top + menuHeight;
+      }
+    }
+
     await showMenu<int>(
-      context: context,
-      position: RelativeRect.fromLTRB(100, 100, 100, 100),
+      context: buttonContext,
+      position: RelativeRect.fromLTRB(left, top, left + menuWidth, bottom),
       items: items,
     );
   }
@@ -350,11 +382,14 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
   editingRowIndex = index;
   editingLeft = left;
   // populate controller once when beginning to edit so caret/selection is stable
-  _controller.text = currentValue;
+  // map any known user uids to display names so ids are not shown
+  // currentValue is already stored/display names (comma-separated)
+  final parts = currentValue.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+  _controller.text = parts.join(', ');
     });
   }
 
-  void _saveEdit(int index, bool left, String newValue) {
+  void _saveEdit(int index, bool left, String newValue, {bool keepEditing = false}) {
     // Find corresponding item and update it in-place
     int counter = 0;
     for (int i = 0; i < widget.items.length; i++) {
@@ -364,8 +399,13 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
           final updated = Assignment(left: left ? newValue : item.left, right: left ? item.right : newValue, extras: item.extras);
           setState(() {
             widget.items[i] = updated;
-            editingRowIndex = null;
+            editingRowIndex = keepEditing ? index : null;
           });
+          if (keepEditing) {
+            // controller should reflect the display names (we store names now)
+            final tokens = newValue.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+            _controller.text = tokens.join(', ');
+          }
           return;
         }
         counter++;
