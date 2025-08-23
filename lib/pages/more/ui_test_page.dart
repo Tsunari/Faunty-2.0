@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'package:faunty/components/table_widget.dart';
+import 'package:faunty/components/role_gate.dart';
+import 'package:faunty/models/user_roles.dart';
 
 class UiTestPage extends StatefulWidget {
   const UiTestPage({super.key});
@@ -43,7 +45,7 @@ class _UiTestPageState extends State<UiTestPage> {
           Text(translation(context: context, 'Attendance example'), style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 6),
           TableWidget(
-            subsections: sections,
+            items: sections.cast<dynamic>(),
             showColumnHeaders: showColumnHeaders,
             leftHeader: translation(context: context, 'Location'),
             rightHeader: translation(context: context, 'Responsible'),
@@ -56,7 +58,7 @@ class _UiTestPageState extends State<UiTestPage> {
           Text(translation(context: context, 'Schedule example'), style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 6),
           TableWidget(
-            flatRows: _generateScheduleFlat(),
+            items: _generateScheduleMixed(),
             showColumnHeaders: showColumnHeaders,
             leftHeader: translation(context: context, 'Time'),
             rightHeader: translation(context: context, 'Event'),
@@ -95,14 +97,13 @@ List<Subsection> _generateDummySchedule() {
   ];
 }
 
-// Schedule dummy generator: times to events
-List<Assignment> _generateScheduleFlat() {
+// Schedule mixed generator: allows both Assignment and Subsection in same list
+List<dynamic> _generateScheduleMixed() {
   return [
     Assignment(left: '08:00', right: 'Breakfast'),
     Assignment(left: '09:00', right: 'Morning Meeting'),
-    Assignment(left: '13:00', right: 'Workshops'),
-    Assignment(left: '15:00', right: 'Cleaning Slot'),
-    Assignment(left: '19:00', right: 'Dinner'),
+    Subsection(title: 'Midday', rows: [Assignment(left: '13:00', right: 'Workshops'),Assignment(left: '15:00', right: 'Cleaning Slot'),]),
+    Subsection(title: 'Test', rows: [Assignment(left: '19:00', right: 'Dinner'),] ),
     Assignment(left: '21:00', right: 'Free Time'),
   ];
 }
