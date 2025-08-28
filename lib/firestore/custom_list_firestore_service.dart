@@ -86,4 +86,65 @@ class CustomListFirestoreService {
     }
     await batch.commit();
   }
+
+  /// Migration helper: Convert any items that store a subsection (payload.type=='subsection' with payload.rows)
+  /// into separate item documents where each row becomes its own item (type: 'assignment').
+  /// This is a best-effort migration and preserves relative ordering by appending new rows at the end.
+  Future<void> migrateSubsectionsToPerRow(String placeId, String listId) async {
+    final itemsRef = _listsRef(placeId).doc(listId).collection('items');
+
+    // find current max order to append new rows after existing items
+    final maxSnap = await itemsRef.orderBy('order', descending: true).limit(1).get();
+    int maxOrder = 0;
+    if (maxSnap.docs.isNotEmpty) {
+      maxOrder = maxSnap.docs.first.data()['order'] as int? ?? 0;
+      // start new items after maxOrder
+    }
+
+    final all = await itemsRef.orderBy('order').get();
+    for (final doc in all.docs) {
+      final data = doc.data();
+      final payload = data['payload'] as Map<String, dynamic>?;
+      final type = payload?['type'] as String? ?? 'assignment';
+      if (type == 'subsection') {
+        final rows = (payload?['rows'] as List<dynamic>?) ?? [];
+        // create new docs for each row
+        for (final row in rows) {
+          maxOrder++;
+          final rowMap = row as Map<String, dynamic>?;
+          final Map<String, dynamic> rowPayload = {
+            'type': 'assignment',
+            'left': rowMap?['left'] ?? '',
+            'right': rowMap?['right'] ?? '',
+          };
+          await itemsRef.add({
+            'payload': rowPayload,
+            'order': maxOrder,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        }
+        // delete the old subsection document
+        await itemsRef.doc(doc.id).delete();
+      }
+    }
+  }
+
+  /// Update a specific field inside a row of a subsection item document.
+  /// rowIndex is the index inside payload['rows'] for that document.
+  Future<void> updateRowInItem(String placeId, String listId, String itemId, int rowIndex, String field, dynamic value) async {
+    final docRef = _listsRef(placeId).doc(listId).collection('items').doc(itemId);
+    await _db.runTransaction((tx) async {
+      final snap = await tx.get(docRef);
+      if (!snap.exists) throw Exception('item not found');
+      final data = snap.data() as Map<String, dynamic>;
+      final payload = Map<String, dynamic>.from(data['payload'] as Map<String, dynamic>? ?? {});
+      final rows = List<dynamic>.from((payload['rows'] as List<dynamic>?) ?? []);
+      if (rowIndex < 0 || rowIndex >= rows.length) throw Exception('rowIndex out of range');
+      final row = Map<String, dynamic>.from(rows[rowIndex] as Map<String, dynamic>);
+      row[field] = value;
+      rows[rowIndex] = row;
+      payload['rows'] = rows;
+      tx.update(docRef, {'payload': payload, 'updatedAt': FieldValue.serverTimestamp()});
+    });
+  }
 }

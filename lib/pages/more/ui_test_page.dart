@@ -1,30 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:faunty/tools/translation_helper.dart';
 import 'package:faunty/components/table_widget.dart';
-import 'package:faunty/components/role_gate.dart';
-import 'package:faunty/models/user_roles.dart';
+// role gating not needed on the debug UI page
+import 'package:faunty/state_management/user_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:faunty/models/custom_list.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:faunty/state_management/custom_list_provider.dart';
+// custom list model/service used via providers
 
-class UiTestPage extends StatefulWidget {
+class UiTestPage extends ConsumerStatefulWidget {
   const UiTestPage({super.key});
 
   @override
-  State<UiTestPage> createState() => _UiTestPageState();
+  ConsumerState<UiTestPage> createState() => _UiTestPageState();
 }
 
-class _UiTestPageState extends State<UiTestPage> {
+class _UiTestPageState extends ConsumerState<UiTestPage> {
   bool showColumnHeaders = true;
+  final Set<String> _migratedLists = {};
 
   @override
   Widget build(BuildContext context) {
-  final sections = _generateDummySchedule();
+    // watch custom lists for current place (use globalsProvider for placeId indirectly via user)
+    final userAsync = ref.watch(userProvider);
+    final user = userAsync.asData?.value;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(translation(context: context, 'UI Test Page')),
       ),
-      body: ListView(
+      body: Padding(
         padding: const EdgeInsets.all(12),
-        children: [
+        child: Column(children: [
           Text(
             translation(context: context, 'This page is only visible in debug mode.'),
             style: Theme.of(context).textTheme.bodyLarge,
@@ -40,30 +48,129 @@ class _UiTestPageState extends State<UiTestPage> {
 
           const SizedBox(height: 12),
 
-          // Attendance example (uses current left/right semantics)
-          const SizedBox(height: 6),
-          Text(translation(context: context, 'Attendance example'), style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 6),
-          TableWidget(
-            items: sections.cast<dynamic>(),
-            showColumnHeaders: showColumnHeaders,
-            leftHeader: translation(context: context, 'Location'),
-            rightHeader: translation(context: context, 'Responsible'),
-          ),
+          if (user == null) const CircularProgressIndicator() else
+          // Read lists and items from Firestore using providers
+          Expanded(child: Builder(builder: (ctx) {
+            return ref.watch(customListsProvider(user.placeId)).when(
+              data: (lists) {
+                if (lists.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('No lists found'),
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final svc = ref.read(customListServiceProvider);
+                            // Build a minimal CustomList object; createList will write serverTimestamp
+                            final sample = CustomList(
+                              id: '',
+                              title: 'UiTest Sample',
+                              type: CustomListType.assignment,
+                              createdBy: user.uid,
+                              createdAt: Timestamp.now(),
+                              order: 0,
+                              visible: true,
+                            );
+                            try {
+                              final listId = await svc.createList(user.placeId, sample);
+                              // add a couple of items
+                              await svc.addItem(user.placeId, listId, {'type': 'assignment', 'left': '08:00', 'right': 'Breakfast'});
+                              await svc.addItem(user.placeId, listId, {'type': 'assignment', 'left': '09:00', 'right': 'Meeting'});
+                              if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sample list created')));
+                            } catch (e) {
+                              if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+                            }
+                          },
+                          child: const Text('Create test list in Firestore'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                final first = lists.first;
+                final svc = ref.read(customListServiceProvider);
+                final key = ListKey(user.placeId, first.id);
+                return ref.watch(customListItemsProvider(key)).when(
+                  data: (items) {
+                    // map ListItem.payload into TableWidget items
+                    final mapped = <dynamic>[];
+                    // flattened map: each entry corresponds to one TableRow and contains docId and rowIndex if nested
+                    final flattened = <Map<String, dynamic>>[];
+                    bool hasSubsectionDocs = false;
+                    for (final li in items) {
+                      final payload = li.payload;
+                      final type = payload['type'] as String? ?? 'assignment';
+                      if (type == 'subsection') {
+                        hasSubsectionDocs = true;
+                        final title = payload['title'] as String? ?? '';
+                        final rowsData = (payload['rows'] as List<dynamic>?) ?? [];
+                        final rows = <Assignment>[];
+                        for (int ri = 0; ri < rowsData.length; ri++) {
+                          final r = rowsData[ri] as Map<String, dynamic>;
+                          rows.add(Assignment(left: r['left'] ?? '', right: r['right'] ?? ''));
+                          flattened.add({'docId': li.id, 'isSub': true, 'rowIndex': ri});
+                        }
+                        mapped.add(Subsection(title: title, rows: rows));
+                      } else {
+                        final left = payload['left'] as String? ?? '';
+                        final right = payload['right'] as String? ?? '';
+                        mapped.add(Assignment(left: left, right: right));
+                        flattened.add({'docId': li.id, 'isSub': false});
+                      }
+                    }
 
-          const SizedBox(height: 16),
+                    // If we detect subsection documents and haven't migrated this list yet,
+                    // schedule an automatic migration once and show a snackbar on completion.
+                    if (hasSubsectionDocs && !_migratedLists.contains(first.id)) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        () async {
+                          try {
+                            await svc.migrateSubsectionsToPerRow(user.placeId, first.id);
+                            if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Auto-migration complete')));
+                            setState(() => _migratedLists.add(first.id));
+                          } catch (e) {
+                            if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Auto-migration failed: $e')));
+                          }
+                        }();
+                      });
+                    }
 
-          // Schedule example (left=Time, right=Event) — flat rows
-          const SizedBox(height: 6),
-          Text(translation(context: context, 'Schedule example'), style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 6),
-          TableWidget(
-            items: _generateScheduleMixed(),
-            showColumnHeaders: showColumnHeaders,
-            leftHeader: translation(context: context, 'Time'),
-            rightHeader: translation(context: context, 'Event'),
-          ),
-        ],
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TableWidget(
+                          items: mapped,
+                          showColumnHeaders: showColumnHeaders,
+                          leftHeader: translation(context: context, 'Left'),
+                          rightHeader: translation(context: context, 'Right'),
+                          onSave: (index, left, newValue) async {
+                            if (index < 0 || index >= flattened.length) return;
+                            final entry = flattened[index];
+                            final svc = ref.read(customListServiceProvider);
+                            final docId = entry['docId'] as String;
+                            if (entry['isSub'] == true) {
+                              final rowIndex = entry['rowIndex'] as int;
+                              await svc.updateRowInItem(user.placeId, first.id, docId, rowIndex, left ? 'left' : 'right', newValue);
+                            } else {
+                              final key = left ? 'left' : 'right';
+                              await svc.updateItem(user.placeId, first.id, docId, {'payload': {key: newValue}});
+                            }
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, st) => Center(child: Text('Error: $e')),
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, st) => Center(child: Text('Error: $e')),
+            );
+          })),
+        ]),
       ),
     );
   }
@@ -71,40 +178,5 @@ class _UiTestPageState extends State<UiTestPage> {
 
 // TableWidget has been moved to `lib/components/table_widget.dart` and is imported above.
 
-// Dummy data generator (generic names)
-List<Subsection> _generateDummySchedule() {
-  return [
-    Subsection(title: 'Görevli', rows: [
-      Assignment(left: 'Talebe Baskanı', right: 'Atuf'),
-      Assignment(left: 'Yemekhane Baskanı', right: 'Ömer'),
-      Assignment(left: 'Çöp', right: 'Abdullah'),
-      Assignment(left: 'Merdiven 5-6', right: 'Kemal'),
-    ]),
-    Subsection(title: '5. Kat', rows: [
-      Assignment(left: 'WC', right: 'Selim, Tunahan, Furkan'),
-      Assignment(left: 'Mescid', right: 'Ingga'),
-      Assignment(left: 'Koridor', right: 'Sevban'),
-      Assignment(left: 'Freizeitraum', right: 'Zhuma, Şermirza'),
-      Assignment(left: 'Yatakhaneler', right: 'Yatakhane Sakinleri'),
-    ]),
-    Subsection(title: '6. Kat', rows: [
-      Assignment(left: 'Dershaneler', right: 'Dershane Sakinleri'),
-      Assignment(left: 'Çayhane', right: 'Hilmi'),
-      Assignment(left: 'WC', right: 'Nasser'),
-      Assignment(left: 'Koridor', right: 'Yasin'),
-      Assignment(left: 'Teras', right: 'Nizami, Talha'),
-    ]),
-  ];
-}
-
-// Schedule mixed generator: allows both Assignment and Subsection in same list
-List<dynamic> _generateScheduleMixed() {
-  return [
-    Assignment(left: '08:00', right: 'Breakfast'),
-    Assignment(left: '09:00', right: 'Morning Meeting'),
-    Subsection(title: 'Midday', rows: [Assignment(left: '13:00', right: 'Workshops'),Assignment(left: '15:00', right: 'Cleaning Slot'),]),
-    Subsection(title: 'Test', rows: [Assignment(left: '19:00', right: 'Dinner'),] ),
-    Assignment(left: '21:00', right: 'Free Time'),
-  ];
-}
+// No local dummy data here — this page reads custom lists from Firestore.
 

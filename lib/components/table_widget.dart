@@ -24,6 +24,7 @@ class TableWidget extends ConsumerStatefulWidget {
   final bool showColumnHeaders;
   final String? leftHeader;
   final String? rightHeader;
+  final Future<void> Function(int index, bool left, String newValue)? onSave;
 
   const TableWidget({
     super.key,
@@ -31,6 +32,7 @@ class TableWidget extends ConsumerStatefulWidget {
     this.showColumnHeaders = true,
     this.leftHeader,
     this.rightHeader,
+  this.onSave,
   });
 
   @override
@@ -237,7 +239,7 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
                   contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
                 ),
-                onSubmitted: (val) => _saveEdit(index, true, val),
+                  onSubmitted: (val) async => await _saveEdit(index, true, val),
               ),
             ),
           ),
@@ -250,8 +252,8 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
         constraints: const BoxConstraints(minHeight: minRowHeight),
         child: Row(children: [
           Expanded(
-            child: GestureDetector(
-              onTap: () => _onCellTap(index, true, r.left),
+              child: GestureDetector(
+              onTap: () async => await _onCellTap(index, true, r.left),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                 child: () {
@@ -288,7 +290,7 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
                   contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
                 ),
-                onSubmitted: (val) => _saveEdit(index, false, val),
+                onSubmitted: (val) async => await _saveEdit(index, false, val),
               ),
             ),
           ),
@@ -301,8 +303,8 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
         constraints: const BoxConstraints(minHeight: minRowHeight),
         child: Row(children: [
           Expanded(
-            child: GestureDetector(
-              onTap: () => _onCellTap(index, false, r.right),
+              child: GestureDetector(
+              onTap: () async => await _onCellTap(index, false, r.right),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                 child: () {
@@ -345,12 +347,12 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
           final isSel = selected.contains(displayName);
           return CheckboxListTile(
             value: isSel,
-            onChanged: (v) {
+            onChanged: (v) async {
               setState(() {
                 if (v == true) selected.add(displayName); else selected.remove(displayName);
               });
               // persist selection immediately and keep editing
-              _saveEdit(index, editingLeft, selected.join(','), keepEditing: true);
+              await _saveEdit(index, editingLeft, selected.join(','), keepEditing: true);
             },
             title: Text(displayName),
             controlAffinity: ListTileControlAffinity.leading,
@@ -405,19 +407,46 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
     );
   }
 
-  void _onCellTap(int index, bool left, String currentValue) {
+  Future<void> _onCellTap(int index, bool left, String currentValue) async {
+    // if there is an active edit in a different cell, persist it first so we don't lose typed text
+    if (editingRowIndex != null && (editingRowIndex != index || editingLeft != left)) {
+      try {
+        final prevStored = _getStoredValueAt(editingRowIndex!, editingLeft);
+        final currentText = _controller.text.trim();
+        if (currentText != prevStored.trim()) {
+          await _saveEdit(editingRowIndex!, editingLeft, _controller.text);
+        }
+      } catch (_) {
+        // ignore save errors here; UI will still switch to new cell
+      }
+    }
     setState(() {
-  editingRowIndex = index;
-  editingLeft = left;
-  // populate controller once when beginning to edit so caret/selection is stable
-  // map any known user uids to display names so ids are not shown
-  // currentValue is already stored/display names (comma-separated)
-  final parts = currentValue.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
-  _controller.text = parts.join(', ');
+      editingRowIndex = index;
+      editingLeft = left;
+      // populate controller once when beginning to edit so caret/selection is stable
+      // currentValue is already stored/display names (comma-separated)
+      final parts = currentValue.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+      _controller.text = parts.join(', ');
     });
   }
 
-  void _saveEdit(int index, bool left, String newValue, {bool keepEditing = false}) {
+  String _getStoredValueAt(int index, bool left) {
+    int counter = 0;
+    for (final item in widget.items) {
+      if (item is Assignment) {
+        if (counter == index) return left ? item.left : item.right;
+        counter++;
+      } else if (item is Subsection) {
+        for (final row in item.rows) {
+          if (counter == index) return left ? row.left : row.right;
+          counter++;
+        }
+      }
+    }
+    return '';
+  }
+
+  Future<void> _saveEdit(int index, bool left, String newValue, {bool keepEditing = false}) async {
     // Find corresponding item and update it in-place
     int counter = 0;
     for (int i = 0; i < widget.items.length; i++) {
@@ -429,6 +458,10 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
             widget.items[i] = updated;
             editingRowIndex = keepEditing ? index : null;
           });
+          // delegate persistence to optional callback
+          if (widget.onSave != null) {
+            await widget.onSave!(index, left, newValue);
+          }
           if (keepEditing) {
             // controller should reflect the display names (we store names now)
             final tokens = newValue.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
@@ -449,6 +482,9 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
               widget.items[i] = newSub;
               editingRowIndex = null;
             });
+            if (widget.onSave != null) {
+              await widget.onSave!(index, left, newValue);
+            }
             return;
           }
           counter++;
