@@ -1,0 +1,9 @@
+{
+  "label": "User Interface",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "Documentation and guides related to the user interface of Faunty, including design principles, components, and user experience considerations."
+  }
+ 
+}
