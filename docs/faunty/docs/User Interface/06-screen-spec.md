@@ -1,11 +1,8 @@
 # Screen spec
 
-This document defines the key screens in Faunty (listed in the Bavbar), their purpose, layout and data sources.
+This document defines the key screens in Faunty (listed in the Navbar), their purpose, layout and data sources.
 
 ## Home / Dashboard
-- ### Route: `/team/:placeId/dashboard` (conceptual; actual routing is in `main.dart` and navigation widgets)
-- ### Entrance: 
-  Navbar, starting the app.
 - ### Primary goals:
   1. Show ther most important items (current cleaning place, quick acces to kantin, program, ...)
   2. Provide quick access to main features (cleaning, kantin, program, ...)
@@ -19,7 +16,6 @@ This document defines the key screens in Faunty (listed in the Bavbar), their pu
 
 
 ## Communication / Messages
-- ### Route: `/team/:placeId/communication` (conceptual; routing in `main.dart` and navigation widgets)
 - ### Implementation reference:
   - Page file: `lib/pages/communication/communication_page.dart`
   - Main widget: `CommunicationPage` (uses `TabPage`)
@@ -31,8 +27,6 @@ This document defines the key screens in Faunty (listed in the Bavbar), their pu
   4. Permissions 
   5. Suggestion Box 
   6. Forum 
-- ### Entrance: 
-  Navbar (Messages tab)
 - ### Primary goals:
   1. Behold all kind of pages wich enable communication between users, even of diffrent roles and even communication between diffretent places (yurds)
   2. Completly negate the need of external communication apps like WhatsApp, Telegram, Email, ...
@@ -51,8 +45,6 @@ This document defines the key screens in Faunty (listed in the Bavbar), their pu
   - Announce incoming messages for screen readers where appropriate
 
 ## Tracking / Main Lists
-- ### Route: `/team/:placeId/tracking` (conceptual; routing in `main.dart` and navigation widgets)
-- ### Entrance: Navbar (Tracking tab), deep links to specific list filters, cross-links from tasks/notifications
 - ### Purpose / Primary goals:
   1. Surface all active items that require user action across domains (kantin debt, Attendance)
   2. Provide clear filters & quick actions to resolve or assign items
@@ -70,9 +62,6 @@ This document defines the key screens in Faunty (listed in the Bavbar), their pu
   - Tab container: `TabPage` — each tab renders its page widget
 
 ## Lists
-- ### Route: `/team/:placeId/:domain` (conceptual; routing in `main.dart` and navigation widgets)
-- ### Entrance: 
-  From Navbar
 - ### Purpose / Primary goals: 
   1. Show all lists wich dont need any special user interaction (like tracking, communication, ...)
 - ### Tabs:
@@ -96,13 +85,10 @@ This document defines the key screens in Faunty (listed in the Bavbar), their pu
   - Security: enforce Firestore rules to filter unauthorized documents; deny client-side access to filtered fields and show contextual messaging
 
 ## More 
-- ### Route: `/team/:placeId/more` (conceptual; routing in `main.dart` and navigation widgets)
 - ### Implementation reference:
   - Page file: `lib/pages/more/more_page.dart`
   - Main widget: `MorePage` (uses `ListView` with role gated items)
   - Key providers used: `lib/state_management/user_provider.dart`, `lib/state_management/globals_provider.dart`
-- ### Entrance: 
-  - Navbar (More tab)
 - ### Primary goals:
   1. Gives Acces to all pages wich can not be categorized in the other tabs of the Navbar
   2. Provide acces to functions wich are not not based on the main workflow of Faunty (like settings, about, help, feedback,...)
