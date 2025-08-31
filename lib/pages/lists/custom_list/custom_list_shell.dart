@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:faunty/models/custom_list.dart';
 import 'package:faunty/state_management/custom_list_provider.dart';
+import 'package:faunty/helper/icon_registry.dart';
 
 class CustomListShell extends ConsumerWidget {
   final String placeId;
@@ -27,7 +28,7 @@ class CustomListShell extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Row(
                 children: [
-                  if (list.icon != null && list.icon!.kind == 'material') Icon(IconData(list.icon!.codePoint ?? 0, fontFamily: list.icon!.fontFamily ?? 'MaterialIcons')),
+                  if (list.icon != null && list.icon!.kind == 'material') Icon(iconFromSpec(list.icon)),
                   const SizedBox(width: 8),
                   Expanded(child: Text(list.title, style: Theme.of(context).textTheme.titleMedium)),
                   IconButton(

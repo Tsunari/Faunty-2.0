@@ -13,6 +13,7 @@ import 'package:faunty/pages/lists/custom_list/schedule_list_widget.dart';
 import 'package:faunty/state_management/custom_list_provider.dart';
 import 'package:faunty/pages/lists/custom_list/assignment_list_widget.dart';
 import 'package:faunty/pages/lists/custom_list/custom_list_shell.dart';
+import 'package:faunty/helper/icon_registry.dart';
 
 final lastTabIndexProvider = StateProvider<int?>((ref) => null);
 
@@ -45,7 +46,7 @@ class ListsPage extends ConsumerWidget {
               pageChild = AssignmentListWidget(placeId: placeId, list: l);
           }
           final page = CustomListShell(placeId: placeId, list: l, child: pageChild);
-          tabs.add(TabMeta(l.title, page, l.icon != null && l.icon!.kind == 'material' ? IconData(l.icon!.codePoint ?? 0, fontFamily: l.icon!.fontFamily) : Icons.list));
+          tabs.add(TabMeta(l.title, page, l.icon != null && l.icon!.kind == 'material' ? iconFromSpec(l.icon) : Icons.list));
         }
 
         // Only show the Add tab for privileged roles.

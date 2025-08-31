@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:faunty/state_management/custom_list_provider.dart';
 import 'package:faunty/state_management/user_provider.dart';
 import 'package:faunty/components/icon_picker.dart';
+import 'package:faunty/helper/icon_registry.dart';
 
 class AddPage extends ConsumerStatefulWidget {
   const AddPage({super.key});
@@ -45,7 +46,7 @@ class _AddPageState extends ConsumerState<AddPage> {
                     itemBuilder: (ctx, idx) {
                       final l = lists[idx];
                       final iconWidget = l.icon != null && l.icon!.kind == 'material'
-                          ? Icon(IconData(l.icon!.codePoint ?? 0, fontFamily: l.icon!.fontFamily ?? 'MaterialIcons'))
+                          ? Icon(iconFromSpec(l.icon))
                           : const Icon(Icons.list);
                       return ListTile(
                         leading: iconWidget,
@@ -83,7 +84,7 @@ class _AddPageState extends ConsumerState<AddPage> {
                                     _editingListId = null;
                                     _titleCtrl.clear();
                                     _type = CustomListType.assignment;
-                                    _icon = IconSpec.material(0xe3af);
+                                            _icon = IconSpec.material(0xe3af);
                                   });
                                 }
                               }

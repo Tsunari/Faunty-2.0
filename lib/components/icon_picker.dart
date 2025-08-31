@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:faunty/models/custom_list.dart';
+import 'package:faunty/helper/icon_registry.dart';
 
 /// A modern, searchable Material icon picker.
 /// Tap the preview to open a modal picker containing a searchable grid of icons.
@@ -93,7 +94,7 @@ class _IconPickerState extends State<IconPicker> {
     MapEntry('attach_money', Icons.attach_money),
     MapEntry('trending_up', Icons.trending_up),
     MapEntry('trending_down', Icons.trending_down),
-    MapEntry('pie_chart', Icons.pie_chart),
+    MapEntry('pie_chart', Icons.pie_chart_outline),
     MapEntry('bar_chart', Icons.bar_chart),
     MapEntry('insert_chart', Icons.insert_chart),
     MapEntry('lightbulb', Icons.lightbulb),
@@ -179,7 +180,7 @@ class _IconPickerState extends State<IconPicker> {
   @override
   Widget build(BuildContext context) {
   final display = widget.selected != null && widget.selected!.kind == 'material'
-    ? Icon(IconData(widget.selected!.codePoint ?? 0, fontFamily: widget.selected!.fontFamily))
+    ? Icon(iconFromSpec(widget.selected))
     : const Icon(Icons.post_add_outlined);
     return Row(
       mainAxisSize: MainAxisSize.min,
