@@ -9,15 +9,8 @@ Brief: Faunty's UI is real-time first (Firestore + Riverpod), component-based (`
 - [Design Principles](02-design-principles.md)
 - [Related artefacts](03-related-artefacts.md)
 - [Tokens (colors, spacing, typography)](04-tokens.md)
-- [Component spec](05-component-spec.md)
-- [Screen spec](06-screen-spec.md )
-- [Interaction & Motion](07-interaction-motion.md)
-- [Accessibility checklist](08-accessibility-checklist.md)
+- [Screen spec](06-screen-spec.md)
 - [Responsive & platform notes](09-responsive-platform.md)
-- [Assets](10-assets.md)
-- [Implementation checklist](11-implementation-checklist.md)
-- [Example usage](12-example-usage.md)
-- [Notes & changelog](13-notes-changelog.md)
 
 ## How to use
 
