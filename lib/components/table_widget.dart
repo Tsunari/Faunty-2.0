@@ -26,13 +26,13 @@ class TableWidget extends ConsumerStatefulWidget {
   final String? rightHeader;
   final Future<void> Function(int index, bool left, String newValue)? onSave;
 
-  const TableWidget({
+  TableWidget({
     super.key,
     required this.items,
     this.showColumnHeaders = true,
     this.leftHeader,
     this.rightHeader,
-  this.onSave,
+    this.onSave,
   });
 
   @override
@@ -49,7 +49,7 @@ class _TableWidgetState extends ConsumerState<TableWidget> {
   @override
   void dispose() {
     _controller.dispose();
-  _subsectionController.dispose();
+    _subsectionController.dispose();
     super.dispose();
   }
 
