@@ -19,11 +19,12 @@ const config: Config = {
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
+  deploymentBranch: 'docs',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'faunty', // Usually your GitHub org/user name.
-  projectName: 'faunty', // Usually your repo name.
+  organizationName: 'Tsunari', // Usually your GitHub org/user name.
+  projectName: 'Faunty', // Usually your repo name.
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -91,7 +92,7 @@ const config: Config = {
         },
         {to: '/blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://github.com/Tsunari/Faunty-2.0',
+          href: 'https://github.com/Tsunari/Faunty',
           label: 'GitHub',
           position: 'right',
         },
@@ -171,7 +172,7 @@ const config: Config = {
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/Tsunari/Faunty-2.0',
+              href: 'https://github.com/Tsunari/Faunty',
             },
           ],
         },

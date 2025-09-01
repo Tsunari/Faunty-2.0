@@ -10,10 +10,10 @@
   <a href="https://github.com/rrousselGit/riverpod"><img src="https://img.shields.io/badge/Riverpod-State%20Management-green?logo=riverpod" alt="Riverpod"></a>
   <a href="https://github.com/slang-i18n/slang"><img src="https://img.shields.io/badge/i18n-Slang-orange" alt="Slang"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-Private-inactive" alt="License"></a>
-  <a href="https://img.shields.io/github/last-commit/Tsunari/Faunty-2.0"><img src="https://img.shields.io/github/last-commit/Tsunari/Faunty-2.0?label=Last%20Commit" alt="Last Commit"></a>
-  <a href="https://img.shields.io/github/languages/top/Tsunari/Faunty-2.0"><img src="https://img.shields.io/github/languages/top/Tsunari/Faunty-2.0?label=Dart" alt="Top Language"></a>
-  <a href="https://img.shields.io/github/issues-pr/Tsunari/Faunty-2.0"><img src="https://img.shields.io/github/issues-pr/Tsunari/Faunty-2.0?label=PRs" alt="Pull Requests"></a>
-  <a href="https://img.shields.io/github/stars/Tsunari/Faunty-2.0"><img src="https://img.shields.io/github/stars/Tsunari/Faunty-2.0?label=Stars" alt="Stars"></a>
+  <a href="https://img.shields.io/github/last-commit/Tsunari/Faunty"><img src="https://img.shields.io/github/last-commit/Tsunari/Faunty?label=Last%20Commit" alt="Last Commit"></a>
+  <a href="https://img.shields.io/github/languages/top/Tsunari/Faunty"><img src="https://img.shields.io/github/languages/top/Tsunari/Faunty?label=Dart" alt="Top Language"></a>
+  <a href="https://img.shields.io/github/issues-pr/Tsunari/Faunty"><img src="https://img.shields.io/github/issues-pr/Tsunari/Faunty?label=PRs" alt="Pull Requests"></a>
+  <a href="https://img.shields.io/github/stars/Tsunari/Faunty"><img src="https://img.shields.io/github/stars/Tsunari/Faunty?label=Stars" alt="Stars"></a>
 </p>
 
 Faunty is a modern Flutter app for team and organization management, built for usability, real-time collaboration, and beautiful design.
