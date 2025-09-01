@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkfaunty=self.webpackChunkfaunty||[]).push([[8121],{8070:t=>{t.exports=JSON.parse('{"tags":[{"label":"Test","permalink":"/blog/tags/test","description":"Test tag description","count":1}]}')}}]);

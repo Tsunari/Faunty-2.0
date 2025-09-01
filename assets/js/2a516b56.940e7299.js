@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkfaunty=self.webpackChunkfaunty||[]).push([[7759],{3961:t=>{t.exports=JSON.parse('{"metadata":{"permalink":"/Faunty/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":1,"blogDescription":"Blog","blogTitle":"Blog"}}')}}]);

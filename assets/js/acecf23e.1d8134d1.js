@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkfaunty=self.webpackChunkfaunty||[]).push([[1903],{1912:t=>{t.exports=JSON.parse('{"blogBasePath":"/Faunty/blog","blogTitle":"Blog","authorsListPath":"/Faunty/blog/authors"}')}}]);

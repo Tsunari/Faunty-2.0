@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkfaunty=self.webpackChunkfaunty||[]).push([[4071],{465:t=>{t.exports=JSON.parse('{"tags":[{"label":"Test","permalink":"/Faunty/blog/tags/test","description":"Test tag description","count":1}]}')}}]);

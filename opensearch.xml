@@ -4,8 +4,8 @@
   <ShortName>Faunty</ShortName>
   <Description>Search Faunty</Description>
   <InputEncoding>UTF-8</InputEncoding>
-  <Image width="16" height="16" type="image/x-icon">https://2faunty.web.app/img/favicon.ico</Image>
-  <Url type="text/html" method="get" template="https://2faunty.web.app/search?q={searchTerms}"/>
-  <Url type="application/opensearchdescription+xml" rel="self" template="https://2faunty.web.app/opensearch.xml" />
-  <moz:SearchForm>https://2faunty.web.app/</moz:SearchForm>
+  <Image width="16" height="16" type="image/x-icon">https://2faunty.web.app/Faunty/img/favicon.ico</Image>
+  <Url type="text/html" method="get" template="https://2faunty.web.app/Faunty/search?q={searchTerms}"/>
+  <Url type="application/opensearchdescription+xml" rel="self" template="https://2faunty.web.app/Faunty/opensearch.xml" />
+  <moz:SearchForm>https://2faunty.web.app/Faunty/</moz:SearchForm>
 </OpenSearchDescription>
